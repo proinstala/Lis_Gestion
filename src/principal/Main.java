@@ -23,8 +23,8 @@ public class Main extends Application{
 
 	public static void main(String[] args) {
 		launch(args);
-		//Esto es una prueba.
 
+		//segunda prueba
 	}
 
 	@Override
