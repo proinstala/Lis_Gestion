@@ -1,0 +1,28 @@
+#Archivos y rutas no respaldados.
+
+# Eclipse IDE: Archivos de configuracion
+.classpath
+.project
+.settings/
+
+bin/
+tmp/
+.metadata
+.project
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+.factorypath
+ 
+# Maven: Archivos compilados
+target/
+
+# Netbeans: Archivos de configuracion
+nbactions.xml
+
+# Visual Studio Code
+.vscode/
+.code-workspace
