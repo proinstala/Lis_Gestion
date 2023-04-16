@@ -248,16 +248,31 @@ public class JornadaControlador implements Initializable {
 		if(jornada == null) {
 			
 			Jornada j = crearJornada();
+			
 			//Hacer que inserte la jornada en la base de datos
-
+			datos.addJornada(j);
 			//Si se ha insertado correctamente en la base de datos, llamar al metodo inicializacion de esta clase y pasarle la jornada.
+			inicializacion(j);
+		} else {
+			toast.show((Stage) bdJornada.getScene().getWindow(), "Jornada creada");
 		}
     }
 	
 
+	/**
+	 * Crea una Jornada con sus clases asignadole valores por defecto.
+	 * 
+	 * @return Un objeto de tipo Jornada con datos por defecto.
+	 */
 	private Jornada crearJornada() {
 		Jornada j = new Jornada(dpFecha.getValue(), "");
-		//hay que crear una plantilla de clases y asignarla a la jornada creada.
+		Clase[] clases = new Clase[8];
+		for(int i = 0; i < j.getClases().length; i++) {
+			clases[i] = new Clase(i + 1, TipoClase.PILATES, null, "");
+		}
+
+		j.setClases(clases); //Establece el Array de Clase a la jornada.
+
 		return j;
 	}
 	

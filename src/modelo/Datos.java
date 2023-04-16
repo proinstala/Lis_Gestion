@@ -150,6 +150,10 @@ public class Datos {
 		}
 		return null;
 	}
+
+	public void addJornada(Jornada jornada) {
+		listaJornadas.add(jornada);
+	}
 	
 
 }
