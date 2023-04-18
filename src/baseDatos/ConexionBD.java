@@ -103,61 +103,42 @@ public class ConexionBD implements Cloneable{
         cn.desconectar(conn);
     }
 
-    public int insertarJornada(Jornada jornada) throws SQLException {
-        ConexionBD cn = INSTANCE;
-        int result = 0;
-        try {
-            conn = cn.conectar();
     
-            ps = conn.prepareStatement("INSERT INTO jornada (fecha, comentario) VALUES (?,?);");
-            ps.setString(1, jornada.getFecha().toString());
-            ps.setString(2, jornada.getComentario());
-        
-            result = ps.executeUpdate();
-
-            System.out.println("Insercion en base de datos"); //Esto es temporal para pruebas.
-
-        } catch (SQLException e) {
-            //aqui poner la insercion en el .log
-            e.printStackTrace();
-        } finally { 
-            ps.close();
-            
-        }
-        
-        cn.desconectar(conn);
-        return result;
-    }
-
-
-    public int insertarClases(Jornada jornada) throws SQLException {
+    public boolean insertarJornada(Jornada jornada) throws SQLException {
         ConexionBD cn = INSTANCE;
-        int result = 0;
+        boolean result = false;
         try {
             conn = cn.conectar();
             conn.setAutoCommit(false);
 
+            //Insertamos la Jornada en la base de datos.
+            ps = conn.prepareStatement("INSERT INTO jornada (fecha, comentario) VALUES (?,?);");
+            ps.setString(1, jornada.getFecha().toString());
+            ps.setString(2, jornada.getComentario());
+            ps.executeUpdate();
+
+            //Insertamos las clases de la jornada en la base de datos.
             ps = conn.prepareStatement("INSERT INTO clase (numero, tipo, hora, anotaciones, jornada) VALUES (?,?,?,?,?);");
             for(Clase clase : jornada.getClases()) {
                 ps.setInt(1, clase.getNumero());
                 ps.setString(2, clase.getTipo().toString());
                 ps.setString(3, clase.getHoraClase().toString());
                 ps.setString(4, clase.getAnotaciones());
-                ps.setString(4, jornada.getFecha().toString());
+                ps.setString(5, jornada.getFecha().toString());
         
-                result += ps.executeUpdate();
+                ps.executeUpdate();
             }
             
-            conn.commit();
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
             System.out.println("Insercion en base de datos"); //Esto es temporal para pruebas.
-
+            result = true;
         } catch (SQLException e) {
             //aqui poner la insercion en el .log
-            conn.rollback();
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
             e.printStackTrace();
         } finally { 
-            ps.close();
-            
+            ps.close(); 
         }
         
         cn.desconectar(conn);

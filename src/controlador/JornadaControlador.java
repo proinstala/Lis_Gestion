@@ -2,11 +2,9 @@ package controlador;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 import baseDatos.ConexionBD;
@@ -33,7 +31,6 @@ import modelo.TipoClase;
 import modelo.Toast;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 
@@ -49,7 +46,7 @@ public class JornadaControlador implements Initializable {
 	private Toast toast;
 	
 	/** BASE DE DATOS **/
-    private static ConexionBD cn;
+    private static ConexionBD conexionBD;
     
 
 	@FXML
@@ -156,7 +153,7 @@ public class JornadaControlador implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		
-		cn = ConexionBD.getInstance(); //Obtenemos una istancia de la Conexion a BD.
+		conexionBD = ConexionBD.getInstance(); //Obtenemos una istancia de la Conexion a BD.
 		
 		toast = new Toast();
 		
@@ -228,17 +225,12 @@ public class JornadaControlador implements Initializable {
 
 	@FXML
 	void botonBorrar(MouseEvent event) {
-		System.out.println("Hola mundo");
+		System.out.println("Pulsado boton botonBorrar");
 	}
 
 	@FXML
 	void botonGuardar(MouseEvent event) {
-		try {
-			cn.insertar();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		System.out.println("Pulsado boton botonGuardar");
 	}
 
 	@FXML
@@ -254,7 +246,7 @@ public class JornadaControlador implements Initializable {
 			//Si se ha insertado correctamente en la base de datos, llamar al metodo inicializacion de esta clase y pasarle la jornada.
 			inicializacion(j);
 		} else {
-			toast.show((Stage) bdJornada.getScene().getWindow(), "Jornada creada");
+			toast.show((Stage) bdJornada.getScene().getWindow(), "Esta Jornada ya esta creada!!");
 		}
     }
 	
@@ -414,7 +406,6 @@ public class JornadaControlador implements Initializable {
 			dpFecha.setValue(jornada.getFecha());	//Asignamos la fecha de la jornada al datePiker.
 			lbDiaSemana.setText(jornada.obtenerDiaSemana()); //Ponemos el dia de la semana de la jornada en el Label lbDiaSemana.
 			
-			Clase[] clases = new Clase[8];
 			//Inicializacion del listView. 
 			//listaClase1 = FXCollections.observableArrayList(jornada.getListaClases().get(0).getListaAlumnos());
 			listaClase1 = FXCollections.observableArrayList(jornada.getClase(0).getListaAlumnos());
