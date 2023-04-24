@@ -2,10 +2,12 @@ package controlador;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import baseDatos.ConexionBD;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -31,6 +33,7 @@ public class PrincipalControlador implements Initializable {
 	private String menuSeleccionado = "ninguno";
 	private ObservableList<Alumno> listadoAlumnos;
 	private Datos datos;
+	private ConexionBD conexionBD;
 	private Toast toast = new Toast();
 	
 	@FXML
@@ -54,7 +57,14 @@ public class PrincipalControlador implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		datos = Datos.getInstance();
-		listadoAlumnos = FXCollections.observableArrayList(datos.listarAlumno());
+		conexionBD = ConexionBD.getInstance();
+		try {
+			listadoAlumnos = FXCollections.observableArrayList(conexionBD.getListadoAlumnos());
+		} catch (Exception e) {
+			e.printStackTrace();
+			// TODO: handle exception
+		}
+		//listadoAlumnos = FXCollections.observableArrayList(datos.listarAlumno());
 		lInicio.getStyleClass().add("menu");
 		lClases.getStyleClass().add("menu");
 		lClientes.getStyleClass().add("menu");
@@ -85,8 +95,15 @@ public class PrincipalControlador implements Initializable {
 			lClientes.getStyleClass().remove("menuSeleccionado");
 			
 			
-			Jornada jornada = datos.getJornada(LocalDate.of(2023,4,8));
-			
+			//Jornada jornada = datos.getJornada(LocalDate.of(2023,4,8));
+			//Jornada jornada = null;
+			Jornada jornada;
+			try {
+				jornada = conexionBD.getJornada("2023-04-08");
+			} catch (SQLException e) {
+				jornada = null;
+				e.printStackTrace();
+			}
 			try {
 				FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/jornadaVista.fxml"));
 				BorderPane jornadaPilates;

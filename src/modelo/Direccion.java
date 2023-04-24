@@ -13,6 +13,7 @@ import javafx.beans.property.StringProperty;
  */
 public class Direccion {
 	
+	private IntegerProperty id;
 	private StringProperty calle;
 	private IntegerProperty numero;
 	private StringProperty localidad;
@@ -24,13 +25,15 @@ public class Direccion {
 	 * Contructor con parametros.
 	 * Crea un objeto de tipo Direccion con los datos pasados por parametros.
 	 * 
+	 * @param id Identificador de la calle.
 	 * @param calle Nombre de la calle.
 	 * @param numero Número del domicilio.
 	 * @param localidad Localidad en la que se encuentra el domicilio.
 	 * @param provincia Provincia en la que se encuentra el domicilio.
 	 * @param codigoPostal Codigo postal del domicilio.
 	 */
-	public Direccion(String calle, int numero, String localidad, String provincia, int codigoPostal) {
+	public Direccion(int id, String calle, int numero, String localidad, String provincia, int codigoPostal) {
+		this.id = new SimpleIntegerProperty(id);
 		this.calle = new SimpleStringProperty(calle);
 		this.numero = new SimpleIntegerProperty(numero);
 		this.localidad = new SimpleStringProperty(localidad);
@@ -45,11 +48,40 @@ public class Direccion {
 	 * @param a Objeto de donde se obtienen los datos para la copia.
 	 */
 	public Direccion(Direccion d) {
+		id = new SimpleIntegerProperty(d.getId());
 		calle = new SimpleStringProperty(d.getCalle());
 		numero = new SimpleIntegerProperty(d.getNumero());
 		localidad = new SimpleStringProperty(d.getLocalidad());
 		provincia = new SimpleStringProperty(d.getProvincia());
 		codigoPostal = new SimpleIntegerProperty(d.getCodigoPostal());
+	}
+	
+	// id -----------------------------------------
+	/**
+     * Obtiene la propiedad del ID de la direccion.
+     *
+     * @return La propiedad del ID de la direccion.
+     */
+	public IntegerProperty idProperty() {
+		return id;
+	}
+
+	/**
+     * Obtiene el ID de la direccion.
+     *
+     * @return El ID de la direccion.
+     */
+	public int getId() {
+		return id.get();
+	}
+
+	/**
+     * Establece el ID de la direccion.
+     *
+     * @param id El nuevo ID para la direccion.
+     */
+	public void setId(int id) {
+		this.id.set(id);
 	}
 	
 	

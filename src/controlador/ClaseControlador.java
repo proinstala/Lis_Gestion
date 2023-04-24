@@ -2,10 +2,13 @@ package controlador;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.ResourceBundle;
 
+import baseDatos.ConexionBD;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -42,6 +45,7 @@ public class ClaseControlador implements Initializable {
 	private Clase claseOriginal;
 	private Clase clase;
 	private Datos datos;
+	private ConexionBD conexionBD;
 	private Jornada jornada;
 	private FilteredList<Alumno> filtro;
 	private Toast toast;
@@ -111,7 +115,8 @@ public class ClaseControlador implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {	
 		toast = new Toast();
-		
+		conexionBD = ConexionBD.getInstance(); //Obtenemos una istancia de la Conexion a BD.
+
 		//Cargo en los comboBox los dataos.
 		cbHora.setItems(FXCollections.observableArrayList(HoraClase.values()));
 		cbTipo.setItems(FXCollections.observableArrayList(TipoClase.values()));
@@ -194,15 +199,40 @@ public class ClaseControlador implements Initializable {
 	@FXML
 	void guardar(MouseEvent event) {
 		
-		//primero hay que guardar los cambios en la base de datos.
-		//Si el guardado en la base de datos es ok, entoces se hace la copia de datos de objeto a objeto.
-		
-		claseOriginal.setHoraClase(clase.getHoraClase());
-		claseOriginal.setTipo(clase.getTipo());
-		claseOriginal.setAnotaciones(clase.getAnotaciones());
-		//claseOriginal.setListaAlumnos(clase.getListaAlumnos());
-		claseOriginal.setListaAlumnos(new ArrayList<Alumno>(listaClase));
-		toast.show((Stage) tvAlumnos.getScene().getWindow(), "Cambios guardados en Clase " + clase.getNumero());
+		try {
+			boolean actualizar = false;
+			if(claseOriginal.getHoraClase() != clase.getHoraClase()) {
+				System.out.println("la hora es diferente");
+				actualizar = true;
+			}
+
+			if(claseOriginal.getTipo() != clase.getTipo()) {
+				System.out.println("El tipo es diferente");
+				actualizar = true;
+			}
+
+			if(claseOriginal.getAnotaciones() != clase.getAnotaciones()) {
+				System.out.println("Las anotaciones son diferentes");
+				actualizar = true;
+			}
+
+			if(actualizar) {
+				conexionBD.actualizarClase(clase, jornada);
+			}
+
+			conexionBD.actualizarAlumnosEnClase(new ArrayList<Alumno>(listaClase), clase.getNumero(), jornada);
+
+			claseOriginal.setHoraClase(clase.getHoraClase());
+			claseOriginal.setTipo(clase.getTipo());
+			claseOriginal.setAnotaciones(clase.getAnotaciones());
+			//claseOriginal.setListaAlumnos(clase.getListaAlumnos());
+			claseOriginal.setListaAlumnos(new ArrayList<Alumno>(listaClase));
+			toast.show((Stage) tvAlumnos.getScene().getWindow(), "Cambios guardados en Clase " + clase.getNumero());
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	@FXML
@@ -290,7 +320,7 @@ public class ClaseControlador implements Initializable {
 	}
 	
 	/**
-	 * Establece la lista de alumnos.
+	 * Establece la lista de Alumnos.
 	 * 
 	 * @param lista La lista de donde se obtienen los Alumnos.
 	 */

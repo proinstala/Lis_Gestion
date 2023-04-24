@@ -43,7 +43,7 @@ public class Alumno {
 	 * @param email Direccion de correo electronico del alumno.
 	 */
 	public Alumno(int id, String nombre, String apellido1, String apellido2, Genero genero, 
-			LocalDate fechaNacimiento, Direccion direccion, int telefono, String email) {
+			Direccion direccion, LocalDate fechaNacimiento, int telefono, String email) {
 		this.id = new SimpleIntegerProperty(id);
 		this.nombre = new SimpleStringProperty(nombre);
 		this.apellido1 = new SimpleStringProperty(apellido1);

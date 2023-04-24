@@ -2,9 +2,11 @@ package controlador;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import baseDatos.ConexionBD;
@@ -40,14 +42,12 @@ public class JornadaControlador implements Initializable {
 	private DateTimeFormatter formatter;
 	private Jornada jornada = null;
 	private Jornada jornadaOriginal;
-	private ObservableList<Alumno> listadoAlumnos;
+	private ObservableList<Alumno> listadoAlumnosGeneral;
 	private Datos datos;
+	private ConexionBD conexionBD;
 	private Alert alerta;
 	private Toast toast;
 	
-	/** BASE DE DATOS **/
-    private static ConexionBD conexionBD;
-    
 
 	@FXML
     private ImageView ivBotonCrearJornada;
@@ -166,6 +166,30 @@ public class JornadaControlador implements Initializable {
 		lvClase6.setFocusModel(null);
 		lvClase7.setFocusModel(null);
 		lvClase8.setFocusModel(null);
+
+		//Deshabilitar la edición y la selección del TextArea
+		taComentarios.setMouseTransparent(true);
+		taComentarios.setFocusTraversable(false);
+		
+		//Desactivar la selección y la interacción de los ListView.
+		lvClase1.setMouseTransparent(true);
+		lvClase2.setMouseTransparent(true);
+		lvClase3.setMouseTransparent(true);
+		lvClase4.setMouseTransparent(true);
+		lvClase5.setMouseTransparent(true);
+		lvClase6.setMouseTransparent(true);
+		lvClase7.setMouseTransparent(true);
+		lvClase8.setMouseTransparent(true);
+		
+		
+		lvClase1.setFocusTraversable(false);
+		lvClase2.setFocusTraversable(false);
+		lvClase3.setFocusTraversable(false);
+		lvClase4.setFocusTraversable(false);
+		lvClase5.setFocusTraversable(false);
+		lvClase6.setFocusTraversable(false);
+		lvClase7.setFocusTraversable(false);
+		lvClase8.setFocusTraversable(false);
 		
 		//Modifica el formato en el que se muestra la fecha en el dtFechaCompra
         formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");//Formato dd/MM/yy
@@ -179,7 +203,13 @@ public class JornadaControlador implements Initializable {
             lbDiaSemana.setText(obtenerDiaSemana(fechaSeleccionada)); //Pongo el dia de la semana de la fecha seleecionada en el label lbDiaSemana.
             
             //LLamar a base de datos para rescatar la jornada
-            inicializacion(datos.getJornada(fechaSeleccionada));
+            //inicializacion(datos.getJornada(fechaSeleccionada));
+			try {
+				inicializacion(conexionBD.getJornada(fechaSeleccionada.toString()));
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         });
 	}
 	
@@ -225,12 +255,21 @@ public class JornadaControlador implements Initializable {
 
 	@FXML
 	void botonBorrar(MouseEvent event) {
-		System.out.println("Pulsado boton botonBorrar");
+		if(jornada != null) {
+			jornada.setComentario("");
+		}
 	}
 
 	@FXML
 	void botonGuardar(MouseEvent event) {
-		System.out.println("Pulsado boton botonGuardar");
+		try {
+			conexionBD.actualizarComentarioJornada(jornada);
+			toast.show((Stage) bdJornada.getScene().getWindow(), "Comentario modificado!!.");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			toast.show((Stage) bdJornada.getScene().getWindow(), "ERROR al intentar modificar el comentario de la jornada!!.");
+		}
 	}
 
 	@FXML
@@ -242,9 +281,18 @@ public class JornadaControlador implements Initializable {
 			Jornada j = crearJornada();
 			
 			//Hacer que inserte la jornada en la base de datos
-			datos.addJornada(j);
+			//datos.addJornada(j);
+			try {
+				conexionBD.insertarJornada(j);
+				inicializacion(j);
+				toast.show((Stage) bdJornada.getScene().getWindow(), "Jornada creada correctamente!!");
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				toast.show((Stage) bdJornada.getScene().getWindow(), "ERROR al intentar crear la jornada!!");
+			}
 			//Si se ha insertado correctamente en la base de datos, llamar al metodo inicializacion de esta clase y pasarle la jornada.
-			inicializacion(j);
+			
 		} else {
 			toast.show((Stage) bdJornada.getScene().getWindow(), "Esta Jornada ya esta creada!!");
 		}
@@ -259,9 +307,14 @@ public class JornadaControlador implements Initializable {
 	private Jornada crearJornada() {
 		Jornada j = new Jornada(dpFecha.getValue(), "");
 		Clase[] clases = new Clase[8];
-		for(int i = 0; i < j.getClases().length; i++) {
-			clases[i] = new Clase(i + 1, TipoClase.PILATES, null, "");
-		}
+		clases[0] = new Clase(1, TipoClase.PILATES, HoraClase.HORA_9_MEDIA, "");
+		clases[1] = new Clase(2, TipoClase.PILATES, HoraClase.HORA_10_MEDIA, "");
+		clases[2] = new Clase(3, TipoClase.PILATES, HoraClase.HORA_11_MEDIA, "");
+		clases[3] = new Clase(4, TipoClase.PILATES, HoraClase.HORA_12_MEDIA, "");
+		clases[4] = new Clase(5, TipoClase.PILATES, HoraClase.HORA_17_MEDIA, "");
+		clases[5] = new Clase(6, TipoClase.PILATES, HoraClase.HORA_18_MEDIA, "");
+		clases[6] = new Clase(7, TipoClase.PILATES, HoraClase.HORA_19_MEDIA, "");
+		clases[7] = new Clase(8, TipoClase.PILATES, HoraClase.HORA_20_MEDIA, "");
 
 		j.setClases(clases); //Establece el Array de Clase a la jornada.
 
@@ -281,7 +334,7 @@ public class JornadaControlador implements Initializable {
 			controller.setControladorPrincipal(controladorPincipal);
 			controller.setJornada(jornada);
 			controller.setClaseIniciacion(numeroClase);
-			controller.setListaAlumnos(listadoAlumnos);
+			controller.setListaAlumnos(listadoAlumnosGeneral);
 			controller.setConexionBD(datos);
 			
 		} catch (IOException e) {
@@ -337,6 +390,7 @@ public class JornadaControlador implements Initializable {
 				
 				//Deshabilitar la edición y la selección del TextArea
 				taComentarios.setEditable(false);
+				taComentarios.setFocusTraversable(false);
 				taComentarios.setMouseTransparent(true);
 				
 				lbHoraClase1.setText("");
@@ -406,6 +460,16 @@ public class JornadaControlador implements Initializable {
 			dpFecha.setValue(jornada.getFecha());	//Asignamos la fecha de la jornada al datePiker.
 			lbDiaSemana.setText(jornada.obtenerDiaSemana()); //Ponemos el dia de la semana de la jornada en el Label lbDiaSemana.
 			
+			//Cambio los alumnos que tiene cada clase por los alumnos de la aplicacion
+			for(Clase clase : jorn.getClases()) {
+				if(!clase.getListaAlumnos().isEmpty()) {
+					clase.setListaAlumnos(comprobarListaClase(clase.getListaAlumnos()));
+				}
+				
+			}
+
+			
+
 			//Inicializacion del listView. 
 			//listaClase1 = FXCollections.observableArrayList(jornada.getListaClases().get(0).getListaAlumnos());
 			listaClase1 = FXCollections.observableArrayList(jornada.getClase(0).getListaAlumnos());
@@ -467,6 +531,7 @@ public class JornadaControlador implements Initializable {
 			
 			//habilitar la edición y la selección del TextArea
 			taComentarios.setEditable(true);
+			taComentarios.setFocusTraversable(true);
 			taComentarios.setMouseTransparent(false);
 			
 			//Habilitar la selección y la interacción los ListView.
@@ -489,10 +554,22 @@ public class JornadaControlador implements Initializable {
 			lvClase8.setFocusTraversable(true);
 			
 		} 
-		
-		
 	}
 	
+	private ArrayList<Alumno> comprobarListaClase(ArrayList<Alumno> listaAlumnos) {
+		ArrayList<Alumno> nuevaListaAlumnos = new ArrayList<Alumno>();
+		//listadoAlumnos
+		for(Alumno alumno : listaAlumnos) {
+			for(Alumno alumnoApp : listadoAlumnosGeneral) {
+				if(alumno.getId() == alumnoApp.getId()) {
+					nuevaListaAlumnos.add(alumnoApp);
+					break;
+				}
+			}
+		}
+		return nuevaListaAlumnos;
+	}
+
 	/**
 	 * Establece para este controlador, el controlador principal de la aplicacion.
 	 * 
@@ -508,7 +585,7 @@ public class JornadaControlador implements Initializable {
 	 * @param lista La lista de donde se obtienen los Alumnos
 	 */
 	public void setListaAlumnos(ObservableList<Alumno> lista) {
-		listadoAlumnos = lista;
+		listadoAlumnosGeneral = lista;
 	}
 	
 	/**

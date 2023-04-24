@@ -64,9 +64,9 @@ public class Datos {
 		*/
 		listaJornadas.add(jornada2);
 		
-		Direccion d1 = new Direccion("brazal nuevo", 26, "Santa Cruz", "Murcia", 30162);
-		Direccion d2 = new Direccion("cerezo rojo", 26, "El Raal", "Murcia", 30205);
-		Direccion d3 = new Direccion("cervantes", 26, "Alquerias", "Murcia", 30580);
+		Direccion d1 = new Direccion(1, "brazal nuevo", 26, "Santa Cruz", "Murcia", 30162);
+		Direccion d2 = new Direccion(2, "cerezo rojo", 26, "El Raal", "Murcia", 30205);
+		Direccion d3 = new Direccion(3, "cervantes", 26, "Alquerias", "Murcia", 30580);
 		
 		LocalDate date2 = LocalDate.parse("05/10/1985", formatter);
 		LocalDate date3 = LocalDate.parse("02/11/1995", formatter);
@@ -74,16 +74,17 @@ public class Datos {
 		LocalDate date5 = LocalDate.parse("22/10/2008", formatter);
 		LocalDate date6 = LocalDate.parse("17/04/2003", formatter);
 		
-		Alumno a1 = new Alumno(1, "Juan", "Lopez", "Sanchez", Genero.HOMBRE, date2, d1, 123450, "Juan@mail.com");
-		Alumno a2 = new Alumno(2, "Pablo", "Sanchez", "Sanchez", Genero.HOMBRE, date2, d2, 123451, "pablo@mail.com");
-		Alumno a3 = new Alumno(3, "Bea", "Lopez", "Lopez", Genero.MUJER, date2, d3, 123452, "bea@mail.com");
-		Alumno a4 = new Alumno(4, "Sara", "Jimenez", "Sanchez", Genero.MUJER, date2, d1, 123453, "sara@mail.com");
-		Alumno a5 = new Alumno(5, "Lucia", "Lopez", "Alonso", Genero.MUJER, date2, d2, 123454, "lucia@mail.com");
-		Alumno a6 = new Alumno(6, "Maria", "Torralva", "Saez", Genero.MUJER, date3, d3, 123455, "maria@mail.com");
-		Alumno a7 = new Alumno(7, "Ana", "Cano", "Hernandez", Genero.HOMBRE, date2, d1, 123456, "ana@mail.com");
-		Alumno a8 = new Alumno(8, "Belen", "Castillo", "Fernandez", Genero.HOMBRE, date2, d2, 123457, "belen@mail.com");
-		Alumno a9 = new Alumno(9, "Juana", "Lama", "Rana", Genero.MUJER, date3, d3, 123458, "juana@mail.com");
-		Alumno a10 = new Alumno(10, "Pepe", "Torete", "Retrete", Genero.HOMBRE, date1, d1, 123459, "pepe@mail.com");
+		Alumno a1 = new Alumno(1, "Juan", "Lopez", "Sanchez", Genero.HOMBRE, d1, date2, 123450, "Juan@mail.com");
+		Alumno a2 = new Alumno(2, "Pablo", "Sanchez", "Sanchez", Genero.HOMBRE, d2, date2, 123451, "pablo@mail.com");
+		Alumno a3 = new Alumno(3, "Bea", "Lopez", "Lopez", Genero.MUJER, d3, date2, 123452, "bea@mail.com");
+		Alumno a4 = new Alumno(4, "Sara", "Jimenez", "Sanchez", Genero.MUJER, d1, date2, 123453, "sara@mail.com");
+		Alumno a5 = new Alumno(5, "Lucia", "Lopez", "Alonso", Genero.MUJER, d2, date2, 123454, "lucia@mail.com");
+		Alumno a6 = new Alumno(6, "Maria", "Torralva", "Saez", Genero.MUJER, d3, date3, 123455, "maria@mail.com");
+		Alumno a7 = new Alumno(7, "Ana", "Cano", "Hernandez", Genero.HOMBRE, d1, date2, 123456, "ana@mail.com");
+		Alumno a8 = new Alumno(8, "Belen", "Castillo", "Fernandez", Genero.HOMBRE, d2, date2, 123457, "belen@mail.com");
+		Alumno a9 = new Alumno(9, "Juana", "Lama", "Rana", Genero.MUJER, d3, date3, 123458, "juana@mail.com");
+		Alumno a10 = new Alumno(10, "Pepe", "Torete", "Retrete", Genero.HOMBRE, d1, date1, 123459, "pepe@mail.com");
+
 		
 		c1.addAlumno(a1);
 		c1.addAlumno(a2);
@@ -99,16 +100,16 @@ public class Datos {
 		c4.addAlumno(a10);
 		
 		
-		Alumno a11 = new Alumno(11, "Francisco", "Mengual", "Sax", Genero.HOMBRE, date2, d1, 123456, "fran@mail.com");
-		Alumno a12 = new Alumno(12, "Javier", "Perez", "Reverte", Genero.HOMBRE, date2, d2, 123455, "javi@mail.com");
-		Alumno a13 = new Alumno(13, "Susana", "Garcia", "Gomez", Genero.MUJER, date2, d3, 123454, "susana@mail.com");
-		Alumno a14 = new Alumno(14, "Silvia", "Moreno", "Sanchez", Genero.MUJER, date2, d1, 123453, "silvia@mail.com");
-		Alumno a15 = new Alumno(15, "Noelia", "Torres", "Molina", Genero.MUJER, date2, d2, 123452, "noelia@mail.com");
-		Alumno a16 = new Alumno(16, "Rosana", "Gil", "Alonso", Genero.MUJER, date2, d2, 123452, "rsana@mail.com");
-		Alumno a17 = new Alumno(17, "Laura", "Serrano", "Romero", Genero.HOMBRE, date2, d1, 123456, "laura@mail.com");
-		Alumno a18 = new Alumno(18, "Federico", "Romero", "Fernandez", Genero.HOMBRE, date2, d2, 123457, "fede@mail.com");
-		Alumno a19 = new Alumno(19, "Pilar", "Ruiz", "Rana", Genero.MUJER, date3, d3, 123458, "pili@mail.com");
-		Alumno a20 = new Alumno(20, "Antonio", "Gonzalez", "Lopez", Genero.HOMBRE, date1, d1, 123459, "anton@mail.com");
+		Alumno a11 = new Alumno(11, "Francisco", "Mengual", "Sax", Genero.HOMBRE, d1, date2, 123456, "fran@mail.com");
+		Alumno a12 = new Alumno(12, "Javier", "Perez", "Reverte", Genero.HOMBRE, d2, date2, 123455, "javi@mail.com");
+		Alumno a13 = new Alumno(13, "Susana", "Garcia", "Gomez", Genero.MUJER, d3, date2, 123454, "susana@mail.com");
+		Alumno a14 = new Alumno(14, "Silvia", "Moreno", "Sanchez", Genero.MUJER, d1, date2, 123453, "silvia@mail.com");
+		Alumno a15 = new Alumno(15, "Noelia", "Torres", "Molina", Genero.MUJER, d2, date2, 123452, "noelia@mail.com");
+		Alumno a16 = new Alumno(16, "Rosana", "Gil", "Alonso", Genero.MUJER, d2, date2, 123452, "rsana@mail.com");
+		Alumno a17 = new Alumno(17, "Laura", "Serrano", "Romero", Genero.HOMBRE, d1, date2, 123456, "laura@mail.com");
+		Alumno a18 = new Alumno(18, "Federico", "Romero", "Fernandez", Genero.HOMBRE, d2, date2, 123457, "fede@mail.com");
+		Alumno a19 = new Alumno(19, "Pilar", "Ruiz", "Rana", Genero.MUJER, d3, date3, 123458, "pili@mail.com");
+		Alumno a20 = new Alumno(20, "Antonio", "Gonzalez", "Lopez", Genero.HOMBRE, d1, date1, 123459, "anton@mail.com");
 		
 		listaAlumnos = new ArrayList<Alumno>();
 		listaAlumnos.add(a1);

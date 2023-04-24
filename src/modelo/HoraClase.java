@@ -47,6 +47,36 @@ public enum HoraClase {
     public int getMinutos() {
         return minutos;
     }
+
+    /**
+     * Obtiene un objeto HoraClase en función de la hora y los minutos.
+     *
+     * @param hora    la hora de la clase
+     * @param minutos los minutos de la clase
+     * @return un objeto HoraClase correspondiente a la hora y los minutos
+     * @throws IllegalArgumentException si la hora o los minutos no están dentro de
+     *                                  los valores permitidos
+     */
+    public static HoraClase getHoraClase(int hora, int minutos) throws IllegalArgumentException {
+        // Validar que la hora esté dentro de los límites permitidos
+        if (hora < 8 || hora > 22 || (hora == 22 && minutos != 0)) {
+            throw new IllegalArgumentException("Hora no válida para una clase");
+        }
+        // Validar que los minutos estén dentro de los límites permitidos
+        if (minutos < 0 || minutos > 30 || (minutos == 30 && hora == 22)) {
+            throw new IllegalArgumentException("Minutos no válidos para una clase");
+        }
+        // Iterar sobre los valores del enumerado HoraClase
+        for (HoraClase horaClase : HoraClase.values()) {
+            // Si la hora y los minutos coinciden con los valores de una constante
+            // HoraClase, devolver esa constante
+            if (horaClase.getHora() == hora && horaClase.getMinutos() == minutos) {
+                return horaClase;
+            }
+        }
+        // Si no se encontró una constante correspondiente, lanzar una excepción
+        throw new IllegalArgumentException("Hora y minutos no corresponden a una hora de clase");
+    }
     
     // Método toString para representar la hora en formato de texto
     @Override
