@@ -81,6 +81,23 @@ public class PrincipalControlador implements Initializable {
 			lInicio.getStyleClass().add("menuSeleccionado");
 			lClases.getStyleClass().remove("menuSeleccionado");
 			lClientes.getStyleClass().remove("menuSeleccionado");
+
+			//----------------------------
+			
+
+			try {
+				FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/loginVista.fxml"));
+				BorderPane login;
+				login = (BorderPane) loader.load();
+				bpPrincipal.setCenter(login);
+				LoginControlador controller = loader.getController(); // cargo el controlador.
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+
 		}
 	}
 

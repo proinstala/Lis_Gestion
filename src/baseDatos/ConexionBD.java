@@ -76,7 +76,6 @@ public class ConexionBD implements Cloneable{
                 "calle TEXT, " +
                 "numero INTEGER, " +
                 "localidad_id INTEGER NOT NULL, " +
-                "c " +
                 "FOREIGN KEY (localidad_id) REFERENCES localidad (id));";  
         st.execute(sql);
 

@@ -93,7 +93,26 @@ BorderPane {
 	-fx-background-color: #78637C;
 }
 
+/* pruebas */
+.panel_border {
+	-fx-border-color: #80488F;
+	-fx-border-width: 2px;
+	-fx-border-radius: 8px;
+}
+	
+.button {
+	-fx-background-color: #78637C;
+	-fx-text-fill: white;
+}
 
+.button:hover {
+	-fx-background-color: #80488F;
+}
+
+.label_resaltado:hover {
+	-fx-text-fill: #80488F;
+	-fx-font-weight: bold; 
+}
 
 
 
