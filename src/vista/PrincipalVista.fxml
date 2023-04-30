@@ -27,14 +27,14 @@
           <RowConstraints minHeight="50.0" prefHeight="50.0" vgrow="NEVER" />
         </rowConstraints>
          <children>
-            <Label fx:id="lClases" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#clases" text="Clases" GridPane.rowIndex="1">
+            <Label fx:id="lClases" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#menuClases" text="Clases" GridPane.rowIndex="1">
                <font>
                   <Font size="18.0" />
                </font>
                <padding>
                   <Insets left="20.0" />
                </padding></Label>
-            <Label fx:id="lInicio" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#inicio" text="Inicio">
+            <Label fx:id="lInicio" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#menuInicio" text="Inicio">
                <font>
                   <Font size="18.0" />
                </font>
@@ -44,7 +44,7 @@
                <padding>
                   <Insets left="20.0" />
                </padding></Label>
-            <Label fx:id="lClientes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#clientes" text="Clientes" GridPane.rowIndex="2">
+            <Label fx:id="lAlumnos" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#menuAlumnos" text="Alumnos" GridPane.rowIndex="2">
                <font>
                   <Font size="18.0" />
                </font>

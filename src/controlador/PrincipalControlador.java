@@ -36,8 +36,9 @@ public class PrincipalControlador implements Initializable {
 	private Datos datos;
 	private ConexionBD conexionBD;
 	private Toast toast = new Toast();
-	private final String usuarioAPP = "lisgestion";
-	private final String passwordAPP = "lisgestion";
+	private final String[] usuarioAPP = {"lisgestion", "lisgestion", "appdata"}; //[0]nombre, [1]password, [2]directorio
+	private String[] usuario = null; //[0]nombre, [1]password
+	
 	
 	@FXML
     private BorderPane bpPrincipal;
@@ -49,7 +50,7 @@ public class PrincipalControlador implements Initializable {
 	private Label lClases;
 
 	@FXML
-	private Label lClientes;
+	private Label lAlumnos;
 
 	@FXML
 	private Label lInicio;
@@ -66,36 +67,41 @@ public class PrincipalControlador implements Initializable {
 		if(!comprobarFicherosApp()) {
 			crearFicherosApp();
 		}
-		//paso 2: si los ficheros no existen, crearlos.
-		//paso 3: cargar vista Login.
+		
+		//lInicio.setDisable(true);
+		lClases.setDisable(true);
+		lAlumnos.setDisable(true);
 
 		datos = Datos.getInstance();
-		conexionBD = ConexionBD.getInstance();
+		//conexionBD = ConexionBD.getInstance();
 
+		/* 
 		try {
 			listadoAlumnos = FXCollections.observableArrayList(conexionBD.getListadoAlumnos());
 		} catch (Exception e) {
 			e.printStackTrace();
 			// TODO: handle exception
-		}
+		}*/
 		//listadoAlumnos = FXCollections.observableArrayList(datos.listarAlumno());
 		lInicio.getStyleClass().add("menu");
 		lClases.getStyleClass().add("menu");
-		lClientes.getStyleClass().add("menu");
+		lAlumnos.getStyleClass().add("menu");
 		gpMenu.getStyleClass().add("gridPaneMenu");
 		pSeparador.getStyleClass().add("panelSeparador");
+
+		menuInicio(null);
 		
 	}
 
 
 	@FXML
-	void inicio(MouseEvent event) {
+	void menuInicio(MouseEvent event) {
 		if (menuSeleccionado != "inicio") {
 			menuSeleccionado = "inicio";
 			
 			lInicio.getStyleClass().add("menuSeleccionado");
 			lClases.getStyleClass().remove("menuSeleccionado");
-			lClientes.getStyleClass().remove("menuSeleccionado");
+			lAlumnos.getStyleClass().remove("menuSeleccionado");
 
 			//----------------------------
 			
@@ -106,7 +112,7 @@ public class PrincipalControlador implements Initializable {
 				login = (BorderPane) loader.load();
 				bpPrincipal.setCenter(login);
 				LoginControlador controller = loader.getController(); // cargo el controlador.
-				
+				controller.setControladorPrincipal(this);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -118,13 +124,13 @@ public class PrincipalControlador implements Initializable {
 
 	
 	@FXML
-	void clases(MouseEvent event) {
+	void menuClases(MouseEvent event) {
 		if (menuSeleccionado != "clases") {
 			menuSeleccionado = "clases";
 
 			lInicio.getStyleClass().remove("menuSeleccionado");
 			lClases.getStyleClass().add("menuSeleccionado");
-			lClientes.getStyleClass().remove("menuSeleccionado");
+			lAlumnos.getStyleClass().remove("menuSeleccionado");
 			
 			
 			//Jornada jornada = datos.getJornada(LocalDate.of(2023,4,8));
@@ -158,13 +164,13 @@ public class PrincipalControlador implements Initializable {
 
 	
 	@FXML
-	void clientes(MouseEvent event) {
+	void menuAlumnos(MouseEvent event) {
 		if(menuSeleccionado != "clientes") {
 			menuSeleccionado = "clientes";
 			
 			lInicio.getStyleClass().remove("menuSeleccionado");
 			lClases.getStyleClass().remove("menuSeleccionado");
-			lClientes.getStyleClass().add("menuSeleccionado");
+			lAlumnos.getStyleClass().add("menuSeleccionado");
 		}
 		
 	}
@@ -193,16 +199,34 @@ public class PrincipalControlador implements Initializable {
 	}
 
 	private void crearFicherosApp() {
-		File directorioApp = new File("app");
+		File directorioApp = new File(usuarioAPP[2]);
 		directorioApp.mkdir();
-		conexionBD.setUsuario(usuarioAPP, passwordAPP);
-		try {
-			conexionBD.crearTablasApp();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		conexionBD.setUsuario(directorioApp, usuarioAPP[0], usuarioAPP[1]);
+		File ficheroBD = new File(directorioApp.getName() + "\\" + usuarioAPP[0] + "datab.db");
+		if(!ficheroBD.exists()) {
+			try {
+				conexionBD.crearTablasApp();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+		
 	}
 
+
+	private void iniciarApp(){
+		lClases.setDisable(false);
+		lAlumnos.setDisable(false);
+	}
+
+	public String[] getUsuarioApp() {
+		return usuarioAPP;
+	}
+
+	public void setUsuario(String[] usuario) {
+		this.usuario = usuario;
+		iniciarApp();
+	}
 
 } //Fin PrincipalControlador

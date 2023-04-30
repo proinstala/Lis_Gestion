@@ -3,6 +3,7 @@
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -12,7 +13,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.LoginControlador">
+<BorderPane fx:id="bdLogin" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.LoginControlador">
    <center>
       <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER">
         <columnConstraints>
@@ -36,7 +37,6 @@
                         <Cursor fx:constant="HAND" />
                      </cursor></Button>
                   <TextField fx:id="tfUsuario" layoutX="23.0" layoutY="170.0" prefHeight="30.0" promptText="Usuario" AnchorPane.leftAnchor="23.0" AnchorPane.rightAnchor="23.0" />
-                  <TextField fx:id="tfPassword" layoutX="25.0" layoutY="221.0" prefHeight="30.0" promptText="Contraseña" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" />
                   <ImageView fitHeight="103.0" fitWidth="98.0" layoutX="101.0" layoutY="32.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../recursos/user_1_512.png" />
@@ -50,6 +50,7 @@
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor></Label>
+                  <PasswordField fx:id="pfPassword" layoutX="75.0" layoutY="220.0" prefHeight="30.0" promptText="Password" AnchorPane.leftAnchor="23.0" AnchorPane.rightAnchor="23.0" />
                </children>
             </AnchorPane>
             <ImageView fitHeight="229.0" fitWidth="225.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">

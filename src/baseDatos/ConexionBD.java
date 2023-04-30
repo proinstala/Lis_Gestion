@@ -1,5 +1,6 @@
 package baseDatos;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -21,15 +22,15 @@ import modelo.TipoClase;
 
 public class ConexionBD implements Cloneable{
 	private static final ConexionBD INSTANCE = new ConexionBD(); //Singleton
-	private final String url = "jdbc:sqlite:src\\baseDatos\\Gestion_de_clientes";
+	//private final String url = "jdbc:sqlite:src\\baseDatos\\Gestion_de_clientes";
     //private final String url = "jdbc:sqlite:Gestion_de_clientes2.db?cipher=sqlcipher&legacy=4&key=12345";
     private Connection conn;
     private Statement st;
     private ResultSet res;
     private PreparedStatement ps;
     private String URLConexion = "";
-    private final String cadenaConexionParte1 = "jdbc:sqlite:appdata";
-    private final String cadenaConexionParte2 = ".db?cipher=sqlcipher&legacy=4&key=";
+    private final String cadenaConexionParte1 = "jdbc:sqlite:";
+    private final String cadenaConexionParte2 = "datab.db?cipher=sqlcipher&legacy=4&key=";
 
     private ConexionBD() {}
 
@@ -37,8 +38,8 @@ public class ConexionBD implements Cloneable{
         return INSTANCE;
     }
 
-    public void setUsuario(String usuario, String password) {
-        URLConexion = cadenaConexionParte1 + usuario + cadenaConexionParte2 + password;
+    public void setUsuario(File directorio, String usuario, String password) {
+        URLConexion = cadenaConexionParte1 + directorio.getName() + "\\" + usuario + cadenaConexionParte2 + password;
     }
     
     @Override
@@ -57,27 +58,28 @@ public class ConexionBD implements Cloneable{
 
     
     public void crearTablasApp() throws SQLException {
-        ConexionBD cn = new ConexionBD();
+        ConexionBD cn = INSTANCE;
         conn = cn.conectar();
         st = conn.createStatement();
         String sql;
 
         //Crea la tabla "usuario"
-        sql = "CREATE TABLE IF NOT EXISTS usuario (" +
+        sql = "CREATE TABLE IF NOT EXISTS USUARIO (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "nombre TEXT NOT NULL UNIQUE, " +
                 "password TEXT NOT NULL, " +
-                "passwordBD TEXT NOT NULL, " +
-                "CHECK (passwordBD = OLD.id));";  
+                "passwordBD TEXT NOT NULL); "; 
         st.execute(sql);
 
+        //CHECK (passwordBD = OLD.passwordBD)
+        
         System.out.println("BD: Creada tabla usuario de APP."); //Esto es temporal para pruebas.
         st.close();
         cn.desconectar(conn);
     }
 
     public void crearTablasUsuario() throws SQLException {
-        ConexionBD cn = new ConexionBD();
+        ConexionBD cn = INSTANCE;
         conn = cn.conectar();
         st = conn.createStatement();
         String sql;
@@ -152,6 +154,76 @@ public class ConexionBD implements Cloneable{
         System.out.println("BD: Creadas tablas."); //Esto es temporal para pruebas.
         st.close();
         cn.desconectar(conn);
+    }
+
+    public boolean comprobarNombreUsuario(String nombre) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+        boolean result = false;
+        
+        try {  
+            st = conn.createStatement();
+            res = st.executeQuery("SELECT nombre FROM usuario WHERE nombre = '" + nombre + "';"); //consulta sql a tabla USUARIO.
+
+            while (res.next()) {
+                result = true;
+                System.out.println("BD: Nombre usuario en base de datos."); //Esto es temporal para pruebas.
+            }
+            System.out.println("paso por base de datos: comprobarNombreUsuario");
+
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            e.printStackTrace();
+        } finally { 
+            if(st != null) st.close();
+            if(res != null) res.close(); 
+        }
+        
+        cn.desconectar(conn);
+
+        return result;
+    }
+
+
+    public boolean comprobarUsuario(String[] usuario) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+        boolean result = false;
+        String[] usuarioBD = new String[2]; //[0]nombre, [1]password
+        
+        try {  
+            //Consulta a base de datos.
+            ps = conn.prepareStatement("SELECT nombre, password FROM USUARIO WHERE nombre = ? and password = ?;");
+            ps.setString(1, usuario[0]);
+            ps.setString(2, usuario[1]);
+           
+            //ps.executeUpdate();
+            res = ps.executeQuery(); //consulta sql a tabla USUARIO.
+
+            while (res.next()) {
+                //Guardo los datos de la consulta en usuarioDB
+                usuarioBD[0] = res.getString(1); 
+                usuarioBD[1] = res.getString(2);
+                
+                //Comparo si el nombre y password pasados por parametro coinciden con los obtenidos en la consulta.
+                if(usuario[0].equals(usuarioBD[0]) && usuario[1].equals(usuarioBD[1])) {
+                    result = true;
+                    System.out.println("BD: usuario macht en base de datos."); //Esto es temporal para pruebas.
+                }
+
+            }
+
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            e.printStackTrace();
+        } finally { 
+            if(ps != null) st.close();
+            if(res != null) res.close(); 
+        }
+        
+        cn.desconectar(conn);
+
+        return result;
     }
 
     
