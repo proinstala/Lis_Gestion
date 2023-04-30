@@ -1,5 +1,6 @@
 package controlador;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -35,6 +36,8 @@ public class PrincipalControlador implements Initializable {
 	private Datos datos;
 	private ConexionBD conexionBD;
 	private Toast toast = new Toast();
+	private final String usuarioAPP = "lisgestion";
+	private final String passwordAPP = "lisgestion";
 	
 	@FXML
     private BorderPane bpPrincipal;
@@ -56,8 +59,19 @@ public class PrincipalControlador implements Initializable {
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		
+		conexionBD = ConexionBD.getInstance();
+
+		//paso 1: llamar metodo comprobar ficheros app
+		if(!comprobarFicherosApp()) {
+			crearFicherosApp();
+		}
+		//paso 2: si los ficheros no existen, crearlos.
+		//paso 3: cargar vista Login.
+
 		datos = Datos.getInstance();
 		conexionBD = ConexionBD.getInstance();
+
 		try {
 			listadoAlumnos = FXCollections.observableArrayList(conexionBD.getListadoAlumnos());
 		} catch (Exception e) {
@@ -72,7 +86,8 @@ public class PrincipalControlador implements Initializable {
 		pSeparador.getStyleClass().add("panelSeparador");
 		
 	}
-	
+
+
 	@FXML
 	void inicio(MouseEvent event) {
 		if (menuSeleccionado != "inicio") {
@@ -173,5 +188,21 @@ public class PrincipalControlador implements Initializable {
     	this.escenario = s;
     }
 	
+	private boolean comprobarFicherosApp() {
+		return false;
+	}
+
+	private void crearFicherosApp() {
+		File directorioApp = new File("app");
+		directorioApp.mkdir();
+		conexionBD.setUsuario(usuarioAPP, passwordAPP);
+		try {
+			conexionBD.crearTablasApp();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 
 } //Fin PrincipalControlador

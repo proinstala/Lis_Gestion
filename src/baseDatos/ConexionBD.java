@@ -22,16 +22,23 @@ import modelo.TipoClase;
 public class ConexionBD implements Cloneable{
 	private static final ConexionBD INSTANCE = new ConexionBD(); //Singleton
 	private final String url = "jdbc:sqlite:src\\baseDatos\\Gestion_de_clientes";
+    //private final String url = "jdbc:sqlite:Gestion_de_clientes2.db?cipher=sqlcipher&legacy=4&key=12345";
     private Connection conn;
     private Statement st;
     private ResultSet res;
     private PreparedStatement ps;
-
+    private String URLConexion = "";
+    private final String cadenaConexionParte1 = "jdbc:sqlite:appdata";
+    private final String cadenaConexionParte2 = ".db?cipher=sqlcipher&legacy=4&key=";
 
     private ConexionBD() {}
 
     public static ConexionBD getInstance() { //Singleton
         return INSTANCE;
+    }
+
+    public void setUsuario(String usuario, String password) {
+        URLConexion = cadenaConexionParte1 + usuario + cadenaConexionParte2 + password;
     }
     
     @Override
@@ -40,7 +47,7 @@ public class ConexionBD implements Cloneable{
     }
     
     private Connection conectar() throws SQLException {
-        conn = DriverManager.getConnection(url);
+        conn = DriverManager.getConnection(URLConexion);
         return conn;
     }
 
@@ -49,7 +56,27 @@ public class ConexionBD implements Cloneable{
     }
 
     
-    public void crearTablas() throws SQLException {
+    public void crearTablasApp() throws SQLException {
+        ConexionBD cn = new ConexionBD();
+        conn = cn.conectar();
+        st = conn.createStatement();
+        String sql;
+
+        //Crea la tabla "usuario"
+        sql = "CREATE TABLE IF NOT EXISTS usuario (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "nombre TEXT NOT NULL UNIQUE, " +
+                "password TEXT NOT NULL, " +
+                "passwordBD TEXT NOT NULL, " +
+                "CHECK (passwordBD = OLD.id));";  
+        st.execute(sql);
+
+        System.out.println("BD: Creada tabla usuario de APP."); //Esto es temporal para pruebas.
+        st.close();
+        cn.desconectar(conn);
+    }
+
+    public void crearTablasUsuario() throws SQLException {
         ConexionBD cn = new ConexionBD();
         conn = cn.conectar();
         st = conn.createStatement();
@@ -76,6 +103,7 @@ public class ConexionBD implements Cloneable{
                 "calle TEXT, " +
                 "numero INTEGER, " +
                 "localidad_id INTEGER NOT NULL, " +
+                "codigo_postal INTEGER NOT NULL, " +
                 "FOREIGN KEY (localidad_id) REFERENCES localidad (id));";  
         st.execute(sql);
 
@@ -120,6 +148,8 @@ public class ConexionBD implements Cloneable{
                 "FOREIGN KEY (clase_id) REFERENCES clase (id) ON DELETE CASCADE, " +
                 "FOREIGN KEY (alumno_id) REFERENCES alumno (id) ON DELETE CASCADE);";
 
+
+        System.out.println("BD: Creadas tablas."); //Esto es temporal para pruebas.
         st.close();
         cn.desconectar(conn);
     }
@@ -471,7 +501,7 @@ public class ConexionBD implements Cloneable{
                     genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8), res.getString(9)));
             }
             
-            System.out.println("Obtencion de listaAlumnos de base de datos."); //Esto es temporal para pruebas.
+            System.out.println("BD: Obtencion de listaAlumnos."); //Esto es temporal para pruebas.
         } catch (SQLException e) {
             //aqui poner la insercion en el .log
             e.printStackTrace();
@@ -561,7 +591,7 @@ public class ConexionBD implements Cloneable{
                     res.getString(4), res.getString(5), res.getInt(6)));
             }
 
-            System.out.println("Obtencion de listaDirecciones de base de datos. Direcciones obtenidas: " + listaDirecciones.size()); //Esto es temporal para pruebas.
+            System.out.println("BD: Obtencion de listaDirecciones de base de datos. Direcciones obtenidas: " + listaDirecciones.size()); //Esto es temporal para pruebas.
         } catch (SQLException e) {
             //aqui poner la insercion en el .log
             e.printStackTrace();
@@ -586,7 +616,7 @@ public class ConexionBD implements Cloneable{
 
             while (res.next()) {
                 jornada = new Jornada(LocalDate.parse(res.getString(1)), res.getString(2));
-                System.out.println("Obtencion de Jornada " + jornada.getFecha().toString() + " de base de datos."); //Esto es temporal para pruebas.
+                System.out.println("BD: Obtencion de Jornada " + jornada.getFecha().toString() + " de base de datos."); //Esto es temporal para pruebas.
             }
 
         } catch (SQLException e) {
@@ -652,7 +682,7 @@ public class ConexionBD implements Cloneable{
             //Si no hay registros, ponemos la listaClases a null.
             if(!resultadoOk) listaClases = null;
 
-            System.out.println("Obtencion de Array de Clases de la jornada " + jornada.getFecha().toString() + "."); //Esto es temporal para pruebas.
+            System.out.println("BD: Obtencion de Array de Clases de la jornada " + jornada.getFecha().toString() + "."); //Esto es temporal para pruebas.
         } catch (SQLException e) {
             //aqui poner la insercion en el .log
             e.printStackTrace();
