@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane fx:id="apRegistroUsuario" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" styleClass="fondo_ventana_prueba" stylesheets="@../hojasEstilos/Styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.RegistroUserControlador">
+   <children>
+      <Button fx:id="btnRegistrarse" layoutX="286.0" layoutY="274.0" mnemonicParsing="false" onMouseClicked="#registrarUsuario" prefHeight="25.0" prefWidth="115.0" text="Registrarse">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </Button>
+      <Label alignment="CENTER" layoutX="312.0" layoutY="28.0" text="REGISTRO DE USUARIO">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="289.0" layoutY="83.0" text="Nombre" />
+      <Label layoutX="286.0" layoutY="140.0" text="Password" />
+      <Label layoutX="286.0" layoutY="198.0" text="Confirmación Password" />
+      <TextField fx:id="tfNombre" layoutX="286.0" layoutY="100.0" prefHeight="25.0" prefWidth="250.0" promptText="Nombre" />
+      <PasswordField fx:id="tfPassword" layoutX="286.0" layoutY="157.0" prefWidth="250.0" promptText="Password" />
+      <PasswordField fx:id="tfConfirmacionPass" layoutX="286.0" layoutY="214.0" prefWidth="250.0" promptText="Password" />
+      <Pane layoutY="94.0" maxHeight="1.7976931348623157E308" prefHeight="400.0" prefWidth="200.0" styleClass="fondo_panel_izquierda" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="25.0" layoutY="23.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../recursos/user_3_512.png" />
+               </image>
+            </ImageView>
+            <Label alignment="TOP_LEFT" layoutX="18.0" layoutY="198.0" prefHeight="130.0" prefWidth="164.0" styleClass="color_texto_negro" text="Introduce un nombre para tu usuario y un password. Vuelve a introducir el password para confirmarlo y haz clic en registrarse para crear el nuevo usuario y empezar a disfrutar de la aplicacion." textAlignment="JUSTIFY" wrapText="true" />
+         </children>
+      </Pane>
+      <Button fx:id="btnCancelar" layoutX="422.0" layoutY="274.0" mnemonicParsing="false" onMouseClicked="#cancelar" prefHeight="25.0" prefWidth="115.0" text="Cancelar">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </Button>
+      <Separator layoutX="253.0" layoutY="63.0" prefHeight="1.0" prefWidth="308.0" />
+   </children>
+</AnchorPane>

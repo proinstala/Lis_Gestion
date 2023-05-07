@@ -1,27 +1,38 @@
 package controlador;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 import baseDatos.ConexionBD;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import modelo.Toast;
+import modelo.Usuario;
 import javafx.fxml.Initializable;
 
 public class LoginControlador implements Initializable {
 
-    String[] usuario = new String[2]; //[0]nombre, [1]password
-    ConexionBD conexionBD;
+    private String[] camposLogin = new String[2]; //[0]nombre, [1]password
+    private Usuario usuario;
+    private Usuario usuarioApp;
+    private ConexionBD conexionBD;
     private PrincipalControlador controladorPincipal;
     private Toast toast;
+    private Stage escenario;
 
 
     @FXML
@@ -47,22 +58,92 @@ public class LoginControlador implements Initializable {
     @FXML
     void acceder(MouseEvent event) {
         if(recuperarDatosCampos() && comprobarUsuario()) {
-            toast.show((Stage) bdLogin.getScene().getWindow(), "Usuario Logueado!!.");
-            controladorPincipal.setUsuario(usuario);
+            try {
+                usuario = conexionBD.getUsuario(camposLogin);
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            if(usuario == null) {
+                toast.show((Stage) bdLogin.getScene().getWindow(), "Algo a salido mal!!.");
+            } else {
+                toast.show((Stage) bdLogin.getScene().getWindow(), "Usuario Logueado!!.");
+                controladorPincipal.setUsuario(usuario);
+
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/inicioVista.fxml"));
+				BorderPane inicio;
+				
+				try {
+                    inicio = (BorderPane) loader.load();
+                    controladorPincipal.setPane(inicio);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
+				//bpPrincipal.setCenter(jornadaPilates);
+            }
         }
-        
     }
 
     
 
     @FXML
     void recuperarPassword(MouseEvent event) {
+        //ESTO ESTA DE PRUEBA PARA VER COMO QUEDA LA VENTANA
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/registroUsuarioVista.fxml"));
+		    GridPane registroUsuario;
+            registroUsuario = (GridPane) loader.load();
+            RegistroUsuarioControlador controller = loader.getController(); // cargo el controlador.
+            
+            Stage ventana= new Stage();
+            ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
+            ventana.initStyle(StageStyle.UNDECORATED);
+            
+            
+            controller.setStage(ventana);
 
+            Scene scene = new Scene(registroUsuario);
+            //scene.getStylesheets().add(getClass().getResource("/estilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
+            ventana.setScene(scene);
+            //ventana.setTitle("titulo de ventana");
+            ventana.showAndWait();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+		//bpPrincipal.setCenter(login);
+		
+		//controller.setControladorPrincipal(this);
+		//controller.setUsuarioApp(usuarioApp);
     }
 
     @FXML
     void registrarse(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/registroUserVista.fxml"));
+		    AnchorPane registroUser;
+            registroUser = (AnchorPane) loader.load();
+            RegistroUserControlador controller = loader.getController(); // cargo el controlador.
+            
+            Stage ventana= new Stage();
+            ventana.initOwner(escenario);
+            ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
+            ventana.initStyle(StageStyle.UNDECORATED);
+            
+            controller.setStage(ventana);
+            controller.setUsuarioApp(usuarioApp);
 
+            Scene scene = new Scene(registroUser);
+            //scene.getStylesheets().add(getClass().getResource("/estilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
+            ventana.setScene(scene);
+            //ventana.setTitle("titulo de ventana");
+            ventana.showAndWait();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     
     private boolean recuperarDatosCampos() {
@@ -70,7 +151,7 @@ public class LoginControlador implements Initializable {
         if (tfUsuario.getText().isBlank()) {
             toast.show((Stage) bdLogin.getScene().getWindow(), "El campo Nombre está vacío!!.");
         } else {
-            usuario[0] = tfUsuario.getText();
+            camposLogin[0] = tfUsuario.getText();
             camposOK = true;
         }
 
@@ -78,7 +159,7 @@ public class LoginControlador implements Initializable {
             toast.show((Stage) bdLogin.getScene().getWindow(), "El campo password está vacío!!.");
             camposOK = false;
         } else {
-            usuario[1] = pfPassword.getText();
+            camposLogin[1] = pfPassword.getText();
         }
 
         return camposOK;
@@ -86,14 +167,15 @@ public class LoginControlador implements Initializable {
 
 
     private boolean comprobarUsuario() {
-        conexionBD.setUsuario(new File(controladorPincipal.getUsuarioApp()[2]), controladorPincipal.getUsuarioApp()[0], controladorPincipal.getUsuarioApp()[0]);
+        //conexionBD.setUsuario(new File(controladorPincipal.getUsuarioApp()[2]), controladorPincipal.getUsuarioApp()[0], controladorPincipal.getUsuarioApp()[0]);
+        conexionBD.setUsuario(usuarioApp);
         try {
-            if(!conexionBD.comprobarNombreUsuario(usuario[0])) {
+            if(!conexionBD.comprobarNombreUsuario(camposLogin[0])) {
                 toast.show((Stage) bdLogin.getScene().getWindow(), "No hay ningun usuario registrado\ncon ese nombre!!.");
                 return false;
             }
             
-            if(!conexionBD.comprobarUsuario(usuario)) {
+            if(!conexionBD.comprobarUsuario(camposLogin)) {
                 toast.show((Stage) bdLogin.getScene().getWindow(), "El password es incorrecto!!.");
                 return false;
             }
@@ -114,5 +196,19 @@ public class LoginControlador implements Initializable {
 	public void setControladorPrincipal(PrincipalControlador principal) {
 		controladorPincipal = principal;
 	}
+
+
+    public void setUsuarioApp(Usuario u) {
+        usuarioApp = u;
+    }
+
+    /**
+     * Establece un Stage para este controlador.
+     * 
+     * @param s Stage que se establece.
+     */
+    public void setStage(Stage stage) {
+    	this.escenario = stage;
+    }
 
 }

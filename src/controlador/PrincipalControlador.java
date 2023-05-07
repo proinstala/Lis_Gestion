@@ -26,6 +26,7 @@ import modelo.Alumno;
 import modelo.Datos;
 import modelo.Jornada;
 import modelo.Toast;
+import modelo.Usuario;
 
 public class PrincipalControlador implements Initializable {
 	
@@ -36,8 +37,12 @@ public class PrincipalControlador implements Initializable {
 	private Datos datos;
 	private ConexionBD conexionBD;
 	private Toast toast = new Toast();
+	
 	private final String[] usuarioAPP = {"lisgestion", "lisgestion", "appdata"}; //[0]nombre, [1]password, [2]directorio
 	private String[] usuario = null; //[0]nombre, [1]password
+	
+	private Usuario usuarioApp; 
+	private Usuario usuarioActual;
 	
 	
 	@FXML
@@ -60,7 +65,7 @@ public class PrincipalControlador implements Initializable {
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		
+		usuarioApp = new Usuario(0, "lisgestion", "lisgestion", new File("appdata"), "lisgestion");
 		conexionBD = ConexionBD.getInstance();
 
 		//paso 1: llamar metodo comprobar ficheros app
@@ -113,6 +118,8 @@ public class PrincipalControlador implements Initializable {
 				bpPrincipal.setCenter(login);
 				LoginControlador controller = loader.getController(); // cargo el controlador.
 				controller.setControladorPrincipal(this);
+				controller.setUsuarioApp(usuarioApp);
+				controller.setStage(escenario);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -137,7 +144,7 @@ public class PrincipalControlador implements Initializable {
 			//Jornada jornada = null;
 			Jornada jornada;
 			try {
-				jornada = conexionBD.getJornada("2023-04-08");
+				jornada = conexionBD.getJornada(LocalDate.now().toString());
 			} catch (SQLException e) {
 				jornada = null;
 				e.printStackTrace();
@@ -190,7 +197,7 @@ public class PrincipalControlador implements Initializable {
      * 
      * @param s Stage que se establece.
      */
-    public void setEscenario(Stage s) {
+    public void setStage(Stage s) {
     	this.escenario = s;
     }
 	
@@ -199,10 +206,9 @@ public class PrincipalControlador implements Initializable {
 	}
 
 	private void crearFicherosApp() {
-		File directorioApp = new File(usuarioAPP[2]);
-		directorioApp.mkdir();
-		conexionBD.setUsuario(directorioApp, usuarioAPP[0], usuarioAPP[1]);
-		File ficheroBD = new File(directorioApp.getName() + "\\" + usuarioAPP[0] + "datab.db");
+		usuarioApp.getDirectorio().mkdir();
+		conexionBD.setUsuario(usuarioApp);
+		File ficheroBD = new File(usuarioApp.getDirectorio().getName() + "\\" + usuarioApp.getNombre() + conexionBD.FINAL_NOMBRE_FICHERO_DB);
 		if(!ficheroBD.exists()) {
 			try {
 				conexionBD.crearTablasApp();
@@ -218,8 +224,17 @@ public class PrincipalControlador implements Initializable {
 	private void iniciarApp(){
 		lClases.setDisable(false);
 		lAlumnos.setDisable(false);
+		conexionBD.setUsuario(usuarioActual);
+		
+		try {
+			listadoAlumnos = FXCollections.observableArrayList(conexionBD.getListadoAlumnos());
+		} catch (Exception e) {
+			e.printStackTrace();
+			// TODO: handle exception
+		}
 	}
 
+	/* 
 	public String[] getUsuarioApp() {
 		return usuarioAPP;
 	}
@@ -227,6 +242,16 @@ public class PrincipalControlador implements Initializable {
 	public void setUsuario(String[] usuario) {
 		this.usuario = usuario;
 		iniciarApp();
+	}/*/
+
+	public Usuario getUsuarioApp() {
+		return usuarioApp;
 	}
+
+	public void setUsuario(Usuario usuario) {
+		this.usuarioActual = usuario;
+		iniciarApp();
+	}
+
 
 } //Fin PrincipalControlador

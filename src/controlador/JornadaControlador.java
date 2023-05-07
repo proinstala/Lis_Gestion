@@ -197,6 +197,8 @@ public class JornadaControlador implements Initializable {
         
         //Para poder escribir directamente la fecha
         dpFecha.setEditable(false); //-> Poner a true para que sea editable.
+
+		dpFecha.setValue(LocalDate.now()); //Establece la fecha de hoy en el datePiker. 
         
         dpFecha.setOnAction(event -> {
         	LocalDate fechaSeleccionada = dpFecha.getValue(); //Guardo la fecha seleccionada en fechaSeleccionada.
@@ -347,7 +349,7 @@ public class JornadaControlador implements Initializable {
 	public void inicializacion(Jornada jorn) {
 		if(jorn == null) {
 			toast.show((Stage) bdJornada.getScene().getWindow(), "Esta jornada no esta creada");
-			
+
 			//Si ya hay cargado datos en pantalla, borra los datos.
 			if(jornada != null) {
 				listaClase1.clear();

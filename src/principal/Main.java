@@ -39,7 +39,7 @@ public class Main extends Application{
 		//controller.setEscenario(primaryStage);		//Le paso al controlador de la nueva ventana este Stage.
 		scene = new Scene(aplicacion);
 		scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm());
-		controller.setEscenario(primaryStage);		//Le paso al controlador de la nueva ventana este Stage.
+		controller.setStage(primaryStage);		//Le paso al controlador de la nueva ventana este Stage.
 		
 		// Icono de aplicacion
 		URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen

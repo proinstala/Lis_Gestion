@@ -1,0 +1,60 @@
+
+
+/* Hoja de estilos principal*/
+
+/*
+ 
+#COLOR LILA FLOJO = #f8e7ff
+#COLOR LILA MEDIO = #78637C
+#COLOR LILA FUERTE = #80488F
+#COLOR GRIS-FONDO = #5E595F
+#COLOR AZUL FLOJO = #00a8f3
+#COLOR AMARILLO FLOJO = #fff79a
+#COLOR AMARILLO FUERTE = #FFCD48
+#COLOR VERDE ON = #33f537
+#COLOR VERDE PARA LETRAS BOTONES TTK = #26d113
+ */
+
+/*
+:hover: representa un control cuando el cursor está sobre él.
+:focused: representa un control cuando tiene el foco.
+:disabled: representa un control deshabilitado.
+:pressed: representa un control que ha sido presionado.
+:armed: representa un control que ha sido presionado y no ha sido liberado aún.
+:selected: representa un control seleccionado.
+:indeterminate: representa un control con un estado indeterminado.
+:odd: representa un elemento en una lista impar.
+:even: representa un elemento en una lista par.
+:visited: representa un hipervínculo visitado.
+ */
+
+
+
+
+/*-- Button --------------------- */
+.button {
+	-fx-background-color: #78637C;
+	-fx-text-fill: white;
+}
+
+.button:hover {
+	-fx-background-color: #80488F;
+	-fx-font-weight: bold;
+	-fx-cursor: hand;
+}
+
+/* 
+.alert .header {
+    -fx-background-color: #236B8E;
+    -fx-text-fill: white;
+}*/
+
+/*Zona mensaje */
+.alert .content {}
+
+/*Zona botones */
+.alert .button-bar {}
+
+
+
+

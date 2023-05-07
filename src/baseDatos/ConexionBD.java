@@ -19,6 +19,7 @@ import modelo.Genero;
 import modelo.HoraClase;
 import modelo.Jornada;
 import modelo.TipoClase;
+import modelo.Usuario;
 
 public class ConexionBD implements Cloneable{
 	private static final ConexionBD INSTANCE = new ConexionBD(); //Singleton
@@ -31,6 +32,7 @@ public class ConexionBD implements Cloneable{
     private String URLConexion = "";
     private final String cadenaConexionParte1 = "jdbc:sqlite:";
     private final String cadenaConexionParte2 = "datab.db?cipher=sqlcipher&legacy=4&key=";
+    public final String FINAL_NOMBRE_FICHERO_DB = "datab.db"; 
 
     private ConexionBD() {}
 
@@ -38,8 +40,8 @@ public class ConexionBD implements Cloneable{
         return INSTANCE;
     }
 
-    public void setUsuario(File directorio, String usuario, String password) {
-        URLConexion = cadenaConexionParte1 + directorio.getName() + "\\" + usuario + cadenaConexionParte2 + password;
+    public void setUsuario(Usuario user) {
+        URLConexion = cadenaConexionParte1 + user.getDirectorio().getName() + "\\" + user.getNombre() + cadenaConexionParte2 + user.getPasswordBD();
     }
     
     @Override
@@ -68,6 +70,7 @@ public class ConexionBD implements Cloneable{
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "nombre TEXT NOT NULL UNIQUE, " +
                 "password TEXT NOT NULL, " +
+                "directorio TEXT NOT NULL, " +
                 "passwordBD TEXT NOT NULL); "; 
         st.execute(sql);
 
@@ -149,7 +152,7 @@ public class ConexionBD implements Cloneable{
                 "PRIMARY KEY (clase_id, alumno_id), " +
                 "FOREIGN KEY (clase_id) REFERENCES clase (id) ON DELETE CASCADE, " +
                 "FOREIGN KEY (alumno_id) REFERENCES alumno (id) ON DELETE CASCADE);";
-
+        st.execute(sql);
 
         System.out.println("BD: Creadas tablas."); //Esto es temporal para pruebas.
         st.close();
@@ -169,7 +172,6 @@ public class ConexionBD implements Cloneable{
                 result = true;
                 System.out.println("BD: Nombre usuario en base de datos."); //Esto es temporal para pruebas.
             }
-            System.out.println("paso por base de datos: comprobarNombreUsuario");
 
         } catch (SQLException e) {
             //aqui poner la insercion en el .log
@@ -224,6 +226,71 @@ public class ConexionBD implements Cloneable{
         cn.desconectar(conn);
 
         return result;
+    }
+
+    public boolean insertarUsuario(Usuario user) throws SQLException{
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        try {
+            conn = cn.conectar();
+            conn.setAutoCommit(false);
+
+            //Insertamos la Jornada en la base de datos.
+            ps = conn.prepareStatement("INSERT INTO USUARIO (nombre, password, directorio, passwordBD) VALUES (?,?,?,?);");
+            ps.setString(1, user.getNombre());
+            ps.setString(2, user.getPassword());
+            ps.setString(3, user.getDirectorio().getName());
+            ps.setString(4, user.getPasswordBD());
+           
+            ps.executeUpdate();
+            
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            System.out.println("Insercion Usuario en base de datos"); //Esto es temporal para pruebas.
+            result = true;
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally { 
+            if(ps != null) ps.close();  
+        }
+        
+        cn.desconectar(conn);
+        return result;
+    }
+
+    public Usuario getUsuario(String[] usuario) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+        String[] usuarioBD = new String[2]; //[0]nombre, [1]password
+        Usuario usuarioRecuperado = null;
+
+        try {  
+            //Consulta a base de datos.
+            ps = conn.prepareStatement("SELECT * FROM USUARIO WHERE nombre = ? and password = ?;");
+            ps.setString(1, usuario[0]);
+            ps.setString(2, usuario[1]);
+           
+            //ps.executeUpdate();
+            res = ps.executeQuery(); //consulta sql a tabla USUARIO.
+
+            while (res.next()) {
+                //id-nombre-password-directorio-passwordDB
+                usuarioRecuperado = new Usuario(res.getInt(1), res.getString(2), res.getString(3), new File(res.getString(4)), res.getString(5));
+            }
+
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            e.printStackTrace();
+        } finally { 
+            if(ps != null) ps.close();
+            if(res != null) res.close(); 
+        }
+        
+        cn.desconectar(conn);
+
+        return usuarioRecuperado;
     }
 
     
