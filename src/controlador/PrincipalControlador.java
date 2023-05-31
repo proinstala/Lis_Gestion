@@ -17,13 +17,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import modelo.Alumno;
-import modelo.Datos;
 import modelo.Jornada;
 import modelo.Toast;
 import modelo.Usuario;
@@ -34,7 +35,6 @@ public class PrincipalControlador implements Initializable {
 	private Stage escenario;
 	private String menuSeleccionado = "ninguno";
 	private ObservableList<Alumno> listadoAlumnos;
-	private Datos datos;
 	private ConexionBD conexionBD;
 	private Toast toast = new Toast();
 	
@@ -45,6 +45,9 @@ public class PrincipalControlador implements Initializable {
 	private Usuario usuarioActual;
 	
 	
+	@FXML
+    private ImageView ivLogo;
+
 	@FXML
     private BorderPane bpPrincipal;
 	
@@ -59,13 +62,32 @@ public class PrincipalControlador implements Initializable {
 
 	@FXML
 	private Label lInicio;
+
+	@FXML
+    private Label lAjustes;
+
+	@FXML
+    private Label lInformes;
+
+	@FXML
+    private Label lUsuario;
 	
 	@FXML
     private Pane pSeparador;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		//Cargar imagenes en ImageView.
+        Image imagenLogo;
+        try {
+            imagenLogo = new Image("/recursos/logo_nuevo.png");
+        } catch (Exception e) {
+            imagenLogo = new Image(getClass().getResourceAsStream("/recursos/logo_nuevo.png"));
+        }
+        ivLogo.setImage(imagenLogo);
+
 		usuarioApp = new Usuario(0, "lisgestion", "lisgestion", new File("appdata"), "lisgestion");
+		usuarioActual = null;
 		conexionBD = ConexionBD.getInstance();
 
 		//paso 1: llamar metodo comprobar ficheros app
@@ -73,24 +95,15 @@ public class PrincipalControlador implements Initializable {
 			crearFicherosApp();
 		}
 		
-		//lInicio.setDisable(true);
-		lClases.setDisable(true);
-		lAlumnos.setDisable(true);
-
-		datos = Datos.getInstance();
-		//conexionBD = ConexionBD.getInstance();
-
-		/* 
-		try {
-			listadoAlumnos = FXCollections.observableArrayList(conexionBD.getListadoAlumnos());
-		} catch (Exception e) {
-			e.printStackTrace();
-			// TODO: handle exception
-		}*/
-		//listadoAlumnos = FXCollections.observableArrayList(datos.listarAlumno());
+		deshabilitarMenus();
+		
 		lInicio.getStyleClass().add("menu");
 		lClases.getStyleClass().add("menu");
 		lAlumnos.getStyleClass().add("menu");
+		lInformes.getStyleClass().add("menu");
+		lUsuario.getStyleClass().add("menu");
+		lAjustes.getStyleClass().add("menu");
+
 		gpMenu.getStyleClass().add("gridPaneMenu");
 		pSeparador.getStyleClass().add("panelSeparador");
 
@@ -107,23 +120,40 @@ public class PrincipalControlador implements Initializable {
 			lInicio.getStyleClass().add("menuSeleccionado");
 			lClases.getStyleClass().remove("menuSeleccionado");
 			lAlumnos.getStyleClass().remove("menuSeleccionado");
-
-			//----------------------------
+			lInformes.getStyleClass().remove("menuSeleccionado");
+			lUsuario.getStyleClass().remove("menuSeleccionado");
+			lAjustes.getStyleClass().remove("menuSeleccionado");
 			
+			if(usuarioActual == null) {
+				try {
+					FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/loginVista.fxml"));
+					BorderPane login;
+					login = (BorderPane) loader.load();
+					bpPrincipal.setCenter(login);
+					
+					LoginControlador controller = loader.getController(); //Cargo el controlador.
+					controller.setControladorPrincipal(this);
+					controller.setUsuarioApp(usuarioApp);
+					controller.setStage(escenario);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				try {
+					FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/inicioVista.fxml"));
+					BorderPane inicio;
+					inicio = (BorderPane) loader.load();
+					bpPrincipal.setCenter(inicio);
 
-			try {
-				FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/loginVista.fxml"));
-				BorderPane login;
-				login = (BorderPane) loader.load();
-				bpPrincipal.setCenter(login);
-				LoginControlador controller = loader.getController(); // cargo el controlador.
-				controller.setControladorPrincipal(this);
-				controller.setUsuarioApp(usuarioApp);
-				controller.setStage(escenario);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+					InicioControlador controller = loader.getController(); // cargo el controlador.
+					controller.setControladorPrincipal(this);
+					controller.setUsuarioApp(usuarioApp);
+					controller.setUsuarioActual(usuarioActual);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
+			
 			
 
 		}
@@ -138,6 +168,9 @@ public class PrincipalControlador implements Initializable {
 			lInicio.getStyleClass().remove("menuSeleccionado");
 			lClases.getStyleClass().add("menuSeleccionado");
 			lAlumnos.getStyleClass().remove("menuSeleccionado");
+			lInformes.getStyleClass().remove("menuSeleccionado");
+			lUsuario.getStyleClass().remove("menuSeleccionado");
+			lAjustes.getStyleClass().remove("menuSeleccionado");
 			
 			
 			//Jornada jornada = datos.getJornada(LocalDate.of(2023,4,8));
@@ -159,7 +192,6 @@ public class PrincipalControlador implements Initializable {
 				JornadaControlador controller = loader.getController(); // cargo el controlador.
 				controller.setControladorPrincipal(this);
 				controller.setListaAlumnos(listadoAlumnos);
-				controller.setConexionBD(datos);
 				controller.inicializacion(jornada);
 				
 			} catch (IOException e) {
@@ -172,15 +204,84 @@ public class PrincipalControlador implements Initializable {
 	
 	@FXML
 	void menuAlumnos(MouseEvent event) {
-		if(menuSeleccionado != "clientes") {
-			menuSeleccionado = "clientes";
+		if(menuSeleccionado != "alumnos") {
+			menuSeleccionado = "alumnos";
 			
 			lInicio.getStyleClass().remove("menuSeleccionado");
 			lClases.getStyleClass().remove("menuSeleccionado");
 			lAlumnos.getStyleClass().add("menuSeleccionado");
+			lInformes.getStyleClass().remove("menuSeleccionado");
+			lUsuario.getStyleClass().remove("menuSeleccionado");
+			lAjustes.getStyleClass().remove("menuSeleccionado");
+
+			try {
+				FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/alumnosVista.fxml"));
+				BorderPane alumnos;
+				
+				alumnos = (BorderPane) loader.load();
+				bpPrincipal.setCenter(alumnos);
+				
+				AlumnosControlador controller = loader.getController(); // cargo el controlador.
+				controller.setControladorPrincipal(this);
+				controller.setListaAlumnos(listadoAlumnos);
+				controller.setStage(escenario);
+				
+			} catch (IOException e) {
+				System.out.println("-ERROR- Fallo al cargar jornadaVista.fxml" + e.getMessage());
+				e.printStackTrace();
+			}
+
 		}
 		
 	}
+
+
+	@FXML
+    void menuInformes(MouseEvent event) {
+		if(menuSeleccionado != "informes") {
+			menuSeleccionado = "informes";
+			
+			lInicio.getStyleClass().remove("menuSeleccionado");
+			lClases.getStyleClass().remove("menuSeleccionado");
+			lAlumnos.getStyleClass().remove("menuSeleccionado");
+			lInformes.getStyleClass().add("menuSeleccionado");
+			lUsuario.getStyleClass().remove("menuSeleccionado");
+			lAjustes.getStyleClass().remove("menuSeleccionado");
+
+		}
+    }
+
+
+	@FXML
+    void menuUsuario(MouseEvent event) {
+		if(menuSeleccionado != "usuario") {
+			menuSeleccionado = "usuario";
+			
+			lInicio.getStyleClass().remove("menuSeleccionado");
+			lClases.getStyleClass().remove("menuSeleccionado");
+			lAlumnos.getStyleClass().remove("menuSeleccionado");
+			lInformes.getStyleClass().remove("menuSeleccionado");
+			lUsuario.getStyleClass().add("menuSeleccionado");
+			lAjustes.getStyleClass().remove("menuSeleccionado");
+
+		}
+    }
+
+
+	@FXML
+    void menuAjustes(MouseEvent event) {
+		if(menuSeleccionado != "ajustes") {
+			menuSeleccionado = "ajustes";
+			
+			lInicio.getStyleClass().remove("menuSeleccionado");
+			lClases.getStyleClass().remove("menuSeleccionado");
+			lAlumnos.getStyleClass().remove("menuSeleccionado");
+			lInformes.getStyleClass().remove("menuSeleccionado");
+			lUsuario.getStyleClass().remove("menuSeleccionado");
+			lAjustes.getStyleClass().add("menuSeleccionado");
+
+		}
+    }
 	
 	
 	/**
@@ -199,6 +300,10 @@ public class PrincipalControlador implements Initializable {
      */
     public void setStage(Stage s) {
     	this.escenario = s;
+		if(escenario == null) {
+			System.out.println("Es nulo");
+		}
+		System.out.println(escenario.getX()); 
     }
 	
 	private boolean comprobarFicherosApp() {
@@ -221,17 +326,59 @@ public class PrincipalControlador implements Initializable {
 	}
 
 
-	private void iniciarApp(){
-		lClases.setDisable(false);
-		lAlumnos.setDisable(false);
+	public void iniciarSesion(Usuario usuario){
+		this.usuarioActual = usuario;
 		conexionBD.setUsuario(usuarioActual);
+
+		habilitarMenus();
+			
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/inicioVista.fxml"));
+			BorderPane inicio;
+			inicio = (BorderPane) loader.load();
+			bpPrincipal.setCenter(inicio);
+
+			InicioControlador controller = loader.getController(); //Cargo el controlador.
+			controller.setControladorPrincipal(this);
+			controller.setUsuarioApp(usuarioApp);
+			controller.setUsuarioActual(usuarioActual);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		try {
 			listadoAlumnos = FXCollections.observableArrayList(conexionBD.getListadoAlumnos());
 		} catch (Exception e) {
 			e.printStackTrace();
-			// TODO: handle exception
 		}
+	}
+
+	public void cerrarSesion() {
+		this.usuarioActual = null;
+		listadoAlumnos = null;
+		conexionBD.setUsuario(usuarioApp);
+
+		deshabilitarMenus();
+		
+		menuSeleccionado = ""; //Borro el contenido del String para que cuando ejecute el menuInicio() cargue la vista de login.
+		toast.show(escenario, "Usuario Desconectado!!.");
+		menuInicio(null);
+	}
+
+	private void habilitarMenus() {
+		lClases.setDisable(false);
+		lAlumnos.setDisable(false);
+		lInformes.setDisable(false);
+		lUsuario.setDisable(false);
+		lAjustes.setDisable(false);
+	}
+
+	private void deshabilitarMenus() {
+		lClases.setDisable(true);
+		lAlumnos.setDisable(true);
+		lInformes.setDisable(true);
+		lUsuario.setDisable(true);
+		lAjustes.setDisable(true);
 	}
 
 	/* 
@@ -248,9 +395,14 @@ public class PrincipalControlador implements Initializable {
 		return usuarioApp;
 	}
 
+	//NOTA: Si no hace falta este metodo, borrarlo.
+	/**
+	 * Etablece el usuario que esta usando la aplicación.
+	 * @param usuario
+	 */
 	public void setUsuario(Usuario usuario) {
 		this.usuarioActual = usuario;
-		iniciarApp();
+		//iniciarApp();
 	}
 
 

@@ -39,7 +39,7 @@ public class Main extends Application{
 		//controller.setEscenario(primaryStage);		//Le paso al controlador de la nueva ventana este Stage.
 		scene = new Scene(aplicacion);
 		scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm());
-		controller.setStage(primaryStage);		//Le paso al controlador de la nueva ventana este Stage.
+		//controller.setStage(this.primaryStage);		//Le paso al controlador de la nueva ventana este Stage.
 		
 		// Icono de aplicacion
 		URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen
@@ -50,6 +50,9 @@ public class Main extends Application{
 		this.primaryStage.setScene(scene);
 		this.primaryStage.setMinHeight(800);
 		this.primaryStage.setMinWidth(1200);
+
+		controller.setStage(this.primaryStage);		//Le paso al controlador de la nueva ventana este Stage.
+
 		this.primaryStage.show();
 		
 	}

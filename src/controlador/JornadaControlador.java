@@ -17,6 +17,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -24,7 +25,6 @@ import javafx.stage.Stage;
 import javafx.util.converter.LocalDateStringConverter;
 import modelo.Alumno;
 import modelo.Clase;
-import modelo.Datos;
 import modelo.Direccion;
 import modelo.Genero;
 import modelo.HoraClase;
@@ -43,7 +43,6 @@ public class JornadaControlador implements Initializable {
 	private Jornada jornada = null;
 	private Jornada jornadaOriginal;
 	private ObservableList<Alumno> listadoAlumnosGeneral;
-	private Datos datos;
 	private ConexionBD conexionBD;
 	private Alert alerta;
 	private Toast toast;
@@ -152,6 +151,16 @@ public class JornadaControlador implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		//Cargar imagenes en ImageView.
+        Image imagenCrearJornada;
+        try {
+        	imagenCrearJornada = new Image("/recursos/circulo_flecha_1.png");
+        } catch (Exception e) {
+        	imagenCrearJornada = new Image(getClass().getResourceAsStream("/recursos/circulo_flecha_1.png"));
+        }
+        ivBotonCrearJornada.setImage(imagenCrearJornada);
+        
+        btnBorrar.getStyleClass().add("boton_rojo");
 		
 		conexionBD = ConexionBD.getInstance(); //Obtenemos una istancia de la Conexion a BD.
 		
@@ -337,7 +346,6 @@ public class JornadaControlador implements Initializable {
 			controller.setJornada(jornada);
 			controller.setClaseIniciacion(numeroClase);
 			controller.setListaAlumnos(listadoAlumnosGeneral);
-			controller.setConexionBD(datos);
 			
 		} catch (IOException e) {
 			System.out.println("-ERROR- Fallo al cargar ClaseVista.fxml" + e.getMessage());
@@ -597,15 +605,6 @@ public class JornadaControlador implements Initializable {
 	 */
 	public void setJornada(Jornada jornada) {
 		this.jornada = jornada;
-	}
-	
-	/**
-	 * Establece el objeto para la conexion a la base de datos.
-	 * 
-	 * @param datos El objeto que se utiliza para la conexion a la base de datos.
-	 */
-	public void setConexionBD(Datos datos) {
-		this.datos = datos;
 	}
 	
 	

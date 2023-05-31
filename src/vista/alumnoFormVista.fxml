@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<GridPane fx:id="gpFormAlumno" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="730.0" prefWidth="550.0" styleClass="fondo_ventana_degradado_toRight" stylesheets="@../hojasEstilos/Styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.AlumnoFormControlador">
+  <columnConstraints>
+    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="0.0" prefWidth="110.0" />
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="ALWAYS" />
+      <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="NEVER" />
+  </rowConstraints>
+   <padding>
+      <Insets left="20.0" right="20.0" />
+   </padding>
+   <children>
+      <Label fx:id="lbTitulo" text="Alumno" GridPane.columnSpan="2" GridPane.halignment="CENTER">
+         <font>
+            <Font name="System Bold" size="24.0" />
+         </font>
+         <padding>
+            <Insets top="15.0" />
+         </padding>
+      </Label>
+      <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.rowIndex="1">
+         <children>
+            <Label text="Datos" />
+            <Separator maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES" />
+         </children>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </HBox>
+      <Label text="ID" GridPane.rowIndex="2">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfIdAlumno" editable="false" maxWidth="-Infinity" prefWidth="200.0" promptText="Número identificador de alumno" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <Label text="Nombre" GridPane.rowIndex="3">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfNombre" promptText="Nombre de alumno" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+      <Label text="1º Apellido" GridPane.rowIndex="4">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <Label text="2º Apellido" GridPane.rowIndex="5">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <Label text="Género" GridPane.rowIndex="6">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfApellido1" promptText="Primer apellido" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+      <TextField fx:id="tfApellido2" promptText="Segundo apellido" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+      <ComboBox fx:id="cbGenero" maxWidth="-Infinity" prefWidth="200.0" promptText="Género" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+      <Label text="Fecha Nacimiento" GridPane.rowIndex="7">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <DatePicker fx:id="dpFechaNacimiento" maxWidth="-Infinity" prefWidth="200.0" promptText="Fecha" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+      <HBox alignment="CENTER_LEFT" layoutX="30.0" layoutY="50.0" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.rowIndex="8">
+         <children>
+            <Label text="Contacto" />
+            <Separator maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES" />
+         </children>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </HBox>
+      <Label text="Teléfono" GridPane.rowIndex="9">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <Label text="Email *" GridPane.rowIndex="10">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfTelefono" promptText="Telefono de contacto" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+      <TextField fx:id="tfEmail" promptText="Correo electrónico" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+      <HBox alignment="CENTER_LEFT" layoutX="30.0" layoutY="330.0" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.rowIndex="11">
+         <children>
+            <Label text="Dirección" />
+            <Separator maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES" />
+         </children>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </HBox>
+      <Label text="ID Dirección" GridPane.rowIndex="12">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfIdDireccion" editable="false" maxWidth="-Infinity" prefWidth="200.0" promptText="Número identificador de dirección" GridPane.columnIndex="1" GridPane.rowIndex="12" />
+      <TextField fx:id="tfCalle" promptText="Nombre de la calle" GridPane.columnIndex="1" GridPane.rowIndex="13" />
+      <Label text="Calle *" GridPane.rowIndex="13">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <Label text="Número *" GridPane.rowIndex="14">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfNumeroVivienda" promptText="Número de la vivienda" GridPane.columnIndex="1" GridPane.rowIndex="14" />
+      <Label text="Código Postal *" GridPane.rowIndex="17">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfCodigoPostal" promptText="Código postal" GridPane.columnIndex="1" GridPane.rowIndex="17" />
+      <Label text="Localidad" GridPane.rowIndex="15">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <Label text="Provincia" GridPane.rowIndex="16">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <ComboBox fx:id="cbLocalidad" layoutX="140.0" layoutY="225.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Localidad" GridPane.columnIndex="1" GridPane.rowIndex="15" />
+      <ComboBox fx:id="cbProvincia" layoutX="140.0" layoutY="540.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Provincia" GridPane.columnIndex="1" GridPane.rowIndex="16" />
+      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="21">
+         <children>
+            <Button fx:id="btnConfirmacion" mnemonicParsing="false" onMouseClicked="#confirmacion" prefWidth="80.0" text="Guardar" />
+            <Button fx:id="btnCancelar" mnemonicParsing="false" onMouseClicked="#cancelar" prefWidth="80.0" text="Cancelar" />
+         </children>
+      </HBox>
+      <ImageView fx:id="ivImagenTipoFormulario" fitHeight="150.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.rowIndex="20" GridPane.rowSpan="2" GridPane.valignment="TOP">
+         <image>
+            <Image url="@../recursos/usuario_edit_1_128.png" />
+         </image>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </ImageView>
+      <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.rowIndex="18">
+         <children>
+            <Label text="Estado" />
+            <Separator maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES" />
+         </children>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </HBox>
+      <Label text="Estado" GridPane.rowIndex="19">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <ComboBox fx:id="cbEstado" maxWidth="-Infinity" prefWidth="200.0" promptText="Estado" GridPane.columnIndex="1" GridPane.rowIndex="19" />
+   </children>
+</GridPane>

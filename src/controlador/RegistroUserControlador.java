@@ -12,6 +12,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -31,6 +33,10 @@ public class RegistroUserControlador implements Initializable {
     private Usuario usuario;
     private Usuario usuarioApp;
     private ConexionBD conexionBD;
+
+    
+    @FXML
+    private ImageView imImagenRegistro;
 
     @FXML
     private AnchorPane apRegistroUsuario;
@@ -53,8 +59,17 @@ public class RegistroUserControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        conexionBD = ConexionBD.getInstance();
-        toast = new Toast();
+        //Cargar imagenes en ImageView.
+        Image imagenRegistro;
+        try {
+            imagenRegistro = new Image("/recursos/user_3_512.png");
+        } catch (Exception e) {
+            imagenRegistro = new Image(getClass().getResourceAsStream("/recursos/user_3_512.png"));
+        }
+        imImagenRegistro.setImage(imagenRegistro);
+        
+        apRegistroUsuario.getStyleClass().add("fondo_ventana_degradado_masBorde");
+        btnCancelar.getStyleClass().add("boton_rojo");
 
         apRegistroUsuario.setOnMousePressed(mouseEvent -> {
             x = mouseEvent.getSceneX();
@@ -66,7 +81,8 @@ public class RegistroUserControlador implements Initializable {
             escenario.setY(mouseEvent.getScreenY() - y);
         });
 
-        //Stage stagePrimario= (Stage) pane.getScene().getWindow(); para probar
+        conexionBD = ConexionBD.getInstance();
+        toast = new Toast();
     }
 
 
@@ -84,7 +100,6 @@ public class RegistroUserControlador implements Initializable {
             usuario.setPassword(tfPassword.getText());
             usuario.setDirectorio(new File(tfNombre.getText()));
             usuario.setPasswordBD(tfPassword.getText());
-
             
             if(crearFicherosUsuario(usuario)) {
                 boolean insertarUserOk = false;
@@ -116,10 +131,8 @@ public class RegistroUserControlador implements Initializable {
                 toast.show((Stage) apRegistroUsuario.getScene().getWindow(), "No se ha podido crear los ficheros de usuario!!.");
             }
 
-
             toast.show((Stage) apRegistroUsuario.getScene().getWindow(), "Usuario Registrado!!."); //toast.show(escenario, "Usuario Registrado!!.");
         }
-        //LLamar a los metodos de comprobar campos. Si son ok, crear el directorio y base de datos de usuario, despues insertar usuario en base de datos app.
         
     }
     

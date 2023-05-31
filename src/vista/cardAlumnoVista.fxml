@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane fx:id="apCardAlumno" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="430.0" prefWidth="600.0" styleClass="fondo_ventana_degradado_masBorde" stylesheets="@../hojasEstilos/Styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.CardAlumnoControlador">
+   <children>
+      <AnchorPane fx:id="apIzquierda" prefHeight="310.0" prefWidth="200.0" styleClass="fondo_panel_izquierda" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="400.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <ImageView fx:id="ivImagenUser" fitHeight="150.0" fitWidth="174.0" layoutX="23.0" layoutY="24.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="21.0" AnchorPane.topAnchor="25.0">
+               <image>
+                  <Image url="@../recursos/usuario_info_1_128.png" />
+               </image>
+            </ImageView>
+            <Label fx:id="lbEstado" alignment="CENTER" layoutX="84.0" layoutY="263.0" text="ACTIVO" textFill="WHITE" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="230.0">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER" layoutX="84.0" layoutY="213.0" text="   Estado   " underline="true" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="215.0">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutX="318.0" layoutY="107.0" prefHeight="400.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Label layoutX="125.0" layoutY="34.0" text="DATOS ALUMNO" AnchorPane.topAnchor="25.0">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+            <Separator layoutX="98.0" layoutY="63.0" prefWidth="200.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0" />
+            <Label alignment="CENTER_RIGHT" layoutX="30.0" layoutY="85.0" text="Nombre:" AnchorPane.rightAnchor="310.0" AnchorPane.topAnchor="75.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER_RIGHT" layoutX="223.0" layoutY="85.0" text="Id:" AnchorPane.rightAnchor="135.0" AnchorPane.topAnchor="75.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER_RIGHT" layoutX="30.0" layoutY="125.0" text="Apellidos:" AnchorPane.rightAnchor="310.0" AnchorPane.topAnchor="105.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER_RIGHT" layoutX="30.0" layoutY="165.0" text="Edad:" AnchorPane.rightAnchor="135.0" AnchorPane.topAnchor="135.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER_RIGHT" layoutX="213.0" layoutY="165.0" text="Género:" AnchorPane.rightAnchor="135.0" AnchorPane.topAnchor="105.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label layoutX="29.0" layoutY="198.0" text="Dirección" AnchorPane.topAnchor="230.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Separator layoutX="100.0" layoutY="229.0" prefWidth="200.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="239.0" />
+            <Label alignment="CENTER_RIGHT" layoutX="30.0" layoutY="239.0" text="Calle:" AnchorPane.rightAnchor="310.0" AnchorPane.topAnchor="255.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER_RIGHT" layoutX="30.0" layoutY="267.0" text="Número:" AnchorPane.rightAnchor="310.0" AnchorPane.topAnchor="285.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER_RIGHT" layoutX="231.0" layoutY="265.0" text="C. Postal:" AnchorPane.rightAnchor="135.0" AnchorPane.topAnchor="285.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label layoutX="30.0" layoutY="310.0" text="Localidad:" AnchorPane.rightAnchor="310.0" AnchorPane.topAnchor="315.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label layoutX="223.0" layoutY="300.0" text="Provincia:" AnchorPane.rightAnchor="135.0" AnchorPane.topAnchor="315.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Button fx:id="btnCerrar" layoutX="296.0" layoutY="369.0" mnemonicParsing="false" onMouseClicked="#cerrarVentana" prefWidth="70.0" text="Cerrar" AnchorPane.topAnchor="370.0" />
+            <Label fx:id="lbNombre" layoutX="95.0" layoutY="80.0" text="Label" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="75.0" />
+            <Label fx:id="lbIdAlumno" layoutX="282.0" layoutY="80.0" text="Label" AnchorPane.leftAnchor="275.0" AnchorPane.topAnchor="75.0" />
+            <Label fx:id="lbApellidos" layoutX="100.0" layoutY="115.0" text="Label" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="105.0" />
+            <Label fx:id="lbEdad" layoutX="100.0" layoutY="150.0" text="Label" AnchorPane.leftAnchor="275.0" AnchorPane.topAnchor="135.0" />
+            <Label fx:id="lbGenero" layoutX="275.0" layoutY="150.0" text="Label" AnchorPane.leftAnchor="275.0" AnchorPane.topAnchor="105.0" />
+            <Label fx:id="lbCalle" layoutX="100.0" layoutY="230.0" text="Label" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="255.0" />
+            <Label fx:id="lbNumero" layoutX="100.0" layoutY="265.0" text="Label" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="285.0" />
+            <Label fx:id="lbCodigoPostal" layoutX="282.0" layoutY="265.0" text="Label" AnchorPane.leftAnchor="275.0" AnchorPane.topAnchor="285.0" />
+            <Label fx:id="lbLocalidad" layoutX="100.0" layoutY="300.0" text="Label" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="315.0" />
+            <Label fx:id="lbProvincia" layoutX="275.0" layoutY="300.0" text="Label" AnchorPane.leftAnchor="275.0" AnchorPane.topAnchor="315.0" />
+            <Label alignment="CENTER_RIGHT" layoutX="58.0" layoutY="172.0" text="Teléfono" AnchorPane.rightAnchor="310.0" AnchorPane.topAnchor="165.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER_RIGHT" layoutX="57.0" layoutY="190.0" text="Email" AnchorPane.rightAnchor="310.0" AnchorPane.topAnchor="195.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label fx:id="lbTelefono" layoutX="100.0" layoutY="165.0" text="Label" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="165.0" />
+            <Label fx:id="lbEmail" layoutX="100.0" layoutY="195.0" text="Label" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="195.0" />
+            <Label alignment="CENTER_RIGHT" layoutX="46.0" layoutY="135.0" text="Fecha Nac.:" AnchorPane.rightAnchor="310.0" AnchorPane.topAnchor="135.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label fx:id="lbFecha" layoutX="100.0" layoutY="135.0" text="Label" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="135.0" />
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>

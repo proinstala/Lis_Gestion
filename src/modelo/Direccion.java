@@ -11,7 +11,7 @@ import javafx.beans.property.StringProperty;
  * @author David Jimenez Alonso
  *
  */
-public class Direccion {
+public class Direccion implements Cloneable {
 	
 	private IntegerProperty id;
 	private StringProperty calle;
@@ -20,6 +20,14 @@ public class Direccion {
 	private StringProperty provincia;
 	private IntegerProperty codigoPostal;
 	
+	public Direccion() {
+		this.id = new SimpleIntegerProperty();
+		this.calle = new SimpleStringProperty(null);
+		this.numero = new SimpleIntegerProperty();
+		this.localidad = new SimpleStringProperty(null);
+		this.provincia = new SimpleStringProperty(null);
+		this.codigoPostal = new SimpleIntegerProperty();
+	}
 	
 	/**
 	 * Contructor con parametros.
@@ -55,6 +63,36 @@ public class Direccion {
 		provincia = new SimpleStringProperty(d.getProvincia());
 		codigoPostal = new SimpleIntegerProperty(d.getCodigoPostal());
 	}
+
+	public Object clone(){
+        
+    	Direccion obj = new Direccion();
+
+		obj.setId(this.id.getValue().intValue());
+		obj.setCalle(this.calle.getValue());
+		obj.setNumero(this.numero.getValue().intValue());
+		obj.setLocalidad(this.localidad.getValue());
+		obj.setProvincia(this.provincia.getValue());
+		obj.setCodigoPostal(this.codigoPostal.getValue().intValue());
+
+		return obj;
+	}
+
+	/**
+	 * Establece los datos del objeto pasados como parametros a este objeto.
+	 * 
+	 * @param d objeto de donde se obtiene la información.
+	 */
+	public void setValoresDireccion(Direccion d) {
+		this.id.set(d.getId());
+		this.calle.set(d.getCalle());
+		this.numero.set(d.getNumero());
+		this.localidad.set(d.getLocalidad());
+		this.provincia.set(d.getProvincia());
+		this.codigoPostal.set(d.getCodigoPostal());
+	}
+
+
 	
 	// id -----------------------------------------
 	/**
@@ -228,5 +266,13 @@ public class Direccion {
 	public void setCodigoPostal(int codigoPostal) {
 		this.codigoPostal.set(codigoPostal);
 	}
+
+	@Override
+	public String toString() {
+		return "Direccion [id=" + id + ", calle=" + calle + ", numero=" + numero + ", localidad=" + localidad
+				+ ", provincia=" + provincia + ", codigoPostal=" + codigoPostal + "]";
+	}
+
+	
 
 }

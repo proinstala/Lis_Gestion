@@ -1,7 +1,6 @@
 package baseDatos;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -11,10 +10,10 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import javafx.util.converter.LocalDateStringConverter;
 import modelo.Alumno;
 import modelo.Clase;
 import modelo.Direccion;
+import modelo.EstadoAlumno;
 import modelo.Genero;
 import modelo.HoraClase;
 import modelo.Jornada;
@@ -65,7 +64,7 @@ public class ConexionBD implements Cloneable{
         st = conn.createStatement();
         String sql;
 
-        //Crea la tabla "usuario"
+        //Crea la tabla "usuario" de la App.
         sql = "CREATE TABLE IF NOT EXISTS USUARIO (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "nombre TEXT NOT NULL UNIQUE, " +
@@ -73,8 +72,6 @@ public class ConexionBD implements Cloneable{
                 "directorio TEXT NOT NULL, " +
                 "passwordBD TEXT NOT NULL); "; 
         st.execute(sql);
-
-        //CHECK (passwordBD = OLD.passwordBD)
         
         System.out.println("BD: Creada tabla usuario de APP."); //Esto es temporal para pruebas.
         st.close();
@@ -108,7 +105,7 @@ public class ConexionBD implements Cloneable{
                 "calle TEXT, " +
                 "numero INTEGER, " +
                 "localidad_id INTEGER NOT NULL, " +
-                "codigo_postal INTEGER NOT NULL, " +
+                "codigo_postal INTEGER, " +
                 "FOREIGN KEY (localidad_id) REFERENCES localidad (id));";  
         st.execute(sql);
 
@@ -123,6 +120,7 @@ public class ConexionBD implements Cloneable{
                 "fecha_nacimiento TEXT NOT NULL, " +
                 "telefono INTEGER NOT NULL, " +
                 "email TEXT, " +
+                "estado TEXT NOT NULL, " +
                 "FOREIGN KEY (direccion_id) REFERENCES direccion (id));";   
         st.execute(sql);
 
@@ -345,7 +343,7 @@ public class ConexionBD implements Cloneable{
 
             //Insertamos el Alumno en la base de datos.
 
-            ps = conn.prepareStatement("INSERT INTO DIRECCION (calle, numero, localidad, codigo_postal) " + 
+            ps = conn.prepareStatement("INSERT INTO DIRECCION (calle, numero, localidad_id, codigo_postal) " + 
                 "VALUES (?,?,(SELECT id FROM LOCALIDAD WHERE nombre = ? AND provincia_id = (SELECT id FROM PROVINCIA WHERE nombre = ?)),?);");
 
             ps.setString(1, alumno.getDireccion().getCalle());
@@ -362,7 +360,7 @@ public class ConexionBD implements Cloneable{
             int idDirInsertada = res.getInt(1); //Guardo el valor de id obtenido en la consulta en la variable.
 
             //Insertamos el Alumno en la base de datos.
-            ps = conn.prepareStatement("INSERT INTO ALUMNO (nombre, apellido1, apellido2, genero, direccion_id, fecha_nacimiento, telefono, email) VALUES (?,?,?,?,?,?,?,?);");
+            ps = conn.prepareStatement("INSERT INTO ALUMNO (nombre, apellido1, apellido2, genero, direccion_id, fecha_nacimiento, telefono, email, estado) VALUES (?,?,?,?,?,?,?,?,?);");
             ps.setString(1, alumno.getNombre());
             ps.setString(2, alumno.getApellido1());
             ps.setString(3, alumno.getApellido2());
@@ -371,10 +369,15 @@ public class ConexionBD implements Cloneable{
             ps.setString(6, alumno.getFechaNacimiento().toString());
             ps.setInt(7, alumno.getTelefono());
             ps.setString(8, alumno.getEmail());
+            ps.setString(9, alumno.getEstado().toString());
             
             ps.executeUpdate();
 
-            //TERMINAR ESTO
+            //Obtenemos el id que se le asignó a ese alumno.
+            st = conn.createStatement();
+            res = st.executeQuery("SELECT last_insert_rowid()");
+            int idAlumInsertado = res.getInt(1); //Guardo el valor de id obtenido en la consulta en la variable.
+            alumno.setId(idAlumInsertado); //Pongo el id al objeto Alumno.
             
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
@@ -385,7 +388,9 @@ public class ConexionBD implements Cloneable{
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
             e.printStackTrace();
         } finally { 
-            ps.close(); 
+            if(ps != null) ps.close(); 
+            if(res != null) res.close();
+            if(st != null) st.close();
         }
         
         cn.desconectar(conn);
@@ -457,7 +462,7 @@ public class ConexionBD implements Cloneable{
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
             e.printStackTrace();
         } finally { 
-            ps.close(); 
+            if(ps != null) ps.close();
         }
         
         cn.desconectar(conn);
@@ -635,9 +640,18 @@ public class ConexionBD implements Cloneable{
                     genero = null;
                 }
 
+                //Genero un Enumerado de tipo EstadoAlumno a partir del valor rescatado en el campo genero del registro que se esta recorriendo.
+                EstadoAlumno estado;
+                try {
+                    estado = EstadoAlumno.valueOf(res.getString(10));
+                } catch (IllegalArgumentException e) {
+                    //poner esto en el log.
+                    estado = null;
+                }
+
                 //Creo el alumno con los datos del registro que se esta recorriendo y lo añado a la lista de Alumnos.
                 listaAlumnos.add(new Alumno(res.getInt(1), res.getString(2), res.getString(3), res.getString(4), 
-                    genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8), res.getString(9)));
+                    genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8), res.getString(9), estado));
             }
             
             System.out.println("BD: Obtencion de listaAlumnos."); //Esto es temporal para pruebas.
@@ -695,9 +709,18 @@ public class ConexionBD implements Cloneable{
                     genero = null;
                 }
 
+                //Genero un Enumerado de tipo EstadoAlumno a partir del valor rescatado en el campo genero del registro que se esta recorriendo.
+                EstadoAlumno estado;
+                try {
+                    estado = EstadoAlumno.valueOf(res.getString(10));
+                } catch (IllegalArgumentException e) {
+                    //poner esto en el log.
+                    estado = null;
+                }
+
                 //Creo el alumno con los datos del registro que se esta recorriendo y lo añado a la lista de Alumnos.
                 listaAlumnos.add(new Alumno(res.getInt(1), res.getString(2), res.getString(3), res.getString(4), 
-                    genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8), res.getString(9)));
+                    genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8), res.getString(9), estado));
             }
             
             System.out.println("BD: Obtencion de listaAlumnos de la Clase " + numeroClase + ". Jornada " + jornada.getFecha().toString() + "."); //Esto es temporal para pruebas.
@@ -843,6 +866,133 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    public ArrayList<String> getProvincias() throws SQLException {
+        ConexionBD cn = INSTANCE;
+        ArrayList<String> listaProvincias = null;
+        conn = cn.conectar();
+        try {
+            st = conn.createStatement();
+            res = st.executeQuery("SELECT nombre FROM PROVINCIA");
+
+            listaProvincias = new ArrayList<String>();
+            while (res.next()) {
+                listaProvincias.add(res.getString(1));
+            }
+
+            System.out.println("BD: Obtencion de listaProvincias de base de datos. Provincias obtenidas: " + listaProvincias.size()); //Esto es temporal para pruebas.
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            e.printStackTrace();
+        } finally { 
+            if(st != null) st.close();
+            if(res != null) res.close(); 
+        }
+        
+        cn.desconectar(conn);
+        return listaProvincias;
+    }
+
+
+    public ArrayList<String> getLocalidades(String provincia) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        ArrayList<String> listaLocalidades = null;
+        conn = cn.conectar();
+        try {
+            st = conn.createStatement();
+            res = st.executeQuery("SELECT nombre FROM LOCALIDAD WHERE provincia_id = (SELECT id FROM PROVINCIA WHERE nombre = '" + provincia + "');");
+
+            listaLocalidades = new ArrayList<String>();
+            while (res.next()) {
+                listaLocalidades.add(res.getString(1));
+            }
+
+            System.out.println("BD: Obtencion de listaProvincias de base de datos. Provincias obtenidas: " + listaLocalidades.size()); //Esto es temporal para pruebas.
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            e.printStackTrace();
+        } finally { 
+            if(st != null) st.close();
+            if(res != null) res.close(); 
+        }
+        
+        cn.desconectar(conn);
+        return listaLocalidades;
+    }
+
+    public boolean modificarAlumno(Alumno alumno) throws SQLException{
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        try {
+            conn = cn.conectar();
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement("UPDATE ALUMNO SET nombre = ?, apellido1 = ?, apellido2 = ?, genero = ?, fecha_nacimiento = ?, telefono = ?, email = ?, estado = ? WHERE id = ?;");
+            ps.setString(1, alumno.getNombre());
+            ps.setString(2, alumno.getApellido1());
+            ps.setString(3, alumno.getApellido2());
+            ps.setString(4, alumno.getGenero().toString());
+            ps.setString(5, alumno.getFechaNacimiento().toString());
+            ps.setInt(6, alumno.getTelefono());
+            ps.setString(7, alumno.getEmail());
+            ps.setString(8, alumno.getEstado().toString());
+            ps.setInt(9, alumno.getId());
+            ps.executeUpdate();
+
+            ps = conn.prepareStatement("UPDATE DIRECCION SET calle = ?, numero = ?, localidad_id = (SELECT id FROM LOCALIDAD WHERE nombre = ?), codigo_postal = ? WHERE id = ?;");
+            ps.setString(1, alumno.getDireccion().getCalle());
+            ps.setInt(2, alumno.getDireccion().getNumero());
+            ps.setString(3, alumno.getDireccion().getLocalidad());
+            ps.setInt(4, alumno.getDireccion().getCodigoPostal());
+            ps.setInt(5, alumno.getDireccion().getId()); 
+            ps.executeUpdate();
+            
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            result = true;
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true);
+            if(ps != null) ps.close();
+        }
+
+        cn.desconectar(conn);
+        return result;
+    }
+
+    public boolean borrarAlumno(Alumno alumno) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        try {
+            conn = cn.conectar();
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement("DELETE FROM ALUMNO WHERE id = ?;");
+            ps.setInt(1, alumno.getId());
+            ps.executeUpdate();
+
+            ps = conn.prepareStatement("DELETE FROM DIRECCION WHERE id = ?;");
+            ps.setInt(1, alumno.getDireccion().getId());
+            ps.executeUpdate();
+
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+           
+            System.out.println("Borrado Alumno de la base de datos"); //Esto es temporal para pruebas.
+            
+            result = true;
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            if(ps != null) ps.close();
+        }
+
+        cn.desconectar(conn);
+        return result;
+    }
     
 
 }

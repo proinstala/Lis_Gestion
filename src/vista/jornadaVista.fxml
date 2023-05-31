@@ -59,10 +59,10 @@
                   <Insets bottom="20.0" top="10.0" />
                </GridPane.margin>
             </TextArea>
-            <Button fx:id="btnGuardar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#botonGuardar" prefHeight="25.0" prefWidth="60.0" text="Guardar" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="11" GridPane.vgrow="NEVER" />
-            <Button fx:id="btnBorrar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#botonBorrar" prefHeight="25.0" prefWidth="60.0" text="Borrar" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="11" GridPane.vgrow="NEVER">
+            <Button fx:id="btnGuardar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#botonGuardar" prefHeight="25.0" prefWidth="70.0" text="Guardar" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="11" GridPane.vgrow="NEVER" />
+            <Button fx:id="btnBorrar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#botonBorrar" prefHeight="25.0" prefWidth="70.0" text="Borrar" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="11" GridPane.vgrow="NEVER">
                <GridPane.margin>
-                  <Insets left="70.0" />
+                  <Insets left="80.0" />
                </GridPane.margin>
             </Button>
             <Label text="Hora:" GridPane.columnIndex="1" GridPane.rowIndex="3">

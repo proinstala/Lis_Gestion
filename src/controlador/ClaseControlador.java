@@ -25,13 +25,13 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import modelo.Alumno;
 import modelo.Clase;
-import modelo.Datos;
 import modelo.HoraClase;
 import modelo.Jornada;
 import modelo.TipoClase;
@@ -44,7 +44,6 @@ public class ClaseControlador implements Initializable {
 	private DateTimeFormatter formatter;
 	private Clase claseOriginal;
 	private Clase clase;
-	private Datos datos;
 	private ConexionBD conexionBD;
 	private Jornada jornada;
 	private FilteredList<Alumno> filtro;
@@ -74,6 +73,9 @@ public class ClaseControlador implements Initializable {
 	@FXML
 	private TableColumn<String, String> colNombre;
 
+	@FXML
+	private ImageView ivLupa;
+	
 	@FXML
 	private ImageView ivFlechaDerecha;
 
@@ -113,7 +115,34 @@ public class ClaseControlador implements Initializable {
 	private ObservableList<Alumno> listadoAlumnos;
 	
 	@Override
-	public void initialize(URL location, ResourceBundle resources) {	
+	public void initialize(URL location, ResourceBundle resources) {
+		//Cargar imagenes en ImageView.
+        Image imagenFlecha;
+        Image imagenFlechaAdd;
+        Image ImagenVolver;
+        Image ImagenGuardar;
+        Image ImagenLupa;
+        try {
+        	imagenFlecha = new Image("/recursos/flecha_derecha_2.png");
+        	imagenFlechaAdd = new Image("/recursos/flecha_derecha_1.png");
+        	ImagenVolver = new Image("/recursos/flceha_recarga_1.png");
+        	ImagenGuardar = new Image("/recursos/floppy_lila_1_128.png");
+        	ImagenLupa = new Image("/recursos/upa_lila_2_128.png");
+        } catch (Exception e) {
+        	imagenFlecha = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_2.png"));
+        	imagenFlechaAdd = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_1.png"));
+        	ImagenVolver = new Image(getClass().getResourceAsStream("/recursos/flceha_recarga_1.png"));
+        	ImagenGuardar = new Image(getClass().getResourceAsStream("/recursos/floppy_lila_1_128.png"));
+        	ImagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png"));
+        }
+        ivFlechaIzquierda.setImage(imagenFlecha);
+        ivFlechaDerecha.setImage(imagenFlecha);
+        ivFlechaAdd.setImage(imagenFlechaAdd);
+        ivFlechaQuitar.setImage(imagenFlechaAdd);
+        ivVolver.setImage(ImagenVolver);
+        ivGuardar.setImage(ImagenGuardar);
+        ivLupa.setImage(ImagenLupa);
+		
 		toast = new Toast();
 		conexionBD = ConexionBD.getInstance(); //Obtenemos una istancia de la Conexion a BD.
 
@@ -136,7 +165,6 @@ public class ClaseControlador implements Initializable {
         		
         	});
         });
-       
 
 	}
 
@@ -245,7 +273,6 @@ public class ClaseControlador implements Initializable {
 
 			JornadaControlador controller = loader.getController(); //cargo el controlador.
 			controller.setControladorPrincipal(controladorPincipal);
-			controller.setConexionBD(datos);
 			controller.setListaAlumnos(listadoAlumnos);
 			controller.inicializacion(jornada);
 			
@@ -332,13 +359,5 @@ public class ClaseControlador implements Initializable {
 		
 	}
 	
-	/**
-	 * Establece el objeto para la conexion a la base de datos.
-	 * 
-	 * @param datos El objeto que se utiliza para la conexion a la base de datos.
-	 */
-	public void setConexionBD(Datos datos) {
-		this.datos = datos;
-	}
 
 }

@@ -1,9 +1,11 @@
 package modelo;
 
 import java.time.LocalDate;
+import java.time.Period;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -15,7 +17,7 @@ import javafx.beans.property.StringProperty;
  * @author David Jimenez Alonso
  *
  */
-public class Alumno {
+public class Alumno implements Cloneable {
 	
 	private IntegerProperty id;
 	private StringProperty nombre;
@@ -26,7 +28,25 @@ public class Alumno {
 	private ObjectProperty<Direccion> direccion;
 	private IntegerProperty telefono;
 	private StringProperty email;
+	private ObjectProperty<EstadoAlumno> estado;
 	
+	/**
+	 * Constructor sin parametros.
+	 * Crea un objeto de tipo Alumno con sus campos a null.
+	 */
+	public Alumno() {
+		this.id = new SimpleIntegerProperty();
+		this.nombre = new SimpleStringProperty(null);
+		this.apellido1 = new SimpleStringProperty(null);
+		this.apellido2 = new SimpleStringProperty(null);
+		this.genero = new SimpleObjectProperty<Genero>(null);
+		this.fechaNacimiento = new SimpleObjectProperty<LocalDate>(null);
+		this.direccion = new SimpleObjectProperty<Direccion>(null, "direccion");
+		this.direccion.set(null);
+		this.telefono = new SimpleIntegerProperty();
+		this.email = new SimpleStringProperty(null);
+		this.estado = new SimpleObjectProperty<EstadoAlumno>(null);
+	}
 	
 	/**
 	 * Contructor con parametros.
@@ -41,18 +61,21 @@ public class Alumno {
 	 * @param direccion objeto que contine los datos de direccion del alumno.
 	 * @param telefono Telefono del alumno.
 	 * @param email Direccion de correo electronico del alumno.
+	 * @param estado Estado del alumno.
 	 */
 	public Alumno(int id, String nombre, String apellido1, String apellido2, Genero genero, 
-			Direccion direccion, LocalDate fechaNacimiento, int telefono, String email) {
+			Direccion direccion, LocalDate fechaNacimiento, int telefono, String email, EstadoAlumno estado) {
 		this.id = new SimpleIntegerProperty(id);
 		this.nombre = new SimpleStringProperty(nombre);
 		this.apellido1 = new SimpleStringProperty(apellido1);
 		this.apellido2 = new SimpleStringProperty(apellido2);
 		this.genero = new SimpleObjectProperty<Genero>(genero);
 		this.fechaNacimiento = new SimpleObjectProperty<LocalDate>(fechaNacimiento);
-		this.direccion = new SimpleObjectProperty<Direccion>(direccion);
+		this.direccion = new SimpleObjectProperty<Direccion>(direccion, "direccion");
+		this.direccion.set(direccion);
 		this.telefono = new SimpleIntegerProperty(telefono);
 		this.email = new SimpleStringProperty(email);
+		this.estado = new SimpleObjectProperty<EstadoAlumno>(estado);
 	}
 	
 	/**
@@ -71,6 +94,26 @@ public class Alumno {
 		direccion = new SimpleObjectProperty<Direccion>(a.getDireccion());
 		telefono = new SimpleIntegerProperty(a.getTelefono());
 		email = new SimpleStringProperty(a.getEmail());
+		estado = new SimpleObjectProperty<EstadoAlumno>(a.getEstado());
+	}
+
+	public Object clone(){
+        
+    	Alumno obj = new Alumno();
+
+		obj.setId(this.id.getValue().intValue());
+		obj.setNombre(this.nombre.getValue());
+		obj.setApellido1(this.apellido1.getValue());
+		obj.setApellido2(this.apellido2.getValue());
+		obj.setGenero(this.genero.getValue());
+		obj.setFechaNacimiento(this.fechaNacimiento.getValue());
+		obj.setDireccion(new Direccion(this.direccion.getValue()));
+		//obj.setDireccion(this.direccion.getValue());
+		obj.setTelefono(this.telefono.getValue().intValue());
+		obj.setEmail(this.email.getValue());
+		obj.setEstado(this.estado.getValue());
+
+		return obj;
 	}
 	
 	// id -----------------------------------------
@@ -190,18 +233,18 @@ public class Alumno {
 	
 	// genero ------------------------------------
 	/**
-     * Obtiene el género del alumno.
+     * Obtiene la propiedad de genero del alumno.
      *
-     * @return El género del alumno.
+     * @return La propiedad de género del alumno.
      */
 	public ObjectProperty<Genero> generoProperty() {
 		return genero;
 	}
 
 	/**
-     * Establece el género del alumno.
+     * obtiene el género del alumno.
      *
-     * @param genero El nuevo género para el alumno.
+     * @return El género del alumno.
      */
 	public Genero getGenero() {
 		return genero.get();
@@ -329,6 +372,55 @@ public class Alumno {
 	 */
 	public void setEmail(String email) {
 		this.email.set(email);
+	}
+
+
+	// estado ------------------------------------
+	/**
+     * Obtiene la propiedad del estado del alumno.
+     *
+     * @return La propiedad del estado del alumno.
+     */
+	public ObjectProperty<EstadoAlumno> estadoProperty() {
+		return estado;
+	}
+
+	/**
+     * Obtine el estado del alumno.
+     *
+     * @return El estado del alumno.
+     */
+	public EstadoAlumno getEstado() {
+		return estado.get();
+	}
+
+	/**
+     * Establece el estado del alumno.
+     *
+     * @param estado El nuevo estado para el alumno.
+     */
+	public void setEstado(EstadoAlumno estado) {
+		this.estado.set(estado);
+	}
+
+	/**
+	 * Obtiene la edad del Alumno
+	 * 
+	 * @return La edad del Alumno.
+	 */
+	public int getEdad() {
+		LocalDate ahora = LocalDate.now();
+		Period periodo = Period.between(fechaNacimiento.get(), ahora);
+		return periodo.getYears();
+	}
+
+	/**
+	 * Obtine un String con el nombre y apellidos del Alumno.
+	 * 
+	 * @return String con el nombre y apellidos del Alumno.
+	 */
+	public String getNombreCompleto() {
+		return getNombre() + " " + getApellido1() + " " + getApellido2();
 	}
 
 	@Override

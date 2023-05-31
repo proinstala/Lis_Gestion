@@ -5,7 +5,7 @@
 /*
  
 #COLOR LILA FLOJO = #f8e7ff
-#COLOR LILA MEDIO = #78637C
+#COLOR LILA MEDIO = #78637C -> MAS FLOJO: #B5A6B8 -> #DDD6DE
 #COLOR LILA FUERTE = #80488F
 #COLOR GRIS-FONDO = #5E595F
 #COLOR AZUL FLOJO = #00a8f3
@@ -13,6 +13,20 @@
 #COLOR AMARILLO FUERTE = #FFCD48
 #COLOR VERDE ON = #33f537
 #COLOR VERDE PARA LETRAS BOTONES TTK = #26d113
+
+OTROS LILAS FLOJOS.
+#EFE4F2 1
+#DEC7E4 2
+#CDAAD6 3
+
+OTRO TONO DE LILA.
+#E8E4F2 1
+#CFC7E4 2
+#B7AAD6 3
+
+UN ROJO CHILLON PARA BOTON CANCELAR o BORRAR
+#D42153
+
  */
 
 /*
@@ -43,6 +57,7 @@ BorderPane {
 }
 
 .fondo_border_pane {
+	/*-fx-background-image: url("/recursos/fondo_circulos_lila_1.png");*/
 	-fx-background-image: url("../recursos/fondo_circulos_lila_1.png");
     -fx-background-position: center;
     /*-fx-background-repeat: stretch;*/
@@ -120,6 +135,13 @@ BorderPane {
 	-fx-cursor: hand;
 }
 
+.boton_rojo:hover  {
+	-fx-background-color: #D42153;
+	-fx-font-weight: bold;
+	-fx-cursor: hand;
+}
+
+
 .label_resaltado:hover {
 	-fx-text-fill: #80488F;
 	-fx-font-weight: bold; 
@@ -142,10 +164,15 @@ BorderPane {
 	-fx-background-color: linear-gradient(to top, white, #FFCD48);
 }
 
-.fondo_ventana_prueba {
+.fondo_ventana_degradado_masBorde {
 	-fx-background-color: linear-gradient(to right, white, #f5f2f7 , #f5f2f7 , #f8e7ff);
 	-fx-border-width: 2px;
-	-fx-border-color: #80488F;;
+	-fx-border-color: #80488F;
+}
+
+.fondo_ventana_degradado_toRight {
+	-fx-background-color: linear-gradient(to right, white, #f5f2f7 , #f5f2f7 , #f8e7ff);
+	
 }
 
 .fondo_panel_izquierda {
@@ -183,5 +210,26 @@ BorderPane {
 
 .table-view .column-header .label {
 	-fx-text-fill:black
+}
+
+.table-view:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color:  #80488F;
+    -fx-text-fill: white;
+}
+
+/*•	Estilos letras de la celda cuando se le pasa el ratón */
+.table-view .table-row-cell:hover {
+    -fx-background-color: #DDD6DE;
+    -fx-text-fill: black;
+    -fx-text-background-color: black;
+    -fx-font-weight: bold; 
+}
+
+/*Estilos de letra en fila seleccionada cuando pierde el foco*/
+.table-view .table-row-cell:selected {
+    -fx-background-color: #80488F;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-text-background-color: white; 
 }
 

@@ -13,6 +13,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -36,6 +38,12 @@ public class LoginControlador implements Initializable {
 
 
     @FXML
+    private ImageView ivImagenLogin;
+
+    @FXML
+    private ImageView ivImagenLogo;
+
+    @FXML
     private BorderPane bdLogin;
 
     @FXML
@@ -50,6 +58,19 @@ public class LoginControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //Cargar imagenes en ImageView.
+        Image imagenLogin;
+        Image imagenLogo;
+        try {
+            imagenLogin = new Image("/recursos/user_1_512.png");
+            imagenLogo = new Image("/recursos/logo_nuevo_letras_color.png");
+        } catch (Exception e) {
+            imagenLogin = new Image(getClass().getResourceAsStream("/recursos/user_1_512.png"));
+            imagenLogo = new Image(getClass().getResourceAsStream("/recursos/logo_nuevo_letras_color.png"));
+        }
+        ivImagenLogin.setImage(imagenLogin);
+        ivImagenLogo.setImage(imagenLogo);
+
         conexionBD = ConexionBD.getInstance();
         toast = new Toast();
         
@@ -68,20 +89,7 @@ public class LoginControlador implements Initializable {
                 toast.show((Stage) bdLogin.getScene().getWindow(), "Algo a salido mal!!.");
             } else {
                 toast.show((Stage) bdLogin.getScene().getWindow(), "Usuario Logueado!!.");
-                controladorPincipal.setUsuario(usuario);
-
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/inicioVista.fxml"));
-				BorderPane inicio;
-				
-				try {
-                    inicio = (BorderPane) loader.load();
-                    controladorPincipal.setPane(inicio);
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                
-				//bpPrincipal.setCenter(jornadaPilates);
+                controladorPincipal.iniciarSesion(usuario);
             }
         }
     }
@@ -90,6 +98,7 @@ public class LoginControlador implements Initializable {
 
     @FXML
     void recuperarPassword(MouseEvent event) {
+        /* 
         //ESTO ESTA DE PRUEBA PARA VER COMO QUEDA LA VENTANA
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/registroUsuarioVista.fxml"));
@@ -117,6 +126,7 @@ public class LoginControlador implements Initializable {
 		
 		//controller.setControladorPrincipal(this);
 		//controller.setUsuarioApp(usuarioApp);
+        */
     }
 
     @FXML
@@ -131,14 +141,26 @@ public class LoginControlador implements Initializable {
             ventana.initOwner(escenario);
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.UNDECORATED);
+
             
+            // calcular la posición de la nueva ventana
+            //double x = screenBounds.getMinX() + (screenBounds.getWidth() - ventana.getWidth()) / 2;
+            //double y = screenBounds.getMinY() + (screenBounds.getHeight() - ventana.getHeight()) / 2;
+            
+            //ventana.setX(x);
+            //ventana.setY(y);
+
             controller.setStage(ventana);
             controller.setUsuarioApp(usuarioApp);
 
             Scene scene = new Scene(registroUser);
-            //scene.getStylesheets().add(getClass().getResource("/estilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
+            scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
             ventana.setScene(scene);
             //ventana.setTitle("titulo de ventana");
+            //System.out.println(escenario.getX()); 
+            //ventana.setX((escenario.getX() + escenario.getWidth() / 2 - ventana.getWidth() / 2)); //posicion del escenario.
+            //ventana.setY(escenario.getY() + escenario.getHeight() - ventana.getHeight() - 50);		 //Posicion del escenario.
+            
             ventana.showAndWait();
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -197,9 +219,12 @@ public class LoginControlador implements Initializable {
 		controladorPincipal = principal;
 	}
 
-
-    public void setUsuarioApp(Usuario u) {
-        usuarioApp = u;
+    /**
+     * Establece el usuarioApp para este controlador.
+     * @param usuarioApp El usuarioApp
+     */
+    public void setUsuarioApp(Usuario usuarioApp) {
+        this.usuarioApp = usuarioApp;
     }
 
     /**
