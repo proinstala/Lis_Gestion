@@ -36,35 +36,35 @@
                      </font>
                   </Label>
                   <Button fx:id="btnCerrarSesion" layoutX="250.0" layoutY="417.0" mnemonicParsing="false" onMouseClicked="#cerrarSesion" prefHeight="40.0" prefWidth="80.0" text="Cerrar Sesión" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" />
-                  <Label alignment="CENTER_RIGHT" layoutX="236.0" layoutY="120.0" text="Nombre" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="280.0">
+                  <Label alignment="CENTER_RIGHT" layoutX="236.0" layoutY="120.0" text="Usuario" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="280.0" AnchorPane.topAnchor="120.0">
                      <padding>
                         <Insets right="10.0" />
                      </padding>
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font></Label>
-                  <Label alignment="CENTER_RIGHT" layoutX="70.0" layoutY="160.0" text="Primer Apellido" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="280.0">
+                  <Label alignment="CENTER_RIGHT" layoutX="70.0" layoutY="160.0" text="Primer Apellido" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="280.0" AnchorPane.topAnchor="200.0">
                      <padding>
                         <Insets right="10.0" />
                      </padding>
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font></Label>
-                  <Label alignment="CENTER_RIGHT" layoutX="70.0" layoutY="200.0" text="Segundo Apellido" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="280.0">
+                  <Label alignment="CENTER_RIGHT" layoutX="70.0" layoutY="200.0" text="Segundo Apellido" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="280.0" AnchorPane.topAnchor="240.0">
                      <padding>
                         <Insets right="10.0" />
                      </padding>
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font></Label>
-                  <Label alignment="CENTER_RIGHT" layoutX="70.0" layoutY="240.0" text="Email Usuario" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="280.0">
+                  <Label alignment="CENTER_RIGHT" layoutX="70.0" layoutY="240.0" text="Email Usuario" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="280.0" AnchorPane.topAnchor="280.0">
                      <padding>
                         <Insets right="10.0" />
                      </padding>
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font></Label>
-                  <Label alignment="CENTER_RIGHT" layoutX="70.0" layoutY="280.0" text="Email  App" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="280.0">
+                  <Label alignment="CENTER_RIGHT" layoutX="70.0" layoutY="280.0" text="Email  App" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="280.0" AnchorPane.topAnchor="320.0">
                      <padding>
                         <Insets right="10.0" />
                      </padding>
@@ -80,7 +80,7 @@
                      </cursor>
                   </ImageView>
                   <Label layoutX="52.0" layoutY="433.0" styleClass="label_resaltado" text="Borrar Usuario" underline="true" AnchorPane.bottomAnchor="110.0" AnchorPane.leftAnchor="50.0" />
-                  <Label fx:id="lbNombre" layoutX="280.0" layoutY="120.0" text="Label" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="0.0">
+                  <Label fx:id="lbNombreUsuario" layoutX="280.0" layoutY="120.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="120.0">
                      <padding>
                         <Insets left="10.0" />
                      </padding>
@@ -88,7 +88,7 @@
                         <Font size="14.0" />
                      </font>
                   </Label>
-                  <Label fx:id="lbApellido1" layoutX="250.0" layoutY="160.0" text="Label" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="0.0">
+                  <Label fx:id="lbApellido1" layoutX="250.0" layoutY="160.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="200.0">
                      <padding>
                         <Insets left="10.0" />
                      </padding>
@@ -96,7 +96,7 @@
                         <Font size="14.0" />
                      </font>
                   </Label>
-                  <Label fx:id="lbApellido2" layoutX="250.0" layoutY="200.0" text="Label" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="0.0">
+                  <Label fx:id="lbApellido2" layoutX="250.0" layoutY="200.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="240.0">
                      <padding>
                         <Insets left="10.0" />
                      </padding>
@@ -104,7 +104,7 @@
                         <Font size="14.0" />
                      </font>
                   </Label>
-                  <Label fx:id="lbEmail" layoutX="250.0" layoutY="240.0" text="Label" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="0.0">
+                  <Label fx:id="lbEmail" layoutX="250.0" layoutY="240.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="280.0">
                      <padding>
                         <Insets left="10.0" />
                      </padding>
@@ -112,7 +112,7 @@
                         <Font size="14.0" />
                      </font>
                   </Label>
-                  <Label fx:id="lbEmailApp" layoutX="250.0" layoutY="280.0" text="Label" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="0.0">
+                  <Label fx:id="lbEmailApp" layoutX="250.0" layoutY="280.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="320.0">
                      <padding>
                         <Insets left="10.0" />
                      </padding>
@@ -121,6 +121,22 @@
                      </font>
                   </Label>
                   <Separator layoutX="180.0" layoutY="78.0" prefWidth="200.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" />
+                  <Label alignment="CENTER_RIGHT" layoutX="12.0" layoutY="130.0" text="Nombre" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="280.0" AnchorPane.topAnchor="160.0">
+                     <padding>
+                        <Insets right="10.0" />
+                     </padding>
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="lbNombre" layoutX="292.0" layoutY="132.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="160.0">
+                     <padding>
+                        <Insets left="10.0" />
+                     </padding>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
                </children>
             </AnchorPane>
          </children>

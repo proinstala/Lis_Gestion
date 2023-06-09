@@ -12,12 +12,12 @@ import javafx.beans.property.StringProperty;
 public class Usuario {
 
      private IntegerProperty id;
+     private StringProperty nombreUsuario;
      private StringProperty nombre;
      private StringProperty apellido1;
      private StringProperty apellido2;
      private StringProperty password;
      private ObjectProperty<File> directorio;
-     private StringProperty passwordBD;
      private IntegerProperty telefono;
      private StringProperty email;
      private StringProperty emailApp;
@@ -30,41 +30,41 @@ public class Usuario {
       */
      public Usuario() {
           this.id = new SimpleIntegerProperty();
+          this.nombreUsuario = new SimpleStringProperty(null);
           this.nombre = new SimpleStringProperty(null);
           this.apellido1 = new SimpleStringProperty(null);
           this.apellido2 = new SimpleStringProperty(null);
           this.password = new SimpleStringProperty(null);
           this.directorio = new SimpleObjectProperty<File>(null);
-          this.passwordBD = new SimpleStringProperty(null);
           this.telefono = new SimpleIntegerProperty();
           this.email = new SimpleStringProperty(null);
           this.emailApp = new SimpleStringProperty(null);
           this.passwordEmailApp = new SimpleStringProperty(null);
      }
 
-     public Usuario(int id, String nombre, String apellido1, String apellido2, String password, File directorio,
-               String passwordBD, int telefono, String email, String emailApp, String passwordEmailApp) {
+     public Usuario(int id, String nombreUsuario, String nombre, String apellido1, String apellido2, String password, File directorio,
+               int telefono, String email, String emailApp, String passwordEmailApp) {
           this.id = new SimpleIntegerProperty(id);
+          this.nombreUsuario = new SimpleStringProperty(nombreUsuario);
           this.nombre = new SimpleStringProperty(nombre);
           this.apellido1 = new SimpleStringProperty(apellido1);
           this.apellido2 = new SimpleStringProperty(apellido2);
           this.password = new SimpleStringProperty(password);
           this.directorio = new SimpleObjectProperty<File>(directorio);
-          this.passwordBD = new SimpleStringProperty(passwordBD);
           this.telefono = new SimpleIntegerProperty(telefono);
           this.email = new SimpleStringProperty(email);
           this.emailApp = new SimpleStringProperty(emailApp);
           this.passwordEmailApp = new SimpleStringProperty(passwordEmailApp);
      }
 
-     public Usuario(int id, String nombre, String password, File directorio, String passwordBD) {
+     public Usuario(int id, String nombreUsuario, String password, File directorio) {
           this.id = new SimpleIntegerProperty(id);
-          this.nombre = new SimpleStringProperty(nombre);
+          this.nombreUsuario = new SimpleStringProperty(nombreUsuario);
+          this.nombre = new SimpleStringProperty(null);
           this.apellido1 = new SimpleStringProperty(null);
           this.apellido2 = new SimpleStringProperty(null);
           this.password = new SimpleStringProperty(password);
           this.directorio = new SimpleObjectProperty<File>(directorio);
-          this.passwordBD = new SimpleStringProperty(passwordBD);
           this.telefono = new SimpleIntegerProperty();
           this.email = new SimpleStringProperty(null);
           this.emailApp = new SimpleStringProperty(null);
@@ -74,12 +74,12 @@ public class Usuario {
      
      public Usuario(Usuario u) {
           id = new SimpleIntegerProperty(u.getId());
+          nombreUsuario = new SimpleStringProperty(u.getNombreUsuario());
           nombre = new SimpleStringProperty(u.getNombre());
           apellido1 = new SimpleStringProperty(u.getApellido1());
           apellido2 = new SimpleStringProperty(u.getApellido2());
           password = new SimpleStringProperty(u.getPassword());
           directorio = new SimpleObjectProperty<File>(u.getDirectorio());
-          passwordBD = new SimpleStringProperty(u.getPasswordBD());
           telefono = new SimpleIntegerProperty(u.getTelefono());
           email = new SimpleStringProperty(u.getEmail());
           emailApp = new SimpleStringProperty(u.getEmailApp());
@@ -113,6 +113,34 @@ public class Usuario {
       */
      public void setId(int id) {
           this.id.set(id);
+     }
+
+     // nombre usuario --------------------------------
+     /**
+      * Obtiene la propiedad del nombreUsuario del usuario.
+      *
+      * @return La propiedad del nombreUsuario del usuario.
+      */
+      public StringProperty nombreUsuarioProperty() {
+          return nombreUsuario;
+     }
+
+     /**
+      * Obtiene el nombreUsuario del usuario.
+      *
+      * @return El nombreUsuario del usuario.
+      */
+     public String getNombreUsuario() {
+          return this.nombreUsuario.get();
+     }
+
+     /**
+      * Establece el nombreUsuario del usuario.
+      *
+      * @param nombreUsuario El nuevo nombreUsuario para el usuario.
+      */
+     public void setNombreUsuario(String nombreUsuario) {
+          this.nombreUsuario.set(nombreUsuario);
      }
 
      // nombre -----------------------------------
@@ -255,34 +283,6 @@ public class Usuario {
           this.directorio.set(directorio);
      }
 
-     // passwordBD -----------------------------------
-     /**
-      * Obtiene la propiedad del passwordBD del usuario.
-      *
-      * @return La propiedad del passwordBD del usuario.
-      */
-     public StringProperty passwordBDProperty() {
-          return passwordBD;
-     }
-
-     /**
-      * Obtiene el passwordBD del usuario.
-      *
-      * @return El passwordBD del usuario.
-      */
-     public String getPasswordBD() {
-          return this.passwordBD.get();
-     }
-
-     /**
-      * Establece el passwordBD del usuario.
-      *
-      * @param passwordBD El nuevo passwordBD para el usuario.
-      */
-     public void setPasswordBD(String passwordBD) {
-          this.passwordBD.set(passwordBD);
-     }
-
      // telefono -----------------------------------------
      /**
       * Obtiene la propiedad del telefono del usuario.
@@ -398,9 +398,8 @@ public class Usuario {
      @Override
      public String toString() {
           return "Usuario [id=" + id + ", nombre=" + nombre + ", apellido1=" + apellido1 + ", apellido2=" + apellido2
-                    + ", password=" + password + ", directorio=" + directorio + ", passwordBD=" + passwordBD
-                    + ", telefono=" + telefono + ", email=" + email + ", emailApp=" + emailApp + ", passwordEmailApp="
-                    + passwordEmailApp + "]";
+                    + ", password=" + password + ", directorio=" + directorio + ", telefono=" + telefono + ", email=" + email
+                    + ", emailApp=" + emailApp + ", passwordEmailApp=" + passwordEmailApp + "]";
      }
 
      

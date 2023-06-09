@@ -15,7 +15,6 @@ import javafx.beans.binding.IntegerBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -43,7 +42,6 @@ import modelo.Alumno;
 import modelo.EstadoAlumno;
 import modelo.Genero;
 import modelo.Toast;
-import modelo.Usuario;
 import javafx.fxml.Initializable;
 
 public class AlumnosControlador implements Initializable {
@@ -194,7 +192,7 @@ public class AlumnosControlador implements Initializable {
             alerta.setTitle("Borrar Alumno");
             alerta.setHeaderText("¿Quieres borrar el alumno seleccionado?");
             alerta.setContentText("Id: " + alumnoSeleccionado.getId() + "\nNombre: " + alumnoSeleccionado.getNombre() + " " + alumnoSeleccionado.getApellido1() + " " + alumnoSeleccionado.getApellido2());
-            alerta.initStyle(StageStyle.UTILITY);
+            alerta.initStyle(StageStyle.DECORATED);
             alerta.initOwner(escenario);
             alerta.initModality(Modality.APPLICATION_MODAL);
 
@@ -211,7 +209,7 @@ public class AlumnosControlador implements Initializable {
                     alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
                     alerta.setTitle("Borrar Alumno");
                     alerta.setContentText("No se ha podido borrar el Alumno.");
-                    alerta.initStyle(StageStyle.UTILITY);
+                    alerta.initStyle(StageStyle.DECORATED);
                     alerta.initOwner(escenario);
                     alerta.initModality(Modality.APPLICATION_MODAL);
                     alerta.showAndWait();
@@ -273,10 +271,10 @@ public class AlumnosControlador implements Initializable {
                 ventana.initOwner(escenario);
                 ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
                 ventana.initStyle(StageStyle.DECORATED);
-                
+                 
                 URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
                 ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
-    
+                
                 controller.setStage(ventana);
                 controller.modoFormulario(controller.MODO_EDITAR_ALUMNO);
                 controller.setAlumno(alumnoSeleccionado);

@@ -117,13 +117,27 @@ BorderPane {
 	-fx-background-color: #78637C;
 }
 
-/* pruebas */
+/* borde y fondo de los paneles -----------------------------------------------------------------------------------------*/
 .panel_border {
 	-fx-border-color: #80488F;
 	-fx-border-width: 2px;
 	-fx-border-radius: 8px;
+	/*-fx-background-color: rgba(240, 233, 248, 0.4);*/
+	-fx-background-color: rgba(232, 228, 242, 0.4);/* #E8E4F2 1*/
+	/*-fx-background-color: rgba(207, 199, 228, 0.3); #CFC7E4 2*/
+	/*-fx-background-color: rgba(245, 242, 247, 0.3); #f5f2f7 */
 }
-	
+/*
+OTROS LILAS FLOJOS.
+#EFE4F2 1
+#DEC7E4 2
+#CDAAD6 3
+
+OTRO TONO DE LILA.
+#E8E4F2 1
+#CFC7E4 2
+#B7AAD6 3
+	*/
 .button {
 	-fx-background-color: #78637C;
 	-fx-text-fill: white;

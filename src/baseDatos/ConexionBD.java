@@ -1,6 +1,7 @@
 package baseDatos;
 
 import java.io.File;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -19,6 +20,7 @@ import modelo.HoraClase;
 import modelo.Jornada;
 import modelo.TipoClase;
 import modelo.Usuario;
+import utilidades.Cifrador;
 
 public class ConexionBD implements Cloneable{
 	private static final ConexionBD INSTANCE = new ConexionBD(); //Singleton
@@ -40,9 +42,13 @@ public class ConexionBD implements Cloneable{
     }
 
     public void setUsuario(Usuario user) {
-        URLConexion = cadenaConexionParte1 + user.getDirectorio().getName() + "\\" + user.getNombre() + cadenaConexionParte2 + user.getPasswordBD();
+        URLConexion = cadenaConexionParte1 + user.getDirectorio().getName() + "\\" + user.getNombreUsuario() + cadenaConexionParte2 + user.getPassword();
     }
     
+    public String getURLConexion() {
+        return URLConexion;
+    }
+
     @Override
     public Object clone() throws CloneNotSupportedException { //Singleton - Para evitar la clonacion del objeto.
         throw new CloneNotSupportedException();
@@ -69,8 +75,7 @@ public class ConexionBD implements Cloneable{
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "nombre TEXT NOT NULL UNIQUE, " +
                 "password TEXT NOT NULL, " +
-                "directorio TEXT NOT NULL, " +
-                "passwordBD TEXT NOT NULL); "; 
+                "directorio TEXT NOT NULL); "; 
         st.execute(sql);
         
         System.out.println("BD: Creada tabla usuario de APP."); //Esto es temporal para pruebas.
@@ -78,84 +83,228 @@ public class ConexionBD implements Cloneable{
         cn.desconectar(conn);
     }
 
-    public void crearTablasUsuario() throws SQLException {
+    public boolean crearTablasUsuario() throws SQLException {
         ConexionBD cn = INSTANCE;
-        conn = cn.conectar();
-        st = conn.createStatement();
         String sql;
+        Boolean result = false;
+        try {
+            conn = cn.conectar();
+            st = conn.createStatement();
+            conn.setAutoCommit(false);
+            // Crea la tabla "PROVINCIA"
+            sql = "CREATE TABLE IF NOT EXISTS DATOS_USUARIO (" +
+                    "id INTEGER PRIMARY KEY, " +
+                    "nombre TEXT, " +
+                    "apellido1 TEXT, " +
+                    "apellido2 TEXT, " +
+                    "telefono INTEGER, " +
+                    "email TEXT, " +
+                    "email_app TEXT, " +
+                    "password_email_app TEXT);";
+            st.execute(sql);
 
+            // Crea la tabla "PROVINCIA"
+            sql = "CREATE TABLE IF NOT EXISTS PROVINCIA (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "nombre TEXT NOT NULL UNIQUE);";
+            st.execute(sql);
 
-        //Crea la tabla "PROVINCIA"
-        sql = "CREATE TABLE IF NOT EXISTS PROVINCIA (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "nombre TEXT NOT NULL UNIQUE);";  
-        st.execute(sql);
+            // Crea la tabla "LOCALIDAD"
+            sql = "CREATE TABLE IF NOT EXISTS LOCALIDAD (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "nombre TEXT NOT NULL, " +
+                    "provincia_id INTEGER NOT NULL, " +
+                    "FOREIGN KEY (provincia_id) REFERENCES provincia (id));";
+            st.execute(sql);
 
-        //Crea la tabla "LOCALIDAD"
-        sql = "CREATE TABLE IF NOT EXISTS LOCALIDAD (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "nombre TEXT NOT NULL, " +
-                "provincia_id INTEGER NOT NULL, " +
-                "FOREIGN KEY (provincia_id) REFERENCES provincia (id));";   
-        st.execute(sql);
+            // Crea la tabla "direccion"
+            sql = "CREATE TABLE IF NOT EXISTS DIRECCION (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "calle TEXT, " +
+                    "numero INTEGER, " +
+                    "localidad_id INTEGER NOT NULL, " +
+                    "codigo_postal INTEGER, " +
+                    "FOREIGN KEY (localidad_id) REFERENCES localidad (id));";
+            st.execute(sql);
 
-        //Crea la tabla "direccion"
-        sql = "CREATE TABLE IF NOT EXISTS DIRECCION (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "calle TEXT, " +
-                "numero INTEGER, " +
-                "localidad_id INTEGER NOT NULL, " +
-                "codigo_postal INTEGER, " +
-                "FOREIGN KEY (localidad_id) REFERENCES localidad (id));";  
-        st.execute(sql);
+            // Crea la tabla "alumno"
+            sql = "CREATE TABLE IF NOT EXISTS ALUMNO (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "nombre TEXT NOT NULL, " +
+                    "apellido1 TEXT NOT NULL, " +
+                    "apellido2 TEXT NOT NULL, " +
+                    "genero TEXT NOT NULL, " +
+                    "direccion_id INTEGER NOT NULL, " +
+                    "fecha_nacimiento TEXT NOT NULL, " +
+                    "telefono INTEGER NOT NULL, " +
+                    "email TEXT, " +
+                    "estado TEXT NOT NULL, " +
+                    "FOREIGN KEY (direccion_id) REFERENCES direccion (id));";
+            st.execute(sql);
 
-        //Crea la tabla "alumno"
-        sql = "CREATE TABLE IF NOT EXISTS ALUMNO (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "nombre TEXT NOT NULL, " +
-                "apellido1 TEXT NOT NULL, " +
-                "apellido2 TEXT NOT NULL, " +
-                "genero TEXT NOT NULL, " +
-                "direccion_id INTEGER NOT NULL, " +
-                "fecha_nacimiento TEXT NOT NULL, " +
-                "telefono INTEGER NOT NULL, " +
-                "email TEXT, " +
-                "estado TEXT NOT NULL, " +
-                "FOREIGN KEY (direccion_id) REFERENCES direccion (id));";   
-        st.execute(sql);
+            // Crea la tabla "jornada"
+            sql = "CREATE TABLE IF NOT EXISTS JORNADA (" +
+                    "fecha TEXT PRIMARY KEY, " +
+                    "comentario TEXT);";
+            st.execute(sql);
 
-        //Crea la tabla "jornada"
-        sql = "CREATE TABLE IF NOT EXISTS JORNADA (" +
-                "fecha TEXT PRIMARY KEY, " +
-                "comentario TEXT);";
-        st.execute(sql);
+            // Crea la tabla "clase"
+            sql = "CREATE TABLE IF NOT EXISTS CLASE (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "numero INTEGER NOT NULL, " +
+                    "tipo TEXT NOT NULL, " +
+                    "hora TEXT NOT NULL, " +
+                    "anotaciones TEXT," +
+                    "jornada TEXT NOT NULL, " +
+                    "FOREIGN KEY (jornada) REFERENCES jornada (fecha), " +
+                    "UNIQUE (numero, jornada), " +
+                    "CHECK (jornada IS NOT NULL));";
+            st.execute(sql);
 
-        //Crea la tabla "clase"
-        sql = "CREATE TABLE IF NOT EXISTS CLASE (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "numero INTEGER NOT NULL, " +
-                "tipo TEXT NOT NULL, " +
-                "hora TEXT NOT NULL, " +
-                "anotaciones TEXT," + 
-                "jornada TEXT NOT NULL, " +
-                "FOREIGN KEY (jornada) REFERENCES jornada (fecha), " +
-                "UNIQUE (numero, jornada), " +
-                "CHECK (jornada IS NOT NULL));";    
-        st.execute(sql);
+            // Crea la tabla "clase_alumno"
+            sql = "CREATE TABLE IF NOT EXISTS CLASE_ALUMNO (" +
+                    "clase_id INTEGER NOT NULL, " +
+                    "alumno_id INTEGER NOT NULL, " +
+                    "PRIMARY KEY (clase_id, alumno_id), " +
+                    "FOREIGN KEY (clase_id) REFERENCES clase (id) ON DELETE CASCADE, " +
+                    "FOREIGN KEY (alumno_id) REFERENCES alumno (id) ON DELETE CASCADE);";
+            st.execute(sql);
 
-        //Crea la tabla "clase_alumno"
-        sql = "CREATE TABLE IF NOT EXISTS CLASE_ALUMNO (" +
-                "clase_id INTEGER NOT NULL, " +
-                "alumno_id INTEGER NOT NULL, " +
-                "PRIMARY KEY (clase_id, alumno_id), " +
-                "FOREIGN KEY (clase_id) REFERENCES clase (id) ON DELETE CASCADE, " +
-                "FOREIGN KEY (alumno_id) REFERENCES alumno (id) ON DELETE CASCADE);";
-        st.execute(sql);
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            result = true;
+        } catch (SQLException e) {
+            // aqui poner la insercion en el .log
+            conn.rollback(); // Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true);
+            if (st != null) st.close();
+        }
 
         System.out.println("BD: Creadas tablas."); //Esto es temporal para pruebas.
-        st.close();
         cn.desconectar(conn);
+        
+        if(insertProvincias()) {
+            System.out.println("insertado provincias y localidades.");
+        } else {
+            System.out.println("NO se han insertado las provincias y localidades.");
+        }
+        return result;
     }
+
+    private boolean insertProvincias() throws SQLException{
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+
+        try {
+            st = conn.createStatement();
+            conn.setAutoCommit(false);
+
+            st.execute("INSERT INTO PROVINCIA (nombre) VALUES ('" + "Murcia" + "');");
+            st.execute("INSERT INTO PROVINCIA (nombre) VALUES ('" + "Alicante" + "');");
+
+            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Alquerias" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
+            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Santa Cruz" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
+            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "El Raal" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
+            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Los Ramos" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
+            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "LLano de Brujas" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
+            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Puente Tocinos" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
+            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Beniel" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
+            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Casillas" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
+            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Santomera" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
+            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Orihuela" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Alicante" + "'));");
+
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+           
+            System.out.println("Cambio de contraseña"); //Esto es temporal para pruebas.
+            
+            result = true;
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            if(st != null) st.close();
+        }
+
+        cn.desconectar(conn);
+        return result;
+    }
+
+    public boolean cambiarPasswordBD(String newPass, Usuario usuarioActual) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        String sqlKey = "PRAGMA key = '" + usuarioActual.getPassword() + "';";      //PRAGMA key = 'old passphrase';
+        String sqlReKey = "PRAGMA rekey = '" + newPass + "';";  //PRAGMA rekey = 'new passphrase';
+        conn = cn.conectar();
+        
+        try {
+            conn.setAutoCommit(false);
+
+            st = conn.createStatement();
+            st.execute(sqlKey);
+            st.execute(sqlReKey);
+
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+           
+            System.out.println("Cambio de contraseña BD"); //Esto es temporal para pruebas.
+            
+            result = true;
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            if(st != null) st.close();
+        }
+
+        cn.desconectar(conn);
+        return result;
+    }
+
+
+    public boolean cambiarPasswordUsuario(String newPass, String oldPass, int idUsuario) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+    
+        try {
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement("UPDATE USUARIO SET password = ? WHERE id = ? AND password = ?;");
+            ps.setString(1, Cifrador.hasPassword(newPass));
+            ps.setInt(2, idUsuario);
+            ps.setString(3, Cifrador.hasPassword(oldPass));
+            int n = ps.executeUpdate();
+
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+           
+            if(n > 0) {
+                result = true;
+                System.out.println("Cambio de contraseña de usuario"); //Esto es temporal para pruebas.
+            } else {
+                result = false;
+                System.out.println("NO se ha Cambio la contraseña de usuario"); //Esto es temporal para pruebas.
+            }
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            conn.rollback();
+            e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            if(ps != null) ps.close();
+        }
+
+        cn.desconectar(conn);
+        return result;
+    }
+
 
     public boolean comprobarNombreUsuario(String nombre) throws SQLException {
         ConexionBD cn = INSTANCE;
@@ -185,17 +334,17 @@ public class ConexionBD implements Cloneable{
     }
 
 
-    public boolean comprobarUsuario(String[] usuario) throws SQLException {
+    public boolean comprobarUsuario(String[] usuario) throws SQLException, NoSuchAlgorithmException {
         ConexionBD cn = INSTANCE;
         conn = cn.conectar();
         boolean result = false;
         String[] usuarioBD = new String[2]; //[0]nombre, [1]password
-        
+        String passwordCifrado = Cifrador.hasPassword(usuario[1]);
         try {  
             //Consulta a base de datos.
             ps = conn.prepareStatement("SELECT nombre, password FROM USUARIO WHERE nombre = ? and password = ?;");
             ps.setString(1, usuario[0]);
-            ps.setString(2, usuario[1]);
+            ps.setString(2, passwordCifrado);
            
             //ps.executeUpdate();
             res = ps.executeQuery(); //consulta sql a tabla USUARIO.
@@ -206,7 +355,7 @@ public class ConexionBD implements Cloneable{
                 usuarioBD[1] = res.getString(2);
                 
                 //Comparo si el nombre y password pasados por parametro coinciden con los obtenidos en la consulta.
-                if(usuario[0].equals(usuarioBD[0]) && usuario[1].equals(usuarioBD[1])) {
+                if(usuario[0].equals(usuarioBD[0]) && passwordCifrado.equals(usuarioBD[1])) {
                     result = true;
                     System.out.println("BD: usuario macht en base de datos."); //Esto es temporal para pruebas.
                 }
@@ -226,19 +375,20 @@ public class ConexionBD implements Cloneable{
         return result;
     }
 
-    public boolean insertarUsuario(Usuario user) throws SQLException{
+    public boolean insertarUsuario(Usuario user) throws SQLException, NoSuchAlgorithmException{
         ConexionBD cn = INSTANCE;
         boolean result = false;
+        String password = Cifrador.hasPassword(user.getPassword());
+        
         try {
             conn = cn.conectar();
             conn.setAutoCommit(false);
 
             //Insertamos la Jornada en la base de datos.
-            ps = conn.prepareStatement("INSERT INTO USUARIO (nombre, password, directorio, passwordBD) VALUES (?,?,?,?);");
-            ps.setString(1, user.getNombre());
-            ps.setString(2, user.getPassword());
+            ps = conn.prepareStatement("INSERT INTO USUARIO (nombre, password, directorio) VALUES (?,?,?);");
+            ps.setString(1, user.getNombreUsuario());
+            ps.setString(2, password);
             ps.setString(3, user.getDirectorio().getName());
-            ps.setString(4, user.getPasswordBD());
            
             ps.executeUpdate();
             
@@ -258,24 +408,25 @@ public class ConexionBD implements Cloneable{
         return result;
     }
 
-    public Usuario getUsuario(String[] usuario) throws SQLException {
+    public Usuario getUsuario(String[] usuario) throws SQLException, NoSuchAlgorithmException {
+        //[]usuario -> [0]nombre, [1]password
         ConexionBD cn = INSTANCE;
         conn = cn.conectar();
-        String[] usuarioBD = new String[2]; //[0]nombre, [1]password
         Usuario usuarioRecuperado = null;
+        String passwordCifrado = Cifrador.hasPassword(usuario[1]);
 
         try {  
             //Consulta a base de datos.
             ps = conn.prepareStatement("SELECT * FROM USUARIO WHERE nombre = ? and password = ?;");
-            ps.setString(1, usuario[0]);
-            ps.setString(2, usuario[1]);
+            ps.setString(1, usuario[0]); 
+            ps.setString(2, passwordCifrado);
            
             //ps.executeUpdate();
             res = ps.executeQuery(); //consulta sql a tabla USUARIO.
 
             while (res.next()) {
-                //id-nombre-password-directorio-passwordDB
-                usuarioRecuperado = new Usuario(res.getInt(1), res.getString(2), res.getString(3), new File(res.getString(4)), res.getString(5));
+                //id-nombre-password-directorio
+                usuarioRecuperado = new Usuario(res.getInt(1), res.getString(2), usuario[1], new File(res.getString(4)));
             }
 
         } catch (SQLException e) {
@@ -289,6 +440,185 @@ public class ConexionBD implements Cloneable{
         cn.desconectar(conn);
 
         return usuarioRecuperado;
+    }
+
+    public boolean borrarUsuario(int idUsuario) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+        boolean result = false;
+        
+        try {
+            conn.setAutoCommit(false);  
+            st = conn.createStatement();
+            int eliminados = st.executeUpdate("DELETE FROM USUARIO WHERE id = " + idUsuario + ";"); //consulta sql a tabla USUARIO.
+
+            if(eliminados == 1) {
+                result = true;
+            } else if(eliminados > 1) {
+                conn.rollback(); //Si borra mas de un usuario, hacemos un rollback por seguridad.
+            }
+            
+            
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally { 
+            if(st != null) st.close();
+        }
+
+        conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+        cn.desconectar(conn);
+
+        return result;
+    }
+
+
+    public boolean getDatosUsuario(Usuario usuario) throws SQLException{
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+
+        try {  
+            //Consulta a base de datos.
+            ps = conn.prepareStatement("SELECT * FROM DATOS_USUARIO WHERE id = " + usuario.getId() + ";");
+            res = ps.executeQuery(); //consulta sql a tabla USUARIO.
+
+            while (res.next()) {
+                if(usuario.getId() == res.getInt(1)) {
+                    usuario.setNombre(res.getString(2));
+                    usuario.setApellido1(res.getString(3));
+                    usuario.setApellido2(res.getString(4));
+                    usuario.setTelefono(res.getInt(5));
+                    usuario.setEmail(res.getString(6));
+                    usuario.setEmailApp(res.getString(7));
+                    usuario.setPasswordEmailApp(res.getString(8));
+                    result = true;
+                }
+            }
+
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            e.printStackTrace();
+        } finally { 
+            if(ps != null) ps.close();
+            if(res != null) res.close(); 
+        }
+        
+        cn.desconectar(conn);
+        return result;
+    }
+
+    public boolean insertarDatosUsuario(Usuario usuario) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+
+        try {
+            conn.setAutoCommit(false);
+
+            //Insertamos la Jornada en la base de datos.
+            ps = conn.prepareStatement("INSERT INTO DATOS_USUARIO (id, nombre, apellido1, apellido2, telefono, email) VALUES (?,?,?,?,?,?);");
+            ps.setInt(1, usuario.getId());
+            ps.setString(2, usuario.getNombre());
+            ps.setString(3, usuario.getApellido1());
+            ps.setString(4, usuario.getApellido2());
+            ps.setInt(5, usuario.getTelefono());
+            ps.setString(6, usuario.getEmail());
+           
+            ps.executeUpdate();
+            
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            System.out.println("Insercion Datos Usuario en base de datos"); //Esto es temporal para pruebas.
+            result = true;
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally { 
+            if(ps != null) ps.close();  
+        }
+        
+        cn.desconectar(conn);
+        return result;
+    }
+
+    public boolean modificarDatosUsuario(Usuario usuario) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+    
+        try {
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement("UPDATE DATOS_USUARIO SET nombre = ?, apellido1 = ?, apellido2 = ?, telefono = ?, email = ? WHERE id = ?;");
+            ps.setString(1, usuario.getNombre());
+            ps.setString(2, usuario.getApellido1());
+            ps.setString(3, usuario.getApellido2());
+            ps.setInt(4, usuario.getTelefono());
+            ps.setString(5, usuario.getEmail());
+            ps.setInt(6, usuario.getId());
+            
+            int n = ps.executeUpdate();
+
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+           
+            if(n > 0) {
+                result = true;
+                System.out.println("Cambio de datos personales de usuario"); //Esto es temporal para pruebas.
+            } else {
+                result = false;
+                System.out.println("NO se ha Cambio los datos personales de usuario"); //Esto es temporal para pruebas.
+            }
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            if(ps != null) ps.close();
+        }
+
+        cn.desconectar(conn);
+        return result;
+    }
+
+    public boolean modificarEmailApp(Usuario usuario) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+    
+        try {
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement("UPDATE DATOS_USUARIO SET email_app = ?, password_email_app = ? WHERE id = ?;");
+            ps.setString(1, usuario.getEmailApp());
+            ps.setString(2, usuario.getPasswordEmailApp());
+            ps.setInt(3, usuario.getId());
+            
+            int n = ps.executeUpdate();
+
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+           
+            if(n > 0) {
+                result = true;
+                System.out.println("Cambio de datos personales de usuario"); //Esto es temporal para pruebas.
+            } else {
+                result = false;
+                System.out.println("NO se ha Cambio los datos personales de usuario"); //Esto es temporal para pruebas.
+            }
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            if(ps != null) ps.close();
+        }
+
+        cn.desconectar(conn);
+        return result;
     }
 
     
@@ -455,7 +785,7 @@ public class ConexionBD implements Cloneable{
             
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            System.out.println("Insercion en base de datos"); //Esto es temporal para pruebas.
+            System.out.println("BD: borrado alumno en clase."); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
             //aqui poner la insercion en el .log
@@ -463,6 +793,8 @@ public class ConexionBD implements Cloneable{
             e.printStackTrace();
         } finally { 
             if(ps != null) ps.close();
+            if(st != null) st.close();
+            if(res != null) res.close();
         }
         
         cn.desconectar(conn);

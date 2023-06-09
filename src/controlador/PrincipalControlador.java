@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import baseDatos.ConexionBD;
@@ -15,8 +14,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -38,10 +35,7 @@ public class PrincipalControlador implements Initializable {
 	private ConexionBD conexionBD;
 	private Toast toast = new Toast();
 	
-	private final String[] usuarioAPP = {"lisgestion", "lisgestion", "appdata"}; //[0]nombre, [1]password, [2]directorio
-	private String[] usuario = null; //[0]nombre, [1]password
-	
-	private Usuario usuarioApp; 
+	private Usuario usuarioRoot; 
 	private Usuario usuarioActual;
 	
 	
@@ -86,7 +80,7 @@ public class PrincipalControlador implements Initializable {
         }
         ivLogo.setImage(imagenLogo);
 
-		usuarioApp = new Usuario(0, "lisgestion", "lisgestion", new File("appdata"), "lisgestion");
+		usuarioRoot = new Usuario(0, "root", "1234", new File("appdata"));
 		usuarioActual = null;
 		conexionBD = ConexionBD.getInstance();
 
@@ -108,7 +102,6 @@ public class PrincipalControlador implements Initializable {
 		pSeparador.getStyleClass().add("panelSeparador");
 
 		menuInicio(null);
-		
 	}
 
 
@@ -125,41 +118,14 @@ public class PrincipalControlador implements Initializable {
 			lAjustes.getStyleClass().remove("menuSeleccionado");
 			
 			if(usuarioActual == null) {
-				try {
-					FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/loginVista.fxml"));
-					BorderPane login;
-					login = (BorderPane) loader.load();
-					bpPrincipal.setCenter(login);
-					
-					LoginControlador controller = loader.getController(); //Cargo el controlador.
-					controller.setControladorPrincipal(this);
-					controller.setUsuarioApp(usuarioApp);
-					controller.setStage(escenario);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				cargarVistaLogin();
 			} else {
-				try {
-					FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/inicioVista.fxml"));
-					BorderPane inicio;
-					inicio = (BorderPane) loader.load();
-					bpPrincipal.setCenter(inicio);
-
-					InicioControlador controller = loader.getController(); // cargo el controlador.
-					controller.setControladorPrincipal(this);
-					controller.setUsuarioApp(usuarioApp);
-					controller.setUsuarioActual(usuarioActual);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				cargarVistaInicio();
 			}
-			
-			
-
 		}
 	}
 
-	
+
 	@FXML
 	void menuClases(MouseEvent event) {
 		if (menuSeleccionado != "clases") {
@@ -172,9 +138,6 @@ public class PrincipalControlador implements Initializable {
 			lUsuario.getStyleClass().remove("menuSeleccionado");
 			lAjustes.getStyleClass().remove("menuSeleccionado");
 			
-			
-			//Jornada jornada = datos.getJornada(LocalDate.of(2023,4,8));
-			//Jornada jornada = null;
 			Jornada jornada;
 			try {
 				jornada = conexionBD.getJornada(LocalDate.now().toString());
@@ -230,9 +193,7 @@ public class PrincipalControlador implements Initializable {
 				System.out.println("-ERROR- Fallo al cargar jornadaVista.fxml" + e.getMessage());
 				e.printStackTrace();
 			}
-
 		}
-		
 	}
 
 
@@ -247,7 +208,6 @@ public class PrincipalControlador implements Initializable {
 			lInformes.getStyleClass().add("menuSeleccionado");
 			lUsuario.getStyleClass().remove("menuSeleccionado");
 			lAjustes.getStyleClass().remove("menuSeleccionado");
-
 		}
     }
 
@@ -264,6 +224,23 @@ public class PrincipalControlador implements Initializable {
 			lUsuario.getStyleClass().add("menuSeleccionado");
 			lAjustes.getStyleClass().remove("menuSeleccionado");
 
+			try {
+				FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/usuarioVista.fxml"));
+				GridPane usuario;
+				
+				usuario = (GridPane) loader.load();
+				bpPrincipal.setCenter(usuario);
+				
+				UsuarioControlador controller = loader.getController(); // cargo el controlador.
+				controller.setUsuarioActual(usuarioActual);
+            	controller.setUsuarioRoot(usuarioRoot);
+				controller.setStage(escenario);
+				controller.setControladorPrincipal(this);
+				
+			} catch (IOException e) {
+				//poner log.
+				e.printStackTrace();
+			}
 		}
     }
 
@@ -279,9 +256,101 @@ public class PrincipalControlador implements Initializable {
 			lInformes.getStyleClass().remove("menuSeleccionado");
 			lUsuario.getStyleClass().remove("menuSeleccionado");
 			lAjustes.getStyleClass().add("menuSeleccionado");
-
 		}
     }
+
+
+	public void iniciarSesion(Usuario usuario){
+		this.usuarioActual = usuario;
+		conexionBD.setUsuario(usuarioActual);
+
+		try {
+			conexionBD.getDatosUsuario(usuarioActual);
+		} catch (SQLException e) {
+			System.out.println("No se ha podido recuperar los datos del usuario."); //Provisional
+			e.printStackTrace();
+		}
+
+		habilitarMenus();
+		cargarVistaInicio();
+		
+		try {
+			listadoAlumnos = FXCollections.observableArrayList(conexionBD.getListadoAlumnos());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void cerrarSesion() {
+		this.usuarioActual = null;
+		listadoAlumnos = null;
+		conexionBD.setUsuario(usuarioRoot);
+
+		deshabilitarMenus();
+
+		if(menuSeleccionado.equals("inicio")) {
+			cargarVistaLogin();
+		} else {
+			menuInicio(null);
+		}
+		
+
+		toast.show(escenario, "Usuario Desconectado!!.");
+	}
+
+
+	private void habilitarMenus() {
+		lClases.setDisable(false);
+		lAlumnos.setDisable(false);
+		lInformes.setDisable(false);
+		lUsuario.setDisable(false);
+		lAjustes.setDisable(false);
+	}
+
+
+	private void deshabilitarMenus() {
+		lClases.setDisable(true);
+		lAlumnos.setDisable(true);
+		lInformes.setDisable(true);
+		lUsuario.setDisable(true);
+		lAjustes.setDisable(true);
+	}
+
+
+	private void cargarVistaInicio() {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/inicioVista.fxml"));
+			BorderPane inicio;
+
+			inicio = (BorderPane) loader.load();
+			bpPrincipal.setCenter(inicio);
+
+			InicioControlador controller = loader.getController(); // cargo el controlador.
+			controller.setControladorPrincipal(this);
+			controller.setUsuarioApp(usuarioRoot);
+			controller.setUsuarioActual(usuarioActual);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	private void cargarVistaLogin() {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/loginVista.fxml"));
+			BorderPane login;
+
+			login = (BorderPane) loader.load();
+			bpPrincipal.setCenter(login);
+			
+			LoginControlador controller = loader.getController(); //Cargo el controlador.
+			controller.setControladorPrincipal(this);
+			controller.setUsuarioRoot(usuarioRoot);
+			//controller.setStage(escenario);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	
 	/**
@@ -293,27 +362,16 @@ public class PrincipalControlador implements Initializable {
     	bpPrincipal.setCenter(p);
     }
     
-    /**
-     * Establece un Stage para este controlador.
-     * 
-     * @param s Stage que se establece.
-     */
-    public void setStage(Stage s) {
-    	this.escenario = s;
-		if(escenario == null) {
-			System.out.println("Es nulo");
-		}
-		System.out.println(escenario.getX()); 
-    }
+    
 	
 	private boolean comprobarFicherosApp() {
 		return false;
 	}
 
 	private void crearFicherosApp() {
-		usuarioApp.getDirectorio().mkdir();
-		conexionBD.setUsuario(usuarioApp);
-		File ficheroBD = new File(usuarioApp.getDirectorio().getName() + "\\" + usuarioApp.getNombre() + conexionBD.FINAL_NOMBRE_FICHERO_DB);
+		usuarioRoot.getDirectorio().mkdir();
+		conexionBD.setUsuario(usuarioRoot);
+		File ficheroBD = new File(usuarioRoot.getDirectorio().getName() + "\\" + usuarioRoot.getNombreUsuario() + conexionBD.FINAL_NOMBRE_FICHERO_DB);
 		if(!ficheroBD.exists()) {
 			try {
 				conexionBD.crearTablasApp();
@@ -326,83 +384,35 @@ public class PrincipalControlador implements Initializable {
 	}
 
 
-	public void iniciarSesion(Usuario usuario){
-		this.usuarioActual = usuario;
-		conexionBD.setUsuario(usuarioActual);
-
-		habilitarMenus();
-			
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/inicioVista.fxml"));
-			BorderPane inicio;
-			inicio = (BorderPane) loader.load();
-			bpPrincipal.setCenter(inicio);
-
-			InicioControlador controller = loader.getController(); //Cargo el controlador.
-			controller.setControladorPrincipal(this);
-			controller.setUsuarioApp(usuarioApp);
-			controller.setUsuarioActual(usuarioActual);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			listadoAlumnos = FXCollections.observableArrayList(conexionBD.getListadoAlumnos());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void cerrarSesion() {
-		this.usuarioActual = null;
-		listadoAlumnos = null;
-		conexionBD.setUsuario(usuarioApp);
-
-		deshabilitarMenus();
-		
-		menuSeleccionado = ""; //Borro el contenido del String para que cuando ejecute el menuInicio() cargue la vista de login.
-		toast.show(escenario, "Usuario Desconectado!!.");
-		menuInicio(null);
-	}
-
-	private void habilitarMenus() {
-		lClases.setDisable(false);
-		lAlumnos.setDisable(false);
-		lInformes.setDisable(false);
-		lUsuario.setDisable(false);
-		lAjustes.setDisable(false);
-	}
-
-	private void deshabilitarMenus() {
-		lClases.setDisable(true);
-		lAlumnos.setDisable(true);
-		lInformes.setDisable(true);
-		lUsuario.setDisable(true);
-		lAjustes.setDisable(true);
-	}
-
-	/* 
-	public String[] getUsuarioApp() {
-		return usuarioAPP;
-	}
-
-	public void setUsuario(String[] usuario) {
-		this.usuario = usuario;
-		iniciarApp();
-	}/*/
-
 	public Usuario getUsuarioApp() {
-		return usuarioApp;
+		return usuarioRoot;
 	}
 
 	//NOTA: Si no hace falta este metodo, borrarlo.
 	/**
 	 * Etablece el usuario que esta usando la aplicación.
+	 * 
 	 * @param usuario
 	 */
 	public void setUsuario(Usuario usuario) {
 		this.usuarioActual = usuario;
-		//iniciarApp();
+	}
+
+
+	/**
+     * Establece un Stage para este controlador.
+     * 
+     * @param stage Stage que se establece.
+     */
+    public void setStage(Stage stage) {
+    	this.escenario = stage;
+		if(escenario == null) {
+			System.out.println("Escenario (Stage) Es nulo");
+		}
+    }
+
+	public Stage getStage() {
+		return this.escenario;
 	}
 
 

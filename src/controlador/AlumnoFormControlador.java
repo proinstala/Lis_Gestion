@@ -483,9 +483,10 @@ public class AlumnoFormControlador implements Initializable {
         Alert alerta = new Alert(Alert.AlertType.ERROR);
         alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
         alerta.setTitle(tiutlo);
+        alerta.initOwner(escenario);
         alerta.setHeaderText(cabecera);
         alerta.setContentText(cuerpo);
-        alerta.initStyle(StageStyle.UTILITY);
+        alerta.initStyle(StageStyle.DECORATED);
         alerta.initOwner(escenario);
         alerta.initModality(Modality.APPLICATION_MODAL);
         alerta.showAndWait();

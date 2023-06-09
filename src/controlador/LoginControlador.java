@@ -1,8 +1,8 @@
 package controlador;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
@@ -10,6 +10,7 @@ import baseDatos.ConexionBD;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -18,7 +19,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -30,7 +30,7 @@ public class LoginControlador implements Initializable {
 
     private String[] camposLogin = new String[2]; //[0]nombre, [1]password
     private Usuario usuario;
-    private Usuario usuarioApp;
+    private Usuario usuarioRoot;
     private ConexionBD conexionBD;
     private PrincipalControlador controladorPincipal;
     private Toast toast;
@@ -79,17 +79,27 @@ public class LoginControlador implements Initializable {
     @FXML
     void acceder(MouseEvent event) {
         if(recuperarDatosCampos() && comprobarUsuario()) {
+            boolean logueoOK = false;
             try {
                 usuario = conexionBD.getUsuario(camposLogin);
+                conexionBD.setUsuario(usuario);
+                if(!conexionBD.getDatosUsuario(usuario)) {
+                    conexionBD.insertarDatosUsuario(usuario);
+                }
+                logueoOK = true;
             } catch (SQLException e) {
-                // TODO Auto-generated catch block
+                // poner log.
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                // poner log.
                 e.printStackTrace();
             }
-            if(usuario == null) {
-                toast.show((Stage) bdLogin.getScene().getWindow(), "Algo a salido mal!!.");
-            } else {
+
+            if(logueoOK && usuario != null) {
                 toast.show((Stage) bdLogin.getScene().getWindow(), "Usuario Logueado!!.");
                 controladorPincipal.iniciarSesion(usuario);
+            } else {
+                toast.show((Stage) bdLogin.getScene().getWindow(), "Algo a salido mal!!.");
             }
         }
     }
@@ -98,40 +108,29 @@ public class LoginControlador implements Initializable {
 
     @FXML
     void recuperarPassword(MouseEvent event) {
-        /* 
-        //ESTO ESTA DE PRUEBA PARA VER COMO QUEDA LA VENTANA
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/registroUsuarioVista.fxml"));
-		    GridPane registroUsuario;
-            registroUsuario = (GridPane) loader.load();
-            RegistroUsuarioControlador controller = loader.getController(); // cargo el controlador.
-            
-            Stage ventana= new Stage();
-            ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
-            ventana.initStyle(StageStyle.UNDECORATED);
-            
-            
-            controller.setStage(ventana);
 
-            Scene scene = new Scene(registroUsuario);
-            //scene.getStylesheets().add(getClass().getResource("/estilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
-            ventana.setScene(scene);
-            //ventana.setTitle("titulo de ventana");
-            ventana.showAndWait();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        if(escenario == null) {
+            setStage(controladorPincipal.getStage());
         }
-		//bpPrincipal.setCenter(login);
-		
-		//controller.setControladorPrincipal(this);
-		//controller.setUsuarioApp(usuarioApp);
-        */
+
+        Alert alerta = new Alert(Alert.AlertType.ERROR);
+        alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
+        alerta.setTitle("Recuperar password");
+        alerta.setContentText("En construcción.");
+        alerta.initStyle(StageStyle.DECORATED);
+        alerta.initOwner(escenario);
+        alerta.initModality(Modality.APPLICATION_MODAL);
+        alerta.showAndWait();
+        
     }
 
     @FXML
     void registrarse(MouseEvent event) {
         try {
+            if(escenario == null) {
+                setStage(controladorPincipal.getStage());
+            }
+            
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/registroUserVista.fxml"));
 		    AnchorPane registroUser;
             registroUser = (AnchorPane) loader.load();
@@ -142,24 +141,15 @@ public class LoginControlador implements Initializable {
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.UNDECORATED);
 
-            
-            // calcular la posición de la nueva ventana
-            //double x = screenBounds.getMinX() + (screenBounds.getWidth() - ventana.getWidth()) / 2;
-            //double y = screenBounds.getMinY() + (screenBounds.getHeight() - ventana.getHeight()) / 2;
-            
-            //ventana.setX(x);
-            //ventana.setY(y);
-
+            URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
+            ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
+                
             controller.setStage(ventana);
-            controller.setUsuarioApp(usuarioApp);
+            controller.setUsuarioRoot(usuarioRoot);
 
             Scene scene = new Scene(registroUser);
             scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
             ventana.setScene(scene);
-            //ventana.setTitle("titulo de ventana");
-            //System.out.println(escenario.getX()); 
-            //ventana.setX((escenario.getX() + escenario.getWidth() / 2 - ventana.getWidth() / 2)); //posicion del escenario.
-            //ventana.setY(escenario.getY() + escenario.getHeight() - ventana.getHeight() - 50);		 //Posicion del escenario.
             
             ventana.showAndWait();
         } catch (IOException e) {
@@ -189,8 +179,7 @@ public class LoginControlador implements Initializable {
 
 
     private boolean comprobarUsuario() {
-        //conexionBD.setUsuario(new File(controladorPincipal.getUsuarioApp()[2]), controladorPincipal.getUsuarioApp()[0], controladorPincipal.getUsuarioApp()[0]);
-        conexionBD.setUsuario(usuarioApp);
+        conexionBD.setUsuario(usuarioRoot);
         try {
             if(!conexionBD.comprobarNombreUsuario(camposLogin[0])) {
                 toast.show((Stage) bdLogin.getScene().getWindow(), "No hay ningun usuario registrado\ncon ese nombre!!.");
@@ -203,7 +192,10 @@ public class LoginControlador implements Initializable {
             }
 
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
+            // poner log
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            // poner log
             e.printStackTrace();
         }
         return true;
@@ -220,11 +212,12 @@ public class LoginControlador implements Initializable {
 	}
 
     /**
-     * Establece el usuarioApp para este controlador.
-     * @param usuarioApp El usuarioApp
+     * Establece el usuarioRoot para este controlador.
+     * 
+     * @param usuarioRoot El usuarioRoot.
      */
-    public void setUsuarioApp(Usuario usuarioApp) {
-        this.usuarioApp = usuarioApp;
+    public void setUsuarioRoot(Usuario usuarioRoot) {
+        this.usuarioRoot = usuarioRoot;
     }
 
     /**

@@ -49,6 +49,9 @@ public class InicioControlador implements Initializable{
     @FXML
     private Label lbNombre;
 
+    @FXML
+    private Label lbNombreUsuario;
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -93,12 +96,12 @@ public class InicioControlador implements Initializable{
 	public void setUsuarioActual(Usuario usuario) {
 		this.usuarioActual = usuario;
 
+        lbNombreUsuario.textProperty().bind(usuarioActual.nombreUsuarioProperty());
         lbNombre.textProperty().bind(usuarioActual.nombreProperty());
         lbApellido1.textProperty().bind(usuarioActual.apellido1Property());
         lbApellido2.textProperty().bind(usuarioActual.apellido2Property());
         lbEmail.textProperty().bind(usuarioActual.emailProperty());
         lbEmailApp.textProperty().bind(usuarioActual.emailAppProperty());
-
 	}
 
 

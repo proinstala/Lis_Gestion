@@ -11,7 +11,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-public class Main extends Application{
+public class Main extends Application {
 	
 	ResourceBundle resourceBundle;
 	BorderPane aplicacion;
