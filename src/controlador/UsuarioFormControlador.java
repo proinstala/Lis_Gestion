@@ -121,17 +121,17 @@ public class UsuarioFormControlador implements Initializable {
         boolean camposCorrectos = false;
 
         Pattern nombrePattern = Pattern.compile("[A-Z][a-z]{1,30}([\\s][A-Z][a-z]{1,30})?$"); //Expresion regular para comprobar un nombre simple o compuesto.
-		Matcher nombreMatch = nombrePattern.matcher(tfNombre.getText());
+		Matcher nombreMatch = nombrePattern.matcher((tfNombre.getText() == null) ? "" : tfNombre.getText());
 
         Pattern apellidoPattern = Pattern.compile("[A-Z][a-z]{1,40}$"); 
-        Matcher apellido1Matcher = apellidoPattern.matcher(tfApellido1.getText());
-        Matcher apellido2Matcher = apellidoPattern.matcher(tfApellido2.getText());
+        Matcher apellido1Matcher = apellidoPattern.matcher((tfApellido1.getText() == null) ? "" : tfApellido1.getText());
+        Matcher apellido2Matcher = apellidoPattern.matcher((tfApellido2.getText() == null) ? "" : tfApellido2.getText());
 
         Pattern telefonoPattern = Pattern.compile("[0-9]{9,10}|^[0]?$");
         Matcher telefonoMatcher = telefonoPattern.matcher(tfTelefono.getText());
 
         Pattern emailPattern = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$|^$");
-        Matcher emaiMatcher = emailPattern.matcher(tfEmail.getText());
+        Matcher emaiMatcher = emailPattern.matcher((tfEmail.getText() == null) ? "" : tfEmail.getText());
 
         if(!nombreMatch.matches()) {
             mensajeAviso("Nombre no valido.",
@@ -159,8 +159,8 @@ public class UsuarioFormControlador implements Initializable {
 
         //Si no hay errores en los campos, guarda la informacion en las variables.
         if (camposCorrectos) {
-            telefono = (tfTelefono.getText().isBlank()) ? 0 : Integer.parseInt(tfTelefono.getText());
-            email = (tfEmail.getText().isBlank()) ? "" : tfEmail.getText();
+            telefono = (tfTelefono.getText() == null) ? 0 : Integer.parseInt(tfTelefono.getText());
+            email = (tfEmail.getText() == null) ? "" : tfEmail.getText();
             
             tfTelefono.setText(Integer.toString(telefono));
             tfEmail.setText(email);

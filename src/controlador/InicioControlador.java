@@ -68,13 +68,15 @@ public class InicioControlador implements Initializable{
     	
     }
 
-    public void inicio() {
-        lbNombre.textProperty().bind(usuarioActual.nombreProperty());
-    }
 
     @FXML
     void cerrarSesion(MouseEvent event) {
         controladorPincipal.cerrarSesion();
+    }
+
+     @FXML
+    void cargarVistaUsuario(MouseEvent event) {
+        controladorPincipal.menuUsuario(null);
     }
 
 

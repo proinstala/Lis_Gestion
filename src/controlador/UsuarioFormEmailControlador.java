@@ -129,7 +129,6 @@ public class UsuarioFormEmailControlador implements Initializable {
         boolean camposCorrectos = false;
 
         Pattern emailPattern = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-        //Matcher emaiMatcher = emailPattern.matcher((tfEmail.getText().isBlank()) ? "" : tfEmail.getText());
         Matcher emaiMatcher = emailPattern.matcher((tfEmail.getText() == null) ? "" : tfEmail.getText());
 
         Pattern passPat = Pattern.compile("^[\\S]{4,20}$");

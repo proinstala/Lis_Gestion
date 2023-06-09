@@ -71,7 +71,7 @@
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font></Label>
-                  <ImageView fx:id="ivCarpetaConfig" fitHeight="76.0" fitWidth="50.0" layoutX="431.0" layoutY="657.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="50.0">
+                  <ImageView fx:id="ivCarpetaConfig" fitHeight="76.0" fitWidth="50.0" layoutX="431.0" layoutY="657.0" onMouseClicked="#cargarVistaUsuario" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="50.0">
                      <image>
                         <Image url="@../recursos/carpeta_lila_2_128.png" />
                      </image>
@@ -79,7 +79,6 @@
                         <Cursor fx:constant="HAND" />
                      </cursor>
                   </ImageView>
-                  <Label layoutX="52.0" layoutY="433.0" styleClass="label_resaltado" text="Borrar Usuario" underline="true" AnchorPane.bottomAnchor="110.0" AnchorPane.leftAnchor="50.0" />
                   <Label fx:id="lbNombreUsuario" layoutX="280.0" layoutY="120.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="120.0">
                      <padding>
                         <Insets left="10.0" />
