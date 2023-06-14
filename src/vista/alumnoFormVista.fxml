@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<GridPane fx:id="gpFormAlumno" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="730.0" prefWidth="550.0" styleClass="fondo_ventana_degradado_toRight" stylesheets="@../hojasEstilos/Styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.AlumnoFormControlador">
+<GridPane fx:id="gpFormAlumno" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="760.0" prefWidth="550.0" styleClass="fondo_ventana_degradado_toRight" stylesheets="@../hojasEstilos/Styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.AlumnoFormControlador">
   <columnConstraints>
     <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="0.0" prefWidth="110.0" />
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -24,6 +24,7 @@
     <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="NEVER" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
@@ -168,13 +169,13 @@
       </Label>
       <ComboBox fx:id="cbLocalidad" layoutX="140.0" layoutY="225.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Localidad" GridPane.columnIndex="1" GridPane.rowIndex="15" />
       <ComboBox fx:id="cbProvincia" layoutX="140.0" layoutY="540.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Provincia" GridPane.columnIndex="1" GridPane.rowIndex="16" />
-      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="21">
+      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="22">
          <children>
             <Button fx:id="btnConfirmacion" mnemonicParsing="false" onMouseClicked="#confirmacion" prefWidth="80.0" text="Guardar" />
             <Button fx:id="btnCancelar" mnemonicParsing="false" onMouseClicked="#cancelar" prefWidth="80.0" text="Cancelar" />
          </children>
       </HBox>
-      <ImageView fx:id="ivImagenTipoFormulario" fitHeight="150.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.rowIndex="20" GridPane.rowSpan="2" GridPane.valignment="TOP">
+      <ImageView fx:id="ivImagenTipoFormulario" fitHeight="150.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.rowIndex="21" GridPane.rowSpan="2" GridPane.valignment="TOP">
          <image>
             <Image url="@../recursos/usuario_edit_1_128.png" />
          </image>
@@ -197,5 +198,11 @@
          </GridPane.margin>
       </Label>
       <ComboBox fx:id="cbEstado" maxWidth="-Infinity" prefWidth="200.0" promptText="Estado" GridPane.columnIndex="1" GridPane.rowIndex="19" />
+      <Label text="Asitencia Semanal" GridPane.rowIndex="20">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <ComboBox fx:id="cbAsistencia" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="20" />
    </children>
 </GridPane>

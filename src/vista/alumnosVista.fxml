@@ -20,16 +20,17 @@
    <center>
       <TableView fx:id="tvAlumnos" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         <columns>
-          <TableColumn fx:id="colId" prefWidth="75.0" text="ID" />
-          <TableColumn fx:id="colNombre" prefWidth="75.0" text="NOMBRE" />
-            <TableColumn fx:id="colApellido1" prefWidth="75.0" text="1º APELLIDO" />
-            <TableColumn fx:id="colApellido2" prefWidth="75.0" text="2º APELLIDO" />
-            <TableColumn fx:id="colGenero" prefWidth="75.0" text="GENERO" />
-            <TableColumn fx:id="colFechaNacimiento" prefWidth="75.0" text="EDAD" />
-            <TableColumn fx:id="colTelefono" prefWidth="75.0" text="TELEFONO" />
-            <TableColumn fx:id="colEmail" prefWidth="75.0" text="EMAIL" />
-            <TableColumn fx:id="colLocalidad" prefWidth="75.0" text="LOCALIDAD" />
-            <TableColumn fx:id="colEstado" prefWidth="75.0" text="ESTADO" />
+          <TableColumn fx:id="colId" maxWidth="60.0" minWidth="50.0" prefWidth="60.0" text="ID" />
+          <TableColumn fx:id="colNombre" maxWidth="500.0" minWidth="75.0" prefWidth="75.0" text="NOMBRE" />
+            <TableColumn fx:id="colApellido1" maxWidth="500.0" minWidth="75.0" prefWidth="75.0" text="1º APELLIDO" />
+            <TableColumn fx:id="colApellido2" maxWidth="500.0" minWidth="75.0" prefWidth="75.0" text="2º APELLIDO" />
+            <TableColumn fx:id="colGenero" maxWidth="500.0" minWidth="75.0" prefWidth="75.0" text="GENERO" />
+            <TableColumn fx:id="colFechaNacimiento" maxWidth="500.0" minWidth="60.0" prefWidth="60.0" text="EDAD" />
+            <TableColumn fx:id="colTelefono" maxWidth="500.0" minWidth="75.0" prefWidth="75.0" text="TELEFONO" />
+            <TableColumn fx:id="colEmail" maxWidth="500.0" minWidth="80.0" text="EMAIL" />
+            <TableColumn fx:id="colLocalidad" maxWidth="500.0" minWidth="75.0" prefWidth="75.0" text="LOCALIDAD" />
+            <TableColumn fx:id="colAsistencia" maxWidth="500.0" minWidth="75.0" prefWidth="75.0" text="ASISTENCIAS" />
+            <TableColumn fx:id="colEstado" maxWidth="500.0" minWidth="60.0" prefWidth="60.0" text="ESTADO" />
         </columns>
          <BorderPane.margin>
             <Insets left="50.0" right="50.0" top="10.0" />

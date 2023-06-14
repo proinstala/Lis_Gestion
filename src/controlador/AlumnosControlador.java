@@ -116,6 +116,9 @@ public class AlumnosControlador implements Initializable {
     private TableColumn<Alumno, Number> colTelefono;
 
     @FXML
+    private TableColumn<Alumno, Number> colAsistencia;
+
+    @FXML
     private TableColumn<Alumno, String> colEstado;
 
     @FXML
@@ -146,6 +149,7 @@ public class AlumnosControlador implements Initializable {
         colGenero.setCellValueFactory(new PropertyValueFactory<>("genero"));
         colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+        colAsistencia.setCellValueFactory(new PropertyValueFactory<>("asistenciaSemanal"));
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
 
         colLocalidad.setCellValueFactory(cellData -> {
@@ -260,7 +264,7 @@ public class AlumnosControlador implements Initializable {
         int i = indiceSeleccionado();
         if(i != -1) {
             Alumno alumnoSeleccionado = tvAlumnos.getSelectionModel().getSelectedItem();
-
+            
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/alumnoFormVista.fxml"));
                 GridPane formAlumno;

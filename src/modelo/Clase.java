@@ -1,6 +1,5 @@
 package modelo;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 
 import javafx.beans.property.IntegerProperty;
@@ -18,6 +17,7 @@ import javafx.beans.property.StringProperty;
  */
 public class Clase {
 	
+	private IntegerProperty id;
 	private IntegerProperty numero;
 	private ObjectProperty<TipoClase> tipo;
 	private ObjectProperty<HoraClase> horaClase;
@@ -34,7 +34,8 @@ public class Clase {
 	 * @param horaClase Hora de comienzo de clase.
 	 * @param anotaciones Apuntes sobre la clase.
 	 */
-	public Clase(int numero, TipoClase tipo, HoraClase horaClase, String anotaciones) {
+	public Clase(int id, int numero, TipoClase tipo, HoraClase horaClase, String anotaciones) {
+		this.id = new SimpleIntegerProperty(id);
 		this.numero = new SimpleIntegerProperty(numero);
 		this.tipo = new SimpleObjectProperty<TipoClase>(tipo);
 		this.horaClase = new SimpleObjectProperty<HoraClase>(horaClase);
@@ -49,12 +50,42 @@ public class Clase {
 	 * @param c Objeto de donde se obtienen los datos para la copia.
 	 */
 	public Clase(Clase c) {
+		id = new SimpleIntegerProperty(c.getId());
 		numero = new SimpleIntegerProperty(c.getNumero());
 		tipo = new SimpleObjectProperty<TipoClase>(c.getTipo());
 		horaClase = new SimpleObjectProperty<HoraClase>(c.getHoraClase());
 		anotaciones = new SimpleStringProperty(c.getAnotaciones());
 		
 		listaAlumnos = new ArrayList<Alumno>(c.getListaAlumnos());
+	}
+
+
+	// id -----------------------------------------
+	/**
+     * Obtiene la propiedad del id de la clase.
+     *
+     * @return La propiedad del id de la clase.
+     */
+	public IntegerProperty idProperty() {
+		return id;
+	}
+
+	/**
+     * Obtiene el id de la clase.
+     *
+     * @return El id de la clase.
+     */
+	public int getId() {
+		return id.get();
+	}
+
+	/**
+     * Establece el id de la clase.
+     *
+     * @param id El nuevo id para la clase.
+     */
+	public void setId(int id) {
+		this.id.set(id);
 	}
 	
 	

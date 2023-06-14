@@ -76,6 +76,9 @@ public class CardAlumnoControlador implements Initializable {
     @FXML
     private Label lbTelefono;
 
+     @FXML
+    private Label lbAsistencias;
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -92,18 +95,6 @@ public class CardAlumnoControlador implements Initializable {
             escenario.setX(mouseEvent.getScreenX() - x);
             escenario.setY(mouseEvent.getScreenY() - y);
         });
-        /*
-         
-        apRegistroUsuario.setOnMousePressed(mouseEvent -> {
-            x = mouseEvent.getSceneX();
-            y = mouseEvent.getSceneY();
-        });
-
-        apRegistroUsuario.setOnMouseDragged(mouseEvent -> {
-            escenario.setX(mouseEvent.getScreenX() - x);
-            escenario.setY(mouseEvent.getScreenY() - y);
-        });
-         */
     }
 
     @FXML
@@ -130,6 +121,7 @@ public class CardAlumnoControlador implements Initializable {
         lbProvincia.setText(alumno.getDireccion().getProvincia());
 
         lbEstado.setText(alumno.getEstado().toString());
+        lbAsistencias.setText(Integer.toString(alumno.getAsistenciaSemanal()));
 
 
     }

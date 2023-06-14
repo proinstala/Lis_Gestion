@@ -246,6 +246,28 @@
                   <Cursor fx:constant="HAND" />
                </cursor>
             </ImageView>
+            <ImageView fx:id="ivBotonCopiarJornada" fitHeight="34.0" fitWidth="33.0" layoutX="737.0" layoutY="29.0" onMouseClicked="#copiarJornada" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+               <image>
+                  <Image url="@../recursos/floppy_lila_1_128.png" />
+               </image>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <GridPane.margin>
+                  <Insets right="250.0" />
+               </GridPane.margin>
+            </ImageView>
+            <ImageView fx:id="ivBotonCopiarSemana" fitHeight="34.0" fitWidth="33.0" layoutX="737.0" layoutY="29.0" onMouseClicked="#copiarSemana" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+               <image>
+                  <Image url="@../recursos/bd_add_1_128.png" />
+               </image>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <GridPane.margin>
+                  <Insets right="300.0" />
+               </GridPane.margin>
+            </ImageView>
          </children>
       </GridPane>
    </center>

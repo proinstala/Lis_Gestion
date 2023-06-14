@@ -63,6 +63,7 @@ public class AlumnoFormControlador implements Initializable {
     private int codigoPostal;
 
     private EstadoAlumno estado;
+    private int asistenciaSemanal;
 
 
     @FXML
@@ -88,6 +89,9 @@ public class AlumnoFormControlador implements Initializable {
 
     @FXML
     private ComboBox<String> cbProvincia;
+
+    @FXML
+    private ComboBox<Integer> cbAsistencia;
 
     @FXML
     private DatePicker dpFechaNacimiento;
@@ -146,6 +150,9 @@ public class AlumnoFormControlador implements Initializable {
             cbProvincia.setValue("Murcia"); //Establezco Murcia como predeterminado a la hora de inicar el controlador
             cbLocalidadSetup(cbProvincia.getValue());
         }
+
+        cbAsistencia.getItems().addAll(1,2,3);
+        cbAsistencia.setValue(1);
     }
 
 
@@ -238,6 +245,7 @@ public class AlumnoFormControlador implements Initializable {
         cbLocalidad.setValue(newAlumno.getDireccion().getLocalidad());
         cbProvincia.setValue(newAlumno.getDireccion().getProvincia());
         cbEstado.setValue(newAlumno.getEstado());
+        cbAsistencia.setValue(newAlumno.getAsistenciaSemanal());
 
         tfIdAlumno.setText(Integer.toString(newAlumno.getId()));
         tfNombre.textProperty().bindBidirectional(newAlumno.nombreProperty());
@@ -270,6 +278,12 @@ public class AlumnoFormControlador implements Initializable {
         cbEstado.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
             newAlumno.estadoProperty().set(ov);
         });
+
+        cbAsistencia.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
+            newAlumno.asistenciaSemanalProperty().set(ov);
+        });
+
+        
     }
 
     /**
@@ -422,6 +436,7 @@ public class AlumnoFormControlador implements Initializable {
             provincia = cbProvincia.getValue().toString();
             codigoPostal = (tfCodigoPostal.getText().isBlank()) ? 0 : Integer.parseInt(tfCodigoPostal.getText());
             estado = (EstadoAlumno) cbEstado.getValue();
+            asistenciaSemanal = cbAsistencia.getValue();
 
         }
 
@@ -435,7 +450,7 @@ public class AlumnoFormControlador implements Initializable {
      */
     private boolean crearAlumno() {
         Direccion direccion = new Direccion(-1, calle, numeroVivienda, localidad, provincia, codigoPostal);
-        Alumno alumno = new Alumno(-1, nombre, apellido1, apellido2, genero, direccion, fechaNac, telefono, email, estado);
+        Alumno alumno = new Alumno(-1, nombre, apellido1, apellido2, genero, direccion, fechaNac, telefono, email, estado, asistenciaSemanal);
 
         try {
             if(conexionBD.insertarAlumno(alumno)) {
@@ -462,6 +477,7 @@ public class AlumnoFormControlador implements Initializable {
                 // oldAlumno.setDireccion(newAlumno.getDireccion());
                 oldAlumno.getDireccion().setValoresDireccion(newAlumno.getDireccion());
                 oldAlumno.setEstado(newAlumno.getEstado());
+                oldAlumno.setAsistenciaSemanal(newAlumno.getAsistenciaSemanal());
                 return true;
             }
         } catch (SQLException e) {

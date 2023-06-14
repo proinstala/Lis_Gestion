@@ -3,9 +3,11 @@ package controlador;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import baseDatos.ConexionBD;
@@ -15,8 +17,10 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -30,6 +34,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import modelo.Alumno;
 import modelo.Clase;
 import modelo.HoraClase;
@@ -40,6 +45,7 @@ import modelo.Toast;
 public class ClaseControlador implements Initializable {
 
 	private PrincipalControlador controladorPincipal;
+	private Stage escenario;
 	private int numeroClase;
 	private DateTimeFormatter formatter;
 	private Clase claseOriginal;
@@ -48,6 +54,7 @@ public class ClaseControlador implements Initializable {
 	private Jornada jornada;
 	private FilteredList<Alumno> filtro;
 	private Toast toast;
+	private Alert alerta;
 	
 	@FXML
     private TextField tfBusqueda;
@@ -59,19 +66,25 @@ public class ClaseControlador implements Initializable {
 	private ComboBox<TipoClase> cbTipo;
 
 	@FXML
-	private TableColumn<String, String> colApellido1;
+	private TableColumn<Alumno, String> colApellido1;
 
 	@FXML
-	private TableColumn<String, String> colApellido2;
+	private TableColumn<Alumno, Number> colGenero;
 
 	@FXML
-	private TableColumn<String, Number> colGenero;
+	private TableColumn<Alumno, Number> colId;
 
 	@FXML
-	private TableColumn<String, Number> colId;
+	private TableColumn<Alumno, String> colNombre;
 
-	@FXML
-	private TableColumn<String, String> colNombre;
+	  @FXML
+    private TableColumn<Alumno, Number> colAsistencias;
+
+    @FXML
+    private TableColumn<Alumno, String> colEdad;
+
+    @FXML
+    private TableColumn<Alumno, Number> colEstado;
 
 	@FXML
 	private ImageView ivLupa;
@@ -102,6 +115,9 @@ public class ClaseControlador implements Initializable {
 
 	@FXML
 	private Label lbNumeroClase;
+
+	@FXML
+    private Label lbIdClase;
 	
 	@FXML
     private TextArea taAnotaciones;
@@ -154,8 +170,17 @@ public class ClaseControlador implements Initializable {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colApellido1.setCellValueFactory(new PropertyValueFactory<>("apellido1"));
-        colApellido2.setCellValueFactory(new PropertyValueFactory<>("apellido2"));
+        colAsistencias.setCellValueFactory(new PropertyValueFactory<>("asistenciaSemanal"));
         colGenero.setCellValueFactory(new PropertyValueFactory<>("genero"));
+		colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
+
+		colEdad.setCellValueFactory(cellData -> {
+        	//LocalDate fechaText = cellData.getValue().getFechaNacimiento();
+        	//return cellData.getValue().fechaNacimientoProperty().asString(fechaText.format(formatter).toString());
+
+            LocalDate fechaText = cellData.getValue().getFechaNacimiento();
+            return cellData.getValue().fechaNacimientoProperty().asString(Integer.toString(Period.between(fechaText, LocalDate.now()).getYears()));
+        });
         
         //Con esto la busqueda es automatica al insertar texto en el tfBusqueda.
         tfBusqueda.textProperty().addListener( (o, ov, nv) -> {
@@ -200,10 +225,41 @@ public class ClaseControlador implements Initializable {
 		if(i != -1){
 			Alumno alumno = tvAlumnos.getSelectionModel().getSelectedItem(); //Obtengo el alumno seleccionado.
 			
+			int numeroIncripciones = -1;
+			try {
+				numeroIncripciones = conexionBD.numeroClasesIsncrito(alumno.getId(), jornada);	 
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+
 			if(listaClase.contains(alumno)) {
 				toast.show((Stage) tvAlumnos.getScene().getWindow(), "El alumno ya esta inscrito en esta Clase.");
 			} else if(jornada.alumnoEnJornada(alumno) != -1){
 				toast.show((Stage) tvAlumnos.getScene().getWindow(), "El alumno ya esta inscrito en una Clase de esta Jornada.\n" + "Inscrito en Clase " + jornada.alumnoEnJornada(alumno) + ".");
+			} else if(numeroIncripciones >= alumno.getAsistenciaSemanal()) {
+				alerta = new Alert(AlertType.CONFIRMATION);
+				alerta.getDialogPane().getStylesheets()
+						.add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
+				alerta.setTitle("Control asistencias");
+				alerta.setHeaderText("Este Alumno ya esta inscrito a su maximo de clases semanales.");
+				alerta.setContentText("¿Quieres añadirlo a esta clase?");
+				alerta.initStyle(StageStyle.DECORATED);
+				alerta.initOwner(escenario);
+
+				ButtonType buttonTypeCancel = new ButtonType("No", ButtonData.CANCEL_CLOSE);
+				ButtonType buttonTypeConfirmar = new ButtonType("Si", ButtonData.YES);
+				alerta.getButtonTypes().setAll(buttonTypeConfirmar, buttonTypeCancel);
+				Optional<ButtonType> result = alerta.showAndWait();
+
+				// Si pulsamos el boton confirmar:
+				if (result.get() == buttonTypeConfirmar) {
+					listaClase.add(alumno); // Añado el alumno a la lista de clase
+					toast.show((Stage) tvAlumnos.getScene().getWindow(),
+							"Alumno añadido a Clase " + clase.getNumero() + ".");
+				}
+				
 			} else {
 				listaClase.add(alumno); //Añado el alumno a la lista de clase
 				toast.show((Stage) tvAlumnos.getScene().getWindow(), "Alumno añadido a Clase " + clase.getNumero() + ".");
@@ -245,10 +301,10 @@ public class ClaseControlador implements Initializable {
 			}
 
 			if(actualizar) {
-				conexionBD.actualizarClase(clase, jornada);
+				conexionBD.actualizarClase(clase);
 			}
 
-			conexionBD.actualizarAlumnosEnClase(new ArrayList<Alumno>(listaClase), clase.getNumero(), jornada);
+			conexionBD.actualizarAlumnosEnClase(new ArrayList<Alumno>(listaClase), clase.getId());
 
 			claseOriginal.setHoraClase(clase.getHoraClase());
 			claseOriginal.setTipo(clase.getTipo());
@@ -274,6 +330,7 @@ public class ClaseControlador implements Initializable {
 			JornadaControlador controller = loader.getController(); //cargo el controlador.
 			controller.setControladorPrincipal(controladorPincipal);
 			controller.setListaAlumnos(listadoAlumnos);
+			controller.setStage(escenario);
 			controller.inicializacion(jornada);
 			
 		} catch (IOException e) {
@@ -307,6 +364,7 @@ public class ClaseControlador implements Initializable {
 		lvClase.setItems(listaClase);
 		
 		lbNumeroClase.setText(Integer.toString(clase.getNumero()));
+		lbIdClase.setText(Integer.toString(clase.getId()));
 		cbHora.setValue(clase.getHoraClase());
 		cbTipo.setValue(clase.getTipo());
 		
@@ -358,6 +416,15 @@ public class ClaseControlador implements Initializable {
 		tvAlumnos.setItems(filtro); //Añado la lista de alumnos TextView tvAlumnos.
 		
 	}
+
+	/**
+     * Establece un Stage para este controlador.
+     * 
+     * @param s Stage que se establece.
+     */
+    public void setStage(Stage stage) {
+    	this.escenario = stage;
+    }
 	
 
 }

@@ -140,7 +140,8 @@ public class PrincipalControlador implements Initializable {
 			
 			Jornada jornada;
 			try {
-				jornada = conexionBD.getJornada(LocalDate.now().toString());
+				//jornada = conexionBD.getJornada(LocalDate.now().toString());
+				jornada = conexionBD.getJornadaCompleta(LocalDate.now().toString());
 			} catch (SQLException e) {
 				jornada = null;
 				e.printStackTrace();
@@ -155,6 +156,7 @@ public class PrincipalControlador implements Initializable {
 				JornadaControlador controller = loader.getController(); // cargo el controlador.
 				controller.setControladorPrincipal(this);
 				controller.setListaAlumnos(listadoAlumnos);
+				controller.setStage(escenario);
 				controller.inicializacion(jornada);
 				
 			} catch (IOException e) {

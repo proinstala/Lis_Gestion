@@ -8,7 +8,6 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-
 <AnchorPane fx:id="apCardAlumno" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="430.0" prefWidth="600.0" styleClass="fondo_ventana_degradado_masBorde" stylesheets="@../hojasEstilos/Styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.CardAlumnoControlador">
    <children>
       <AnchorPane fx:id="apIzquierda" prefHeight="310.0" prefWidth="200.0" styleClass="fondo_panel_izquierda" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="400.0" AnchorPane.topAnchor="0.0">
@@ -26,6 +25,16 @@
             <Label alignment="CENTER" layoutX="84.0" layoutY="213.0" text="   Estado   " underline="true" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="215.0">
                <font>
                   <Font size="14.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER" layoutX="66.0" layoutY="283.0" text="Asistencia semanal" underline="true" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="290.0">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <Label fx:id="lbAsistencias" alignment="CENTER" layoutX="57.0" layoutY="319.0" text="1" textFill="WHITE" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="305.0">
+               <font>
+                  <Font size="24.0" />
                </font>
             </Label>
          </children>

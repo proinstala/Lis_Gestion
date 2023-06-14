@@ -44,11 +44,13 @@
             <ListView fx:id="lvClase" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
             <TableView fx:id="tvAlumnos" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6" GridPane.rowSpan="3" GridPane.vgrow="ALWAYS">
               <columns>
-                <TableColumn fx:id="colId" maxWidth="1.7976931348623157E308" minWidth="40.0" prefWidth="40.0" text="ID" />
-                <TableColumn fx:id="colNombre" maxWidth="1.7976931348623157E308" minWidth="80.0" text="NOMBRE" />
-                  <TableColumn fx:id="colApellido1" maxWidth="1.7976931348623157E308" minWidth="80.0" text="APELLIDO 1" />
-                  <TableColumn fx:id="colApellido2" maxWidth="1.7976931348623157E308" minWidth="80.0" text="APELLIDO 2" />
-                  <TableColumn fx:id="colGenero" maxWidth="1.7976931348623157E308" minWidth="80.0" text="GENERO" />
+                <TableColumn fx:id="colId" maxWidth="500.0" minWidth="40.0" prefWidth="40.0" text="ID" />
+                <TableColumn fx:id="colNombre" maxWidth="500.0" minWidth="80.0" text="NOMBRE" />
+                  <TableColumn fx:id="colApellido1" maxWidth="500.0" minWidth="80.0" text="1º APELLIDO" />
+                  <TableColumn fx:id="colEdad" maxWidth="500.0" minWidth="40.0" prefWidth="40.0" text="EDAD" />
+                  <TableColumn fx:id="colGenero" maxWidth="500.0" minWidth="80.0" text="GENERO" />
+                  <TableColumn fx:id="colAsistencias" maxWidth="500.0" minWidth="80.0" text="ASISTENCIAS" />
+                  <TableColumn fx:id="colEstado" maxWidth="500.0" minWidth="80.0" text="ESTADO" />
               </columns>
                <columnResizePolicy>
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -178,6 +180,12 @@
                <font>
                   <Font size="18.0" />
                </font>
+            </Label>
+            <Label text="ID" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label fx:id="lbIdClase" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2">
+               <GridPane.margin>
+                  <Insets left="20.0" />
+               </GridPane.margin>
             </Label>
          </children>
       </GridPane>

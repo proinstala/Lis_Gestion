@@ -2,6 +2,7 @@ package modelo;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -28,6 +29,9 @@ public class Alumno implements Cloneable {
 	private IntegerProperty telefono;
 	private StringProperty email;
 	private ObjectProperty<EstadoAlumno> estado;
+	private IntegerProperty asistenciaSemanal;
+
+	private ArrayList<Mensualidad> listaMensualidades;
 	
 	/**
 	 * Constructor sin parametros.
@@ -45,6 +49,8 @@ public class Alumno implements Cloneable {
 		this.telefono = new SimpleIntegerProperty();
 		this.email = new SimpleStringProperty(null);
 		this.estado = new SimpleObjectProperty<EstadoAlumno>(null);
+		this.asistenciaSemanal = new SimpleIntegerProperty(1);
+		this.listaMensualidades = new ArrayList<Mensualidad>();
 	}
 	
 	/**
@@ -61,9 +67,10 @@ public class Alumno implements Cloneable {
 	 * @param telefono Telefono del alumno.
 	 * @param email Direccion de correo electronico del alumno.
 	 * @param estado Estado del alumno.
+	 * @param asistenciaSemanal Numero de asistencia semanal del alumno.
 	 */
 	public Alumno(int id, String nombre, String apellido1, String apellido2, Genero genero, 
-			Direccion direccion, LocalDate fechaNacimiento, int telefono, String email, EstadoAlumno estado) {
+			Direccion direccion, LocalDate fechaNacimiento, int telefono, String email, EstadoAlumno estado,  int asistenciaSemanal) {
 		this.id = new SimpleIntegerProperty(id);
 		this.nombre = new SimpleStringProperty(nombre);
 		this.apellido1 = new SimpleStringProperty(apellido1);
@@ -75,6 +82,43 @@ public class Alumno implements Cloneable {
 		this.telefono = new SimpleIntegerProperty(telefono);
 		this.email = new SimpleStringProperty(email);
 		this.estado = new SimpleObjectProperty<EstadoAlumno>(estado);
+		this.asistenciaSemanal = new SimpleIntegerProperty(asistenciaSemanal);
+		this.listaMensualidades = new ArrayList<Mensualidad>();
+	}
+
+
+	/**
+	 * Contructor con parametros.
+	 * Crea un objeto de tipo Alumno con los datos pasados por parametros.
+	 * 
+	 * @param id Identificador del alumno.
+	 * @param nombre Nombre del alumno.
+	 * @param apellido1 Primer apellido del alumno.
+	 * @param apellido2 Segundo apellido del alumno.
+	 * @param genero Genero del alumno.
+	 * @param fechaNacimiento Fecha de nacimiento.
+	 * @param direccion Objeto que contine los datos de direccion del alumno.
+	 * @param telefono Telefono del alumno.
+	 * @param email Direccion de correo electronico del alumno.
+	 * @param estado Estado del alumno.
+	 * @param asistenciaSemanal Numero de asistencia semanal del alumno.
+	 * @param listaMensualidades Lista de mensualidades del alumno.
+	 */
+	public Alumno(int id, String nombre, String apellido1, String apellido2, Genero genero, 
+			Direccion direccion, LocalDate fechaNacimiento, int telefono, String email, EstadoAlumno estado, int asistenciaSemanal, ArrayList<Mensualidad> listaMensualidades) {
+		this.id = new SimpleIntegerProperty(id);
+		this.nombre = new SimpleStringProperty(nombre);
+		this.apellido1 = new SimpleStringProperty(apellido1);
+		this.apellido2 = new SimpleStringProperty(apellido2);
+		this.genero = new SimpleObjectProperty<Genero>(genero);
+		this.fechaNacimiento = new SimpleObjectProperty<LocalDate>(fechaNacimiento);
+		this.direccion = new SimpleObjectProperty<Direccion>(direccion, "direccion");
+		this.direccion.set(direccion);
+		this.telefono = new SimpleIntegerProperty(telefono);
+		this.email = new SimpleStringProperty(email);
+		this.estado = new SimpleObjectProperty<EstadoAlumno>(estado);
+		this.asistenciaSemanal = new SimpleIntegerProperty(asistenciaSemanal);
+		this.listaMensualidades = new ArrayList<Mensualidad>(listaMensualidades);
 	}
 	
 	/**
@@ -94,6 +138,8 @@ public class Alumno implements Cloneable {
 		telefono = new SimpleIntegerProperty(a.getTelefono());
 		email = new SimpleStringProperty(a.getEmail());
 		estado = new SimpleObjectProperty<EstadoAlumno>(a.getEstado());
+		asistenciaSemanal = new SimpleIntegerProperty(a.getAsistenciaSemanal());
+		listaMensualidades = new ArrayList<Mensualidad>(a.getListaMensualidades());
 	}
 
 	public Object clone(){
@@ -111,7 +157,8 @@ public class Alumno implements Cloneable {
 		obj.setTelefono(this.telefono.getValue().intValue());
 		obj.setEmail(this.email.getValue());
 		obj.setEstado(this.estado.getValue());
-
+		obj.setAsistenciaSemanal(this.asistenciaSemanal.getValue());
+		obj.setListaMensualidades(new ArrayList<Mensualidad>(this.getListaMensualidades()));
 		return obj;
 	}
 	
@@ -400,6 +447,43 @@ public class Alumno implements Cloneable {
      */
 	public void setEstado(EstadoAlumno estado) {
 		this.estado.set(estado);
+	}
+
+	// asistenciaSemanal -----------------------------------------
+     /**
+      * Obtiene la propiedad de la asistenciaSemanal del alumno.
+      *
+      * @return La propiedad de la asistenciaSemanal del alumno.
+      */
+     public IntegerProperty asistenciaSemanalProperty() {
+          return asistenciaSemanal;
+     }
+
+     /**
+      * Obtiene la asistenciaSemanal del alumno.
+      *
+      * @return La asistenciaSemanal del alumno.
+      */
+     public int getAsistenciaSemanal() {
+          return asistenciaSemanal.get();
+     }
+
+     /**
+      * Establece la asistenciaSemanal del alumno.
+      *
+      * @param asistenciaSemanal La nueva asistenciaSemanal para el alumno.
+      */
+     public void setAsistenciaSemanal(int asistenciaSemanal) {
+          this.asistenciaSemanal.set(asistenciaSemanal);
+     }
+
+
+	public ArrayList<Mensualidad> getListaMensualidades() {
+		return listaMensualidades;
+	}
+
+	public void setListaMensualidades(ArrayList<Mensualidad> lista) {
+		this.listaMensualidades = lista;
 	}
 
 	/**

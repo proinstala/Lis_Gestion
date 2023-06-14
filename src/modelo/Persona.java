@@ -1,9 +1,7 @@
 package modelo;
 
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -24,7 +22,12 @@ public abstract class Persona {
      * Crea un objeto de tipo Persona con los campos a null.
      */
     protected Persona() {
-        this(null, null, null, null, null, null);
+        this.id = new SimpleIntegerProperty();
+		this.nombre = new SimpleStringProperty(null);
+		this.apellido1 = new SimpleStringProperty(null);
+		this.apellido2 = new SimpleStringProperty(null);
+		this.telefono = new SimpleIntegerProperty();
+		this.email = new SimpleStringProperty(null);
     }
 
     /**
@@ -47,6 +50,7 @@ public abstract class Persona {
         this.telefono = new SimpleIntegerProperty(telefono);
 		this.email = new SimpleStringProperty(email);
     }
+	
 
     /**
 	 * Contructor de copia.
@@ -63,9 +67,6 @@ public abstract class Persona {
 		email = new SimpleStringProperty(p.getEmail());
 	}
 
-
-    public Persona(Object object, Object object2, Object object3, Object object4, Object object5, Object object6) {
-    }
 
     // id -----------------------------------------
 	/**

@@ -39,6 +39,7 @@ import javafx.scene.control.Label;
 public class JornadaControlador implements Initializable {
 	
 	private PrincipalControlador controladorPincipal;
+	private Stage escenario;
 	private DateTimeFormatter formatter;
 	private Jornada jornada = null;
 	private Jornada jornadaOriginal;
@@ -47,6 +48,12 @@ public class JornadaControlador implements Initializable {
 	private Alert alerta;
 	private Toast toast;
 	
+
+	@FXML
+    private ImageView ivBotonCopiarJornada;
+
+    @FXML
+    private ImageView ivBotonCopiarSemana;
 
 	@FXML
     private ImageView ivBotonCrearJornada;
@@ -216,7 +223,8 @@ public class JornadaControlador implements Initializable {
             //LLamar a base de datos para rescatar la jornada
             //inicializacion(datos.getJornada(fechaSeleccionada));
 			try {
-				inicializacion(conexionBD.getJornada(fechaSeleccionada.toString()));
+				//inicializacion(conexionBD.getJornada(fechaSeleccionada.toString()));
+				inicializacion(conexionBD.getJornadaCompleta(fechaSeleccionada.toString()));
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -308,6 +316,16 @@ public class JornadaControlador implements Initializable {
 			toast.show((Stage) bdJornada.getScene().getWindow(), "Esta Jornada ya esta creada!!");
 		}
     }
+
+	@FXML
+    void copiarJornada(MouseEvent event) {
+
+    }
+
+    @FXML
+    void copiarSemana(MouseEvent event) {
+
+    }
 	
 
 	/**
@@ -318,14 +336,14 @@ public class JornadaControlador implements Initializable {
 	private Jornada crearJornada() {
 		Jornada j = new Jornada(dpFecha.getValue(), "");
 		Clase[] clases = new Clase[8];
-		clases[0] = new Clase(1, TipoClase.PILATES, HoraClase.HORA_9_MEDIA, "");
-		clases[1] = new Clase(2, TipoClase.PILATES, HoraClase.HORA_10_MEDIA, "");
-		clases[2] = new Clase(3, TipoClase.PILATES, HoraClase.HORA_11_MEDIA, "");
-		clases[3] = new Clase(4, TipoClase.PILATES, HoraClase.HORA_12_MEDIA, "");
-		clases[4] = new Clase(5, TipoClase.PILATES, HoraClase.HORA_17_MEDIA, "");
-		clases[5] = new Clase(6, TipoClase.PILATES, HoraClase.HORA_18_MEDIA, "");
-		clases[6] = new Clase(7, TipoClase.PILATES, HoraClase.HORA_19_MEDIA, "");
-		clases[7] = new Clase(8, TipoClase.PILATES, HoraClase.HORA_20_MEDIA, "");
+		clases[0] = new Clase(-1, 1, TipoClase.PILATES, HoraClase.HORA_9_MEDIA, "");
+		clases[1] = new Clase(-1, 2, TipoClase.PILATES, HoraClase.HORA_10_MEDIA, "");
+		clases[2] = new Clase(-1, 3, TipoClase.PILATES, HoraClase.HORA_11_MEDIA, "");
+		clases[3] = new Clase(-1, 4, TipoClase.PILATES, HoraClase.HORA_12_MEDIA, "");
+		clases[4] = new Clase(-1, 5, TipoClase.PILATES, HoraClase.HORA_17_MEDIA, "");
+		clases[5] = new Clase(-1, 6, TipoClase.PILATES, HoraClase.HORA_18_MEDIA, "");
+		clases[6] = new Clase(-1, 7, TipoClase.PILATES, HoraClase.HORA_19_MEDIA, "");
+		clases[7] = new Clase(-1, 8, TipoClase.PILATES, HoraClase.HORA_20_MEDIA, "");
 
 		j.setClases(clases); //Establece el Array de Clase a la jornada.
 
@@ -343,6 +361,7 @@ public class JornadaControlador implements Initializable {
 			
 			ClaseControlador controller = loader.getController(); //cargo el controlador.
 			controller.setControladorPrincipal(controladorPincipal);
+			controller.setStage(escenario);
 			controller.setJornada(jornada);
 			controller.setClaseIniciacion(numeroClase);
 			controller.setListaAlumnos(listadoAlumnosGeneral);
@@ -475,7 +494,6 @@ public class JornadaControlador implements Initializable {
 				if(!clase.getListaAlumnos().isEmpty()) {
 					clase.setListaAlumnos(comprobarListaClase(clase.getListaAlumnos()));
 				}
-				
 			}
 
 			
@@ -606,6 +624,16 @@ public class JornadaControlador implements Initializable {
 	public void setJornada(Jornada jornada) {
 		this.jornada = jornada;
 	}
+
+
+	/**
+     * Establece un Stage para este controlador.
+     * 
+     * @param s Stage que se establece.
+     */
+    public void setStage(Stage stage) {
+    	this.escenario = stage;
+    }
 	
 	
 	// ATENCION: El metodo obtenerDiaSemana es para borrar. lo he puesto en la clase Jornada.
