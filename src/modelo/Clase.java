@@ -56,7 +56,7 @@ public class Clase {
 		horaClase = new SimpleObjectProperty<HoraClase>(c.getHoraClase());
 		anotaciones = new SimpleStringProperty(c.getAnotaciones());
 		
-		listaAlumnos = new ArrayList<Alumno>(c.getListaAlumnos());
+		listaAlumnos = c.getListaAlumnos();
 	}
 
 
@@ -237,9 +237,40 @@ public class Clase {
 	 * Elimina un alumno de la lista de alumnos inscritos en la clase.
 	 *
 	 * @param alumno El alumno a eliminar.
+	 * @return true si borra el Alumno, false si no.
 	 */
 	public boolean removeAlumno(Alumno alumno) {
 		return listaAlumnos.remove(alumno);
+	}
+
+	/**
+	 * Elimina un alumno de la lista de alumnos comparando los id de alumnos inscritos en la clase.
+	 *
+	 * @param alumno El alumno a eliminar.
+	 * @return true si borra el Alumno, false si no.
+	 */
+	public boolean removeAlumnoPorId(Alumno alumno) {
+		int posicion = -1;
+		for (Alumno alumnoClase : listaAlumnos) {
+			posicion ++;
+			if(alumno.getId() == alumnoClase.getId()) {
+				break;
+			}
+		}
+		try {
+			listaAlumnos.remove(posicion);
+		} catch (IndexOutOfBoundsException e) {
+			
+		}
+
+		return (posicion != 1) ? true : false;
+	}
+
+	/**
+	 * Vacia la lista de alumnos de la clase.
+	 */
+	public void vaciarListaAlumnos() {
+		listaAlumnos.clear();
 	}
 	
 	/**
@@ -251,4 +282,12 @@ public class Clase {
 	public boolean estaInscrito(Alumno alumno) {
 	    return listaAlumnos.contains(alumno);
 	}
+
+	@Override
+	public String toString() {
+		return "Clase [id=" + id + ", numero=" + numero + ", tipo=" + tipo + ", horaClase=" + horaClase
+				+ ", anotaciones=" + anotaciones + ", listaAlumnos=" + listaAlumnos.toString() + "]";
+	}
+
+	
 }

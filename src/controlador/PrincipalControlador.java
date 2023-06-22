@@ -65,6 +65,12 @@ public class PrincipalControlador implements Initializable {
 
 	@FXML
     private Label lUsuario;
+
+	@FXML
+    private Label lbMensualidad;
+
+    @FXML
+    private Label lbSalir;
 	
 	@FXML
     private Pane pSeparador;
@@ -93,10 +99,12 @@ public class PrincipalControlador implements Initializable {
 		
 		lInicio.getStyleClass().add("menu");
 		lClases.getStyleClass().add("menu");
+		lbMensualidad.getStyleClass().add("menu");
 		lAlumnos.getStyleClass().add("menu");
 		lInformes.getStyleClass().add("menu");
 		lUsuario.getStyleClass().add("menu");
 		lAjustes.getStyleClass().add("menu");
+		lbSalir.getStyleClass().add("menu");
 
 		gpMenu.getStyleClass().add("gridPaneMenu");
 		pSeparador.getStyleClass().add("panelSeparador");
@@ -112,6 +120,7 @@ public class PrincipalControlador implements Initializable {
 			
 			lInicio.getStyleClass().add("menuSeleccionado");
 			lClases.getStyleClass().remove("menuSeleccionado");
+			lbMensualidad.getStyleClass().remove("menuSeleccionado");
 			lAlumnos.getStyleClass().remove("menuSeleccionado");
 			lInformes.getStyleClass().remove("menuSeleccionado");
 			lUsuario.getStyleClass().remove("menuSeleccionado");
@@ -133,6 +142,7 @@ public class PrincipalControlador implements Initializable {
 
 			lInicio.getStyleClass().remove("menuSeleccionado");
 			lClases.getStyleClass().add("menuSeleccionado");
+			lbMensualidad.getStyleClass().remove("menuSeleccionado");
 			lAlumnos.getStyleClass().remove("menuSeleccionado");
 			lInformes.getStyleClass().remove("menuSeleccionado");
 			lUsuario.getStyleClass().remove("menuSeleccionado");
@@ -167,6 +177,25 @@ public class PrincipalControlador implements Initializable {
 	}
 
 	
+	
+
+
+	@FXML
+    void menuMensualidad(MouseEvent event) {
+		if(menuSeleccionado != "mensualidad") {
+			menuSeleccionado = "mensualidad";
+			
+			lInicio.getStyleClass().remove("menuSeleccionado");
+			lClases.getStyleClass().remove("menuSeleccionado");
+			lbMensualidad.getStyleClass().add("menuSeleccionado");
+			lAlumnos.getStyleClass().remove("menuSeleccionado");
+			lInformes.getStyleClass().remove("menuSeleccionado");
+			lUsuario.getStyleClass().remove("menuSeleccionado");
+			lAjustes.getStyleClass().remove("menuSeleccionado");
+		}
+    }
+
+
 	@FXML
 	void menuAlumnos(MouseEvent event) {
 		if(menuSeleccionado != "alumnos") {
@@ -174,6 +203,7 @@ public class PrincipalControlador implements Initializable {
 			
 			lInicio.getStyleClass().remove("menuSeleccionado");
 			lClases.getStyleClass().remove("menuSeleccionado");
+			lbMensualidad.getStyleClass().remove("menuSeleccionado");
 			lAlumnos.getStyleClass().add("menuSeleccionado");
 			lInformes.getStyleClass().remove("menuSeleccionado");
 			lUsuario.getStyleClass().remove("menuSeleccionado");
@@ -206,6 +236,7 @@ public class PrincipalControlador implements Initializable {
 			
 			lInicio.getStyleClass().remove("menuSeleccionado");
 			lClases.getStyleClass().remove("menuSeleccionado");
+			lbMensualidad.getStyleClass().remove("menuSeleccionado");
 			lAlumnos.getStyleClass().remove("menuSeleccionado");
 			lInformes.getStyleClass().add("menuSeleccionado");
 			lUsuario.getStyleClass().remove("menuSeleccionado");
@@ -221,6 +252,7 @@ public class PrincipalControlador implements Initializable {
 			
 			lInicio.getStyleClass().remove("menuSeleccionado");
 			lClases.getStyleClass().remove("menuSeleccionado");
+			lbMensualidad.getStyleClass().remove("menuSeleccionado");
 			lAlumnos.getStyleClass().remove("menuSeleccionado");
 			lInformes.getStyleClass().remove("menuSeleccionado");
 			lUsuario.getStyleClass().add("menuSeleccionado");
@@ -254,12 +286,19 @@ public class PrincipalControlador implements Initializable {
 			
 			lInicio.getStyleClass().remove("menuSeleccionado");
 			lClases.getStyleClass().remove("menuSeleccionado");
+			lbMensualidad.getStyleClass().remove("menuSeleccionado");
 			lAlumnos.getStyleClass().remove("menuSeleccionado");
 			lInformes.getStyleClass().remove("menuSeleccionado");
 			lUsuario.getStyleClass().remove("menuSeleccionado");
 			lAjustes.getStyleClass().add("menuSeleccionado");
 		}
     }
+
+
+	@FXML
+    void menuSalir(MouseEvent event) {
+		//Hacer que salte una ventana para preguntar si cerrar la app.
+	}
 
 
 	public void iniciarSesion(Usuario usuario){
@@ -303,6 +342,7 @@ public class PrincipalControlador implements Initializable {
 
 	private void habilitarMenus() {
 		lClases.setDisable(false);
+		lbMensualidad.setDisable(false);
 		lAlumnos.setDisable(false);
 		lInformes.setDisable(false);
 		lUsuario.setDisable(false);
@@ -312,6 +352,7 @@ public class PrincipalControlador implements Initializable {
 
 	private void deshabilitarMenus() {
 		lClases.setDisable(true);
+		lbMensualidad.setDisable(true);
 		lAlumnos.setDisable(true);
 		lInformes.setDisable(true);
 		lUsuario.setDisable(true);

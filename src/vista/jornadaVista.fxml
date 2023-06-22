@@ -254,7 +254,7 @@
                   <Cursor fx:constant="HAND" />
                </cursor>
                <GridPane.margin>
-                  <Insets right="250.0" />
+                  <Insets right="300.0" />
                </GridPane.margin>
             </ImageView>
             <ImageView fx:id="ivBotonCopiarSemana" fitHeight="34.0" fitWidth="33.0" layoutX="737.0" layoutY="29.0" onMouseClicked="#copiarSemana" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
@@ -265,7 +265,40 @@
                   <Cursor fx:constant="HAND" />
                </cursor>
                <GridPane.margin>
-                  <Insets right="300.0" />
+                  <Insets right="350.0" />
+               </GridPane.margin>
+            </ImageView>
+            <ImageView fx:id="ivBotonBorrarJornada" fitHeight="34.0" fitWidth="33.0" layoutX="737.0" layoutY="29.0" onMouseClicked="#borrarJornadaBD" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+               <image>
+                  <Image url="@../recursos/boton_2_64.png" />
+               </image>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <GridPane.margin>
+                  <Insets right="250.0" />
+               </GridPane.margin>
+            </ImageView>
+            <ImageView fx:id="ivAnteriorJornada" fitHeight="44.0" fitWidth="71.0" nodeOrientation="RIGHT_TO_LEFT" onMouseClicked="#anteriorJornada" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <image>
+                  <Image url="@../recursos/flecha_derecha_2.png" />
+               </image>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <GridPane.margin>
+                  <Insets left="120.0" top="3.0" />
+               </GridPane.margin>
+            </ImageView>
+            <ImageView fx:id="ivSiguienteJornada" fitHeight="44.0" fitWidth="71.0" onMouseClicked="#siguienteJornada" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <image>
+                  <Image url="@../recursos/flecha_derecha_2.png" />
+               </image>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <GridPane.margin>
+                  <Insets left="182.0" top="3.0" />
                </GridPane.margin>
             </ImageView>
          </children>

@@ -42,8 +42,9 @@ public class Toast {
         toastStage.initOwner(ownerStage); //Establece la ventana propietaria de esta ventana.
         toastStage.setScene(scene); //asigno la escena a este escenario.
 
-        toastStage.setX((ownerStage.getX() + ownerStage.getWidth() / 2 - TOAST_WIDTH / 2) + 80); //posicion del escenario.
-        toastStage.setY(ownerStage.getY() + ownerStage.getHeight() - TOAST_HEIGHT - 50);		 //Posicion del escenario.
+        //toastStage.setX((ownerStage.getX() + ownerStage.getWidth() / 2 - TOAST_WIDTH / 2) + 80); //posicion del escenario.
+        toastStage.setX((ownerStage.getX() + ownerStage.getWidth() / 2 - TOAST_WIDTH / 2)); //posicion del escenario.
+        toastStage.setY(ownerStage.getY() + ownerStage.getHeight() - TOAST_HEIGHT - 50);    //Posicion del escenario.
 
         toastStage.show(); //Muestra el escenario.
 

@@ -87,7 +87,7 @@
             </ImageView>
             <ImageView fx:id="ivFlechaDerecha" fitHeight="44.0" fitWidth="71.0" onMouseClicked="#siguienteClase" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <GridPane.margin>
-                  <Insets left="150.0" top="3.0" />
+                  <Insets left="152.0" top="3.0" />
                </GridPane.margin>
                <image>
                   <Image url="@../recursos/flecha_derecha_2.png" />

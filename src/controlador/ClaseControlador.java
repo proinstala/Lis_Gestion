@@ -227,7 +227,7 @@ public class ClaseControlador implements Initializable {
 			
 			int numeroIncripciones = -1;
 			try {
-				numeroIncripciones = conexionBD.numeroClasesIsncrito(alumno.getId(), jornada);	 
+				numeroIncripciones = conexionBD.numeroClasesInscrito(alumno.getId(), jornada);	 
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -303,13 +303,12 @@ public class ClaseControlador implements Initializable {
 			if(actualizar) {
 				conexionBD.actualizarClase(clase);
 			}
-
+			
 			conexionBD.actualizarAlumnosEnClase(new ArrayList<Alumno>(listaClase), clase.getId());
 
 			claseOriginal.setHoraClase(clase.getHoraClase());
 			claseOriginal.setTipo(clase.getTipo());
 			claseOriginal.setAnotaciones(clase.getAnotaciones());
-			//claseOriginal.setListaAlumnos(clase.getListaAlumnos());
 			claseOriginal.setListaAlumnos(new ArrayList<Alumno>(listaClase));
 			toast.show((Stage) tvAlumnos.getScene().getWindow(), "Cambios guardados en Clase " + clase.getNumero());
 		} catch (SQLException e) {
@@ -359,7 +358,8 @@ public class ClaseControlador implements Initializable {
 	private void cargarClase(int numeroClase) {
 		claseOriginal = jornada.getClase(numeroClase);
 		clase = new Clase(claseOriginal);
-		
+		clase.setListaAlumnos(comprobarListaClase(clase.getListaAlumnos()));
+
 		listaClase = FXCollections.observableArrayList(clase.getListaAlumnos());
 		lvClase.setItems(listaClase);
 		
@@ -379,6 +379,21 @@ public class ClaseControlador implements Initializable {
 		});
 		
 		
+	}
+
+
+	private ArrayList<Alumno> comprobarListaClase(ArrayList<Alumno> listaAlumnos) {
+		ArrayList<Alumno> nuevaListaAlumnos = new ArrayList<Alumno>();
+		//listadoAlumnos
+		for(Alumno alumno : listaAlumnos) {
+			for(Alumno alumnoApp : listadoAlumnos) {
+				if(alumno.getId() == alumnoApp.getId()) {
+					nuevaListaAlumnos.add(alumnoApp);
+					break;
+				}
+			}
+		}
+		return nuevaListaAlumnos;
 	}
 	
 	/**

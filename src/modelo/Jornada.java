@@ -43,8 +43,12 @@ public class Jornada {
      */
     public Jornada(Jornada j) {
     	fecha = new SimpleObjectProperty<LocalDate>(j.getFecha()); 
-        comentario = new SimpleStringProperty(j.getComentario()); 
-        clases = j.getClases();
+        comentario = new SimpleStringProperty(j.getComentario());
+        clases = new Clase[8];
+        for (int i = 0; i < clases.length; i++) {
+            clases[i] =  new Clase(j.getClase(i));
+        } 
+        //clases = j.getClases();
     }
     
     
@@ -138,6 +142,14 @@ public class Jornada {
         } else {
             throw new IndexOutOfBoundsException("Índice de Clase fuera de rango: " + index);
         }
+    }
+
+    /**
+     * Estable una clase en el array de clases.
+     * @param clase objeto de donde se obtiene los datos.
+     */
+    public void setClase(Clase clase){
+        clases[clase.getNumero() -1] = clase;
     }
     
     

@@ -21,7 +21,9 @@
           <RowConstraints minHeight="50.0" prefHeight="50.0" vgrow="NEVER" />
             <RowConstraints minHeight="50.0" prefHeight="50.0" vgrow="NEVER" />
             <RowConstraints minHeight="50.0" prefHeight="50.0" vgrow="NEVER" />
+            <RowConstraints minHeight="50.0" prefHeight="50.0" vgrow="NEVER" />
           <RowConstraints minHeight="50.0" prefHeight="50.0" vgrow="NEVER" />
+            <RowConstraints minHeight="50.0" prefHeight="50.0" vgrow="NEVER" />
             <RowConstraints minHeight="50.0" prefHeight="50.0" vgrow="NEVER" />
             <RowConstraints minHeight="50.0" prefHeight="50.0" vgrow="NEVER" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -46,14 +48,14 @@
                <padding>
                   <Insets left="20.0" />
                </padding></Label>
-            <Label fx:id="lAlumnos" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#menuAlumnos" text="Alumnos" GridPane.rowIndex="2">
+            <Label fx:id="lAlumnos" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#menuAlumnos" text="Alumnos" GridPane.rowIndex="3">
                <font>
                   <Font size="18.0" />
                </font>
                <padding>
                   <Insets left="20.0" />
                </padding></Label>
-            <ImageView fx:id="ivLogo" fitHeight="150.0" fitWidth="134.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="CENTER">
+            <ImageView fx:id="ivLogo" fitHeight="150.0" fitWidth="134.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.rowIndex="9" GridPane.valignment="CENTER">
                <image>
                   <Image url="@../recursos/logo_nuevo.png" />
                </image>
@@ -61,7 +63,7 @@
                   <Insets />
                </GridPane.margin>
             </ImageView>
-            <Label fx:id="lInformes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#menuInformes" text="Informes" GridPane.rowIndex="3">
+            <Label fx:id="lInformes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#menuInformes" text="Informes" GridPane.rowIndex="4">
                <padding>
                   <Insets left="20.0" />
                </padding>
@@ -69,7 +71,7 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <Label fx:id="lUsuario" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#menuUsuario" text="Usuario" GridPane.rowIndex="4">
+            <Label fx:id="lUsuario" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#menuUsuario" text="Usuario" GridPane.rowIndex="5">
                <font>
                   <Font size="18.0" />
                </font>
@@ -77,7 +79,26 @@
                   <Insets left="20.0" />
                </padding>
             </Label>
-            <Label fx:id="lAjustes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#menuAjustes" text="Ajustes" GridPane.rowIndex="5">
+            <Label fx:id="lAjustes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#menuAjustes" text="Ajustes" GridPane.rowIndex="6">
+               <padding>
+                  <Insets left="20.0" />
+               </padding>
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <Label fx:id="lbMensualidad" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#menuMensualidad" text="Mensualida" GridPane.rowIndex="2">
+               <padding>
+                  <Insets left="20.0" />
+               </padding>
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <Label fx:id="lbSalir" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#menuSalir" text="Salir" GridPane.rowIndex="7">
+               <GridPane.margin>
+                  <Insets />
+               </GridPane.margin>
                <padding>
                   <Insets left="20.0" />
                </padding>

@@ -145,13 +145,13 @@ public class ConexionBD implements Cloneable{
                     "FOREIGN KEY (direccion_id) REFERENCES direccion (id));";
             st.execute(sql);
 
-            // Crea la tabla "jornada"
+            // Crea la tabla "JORNADA"
             sql = "CREATE TABLE IF NOT EXISTS JORNADA (" +
                     "fecha TEXT PRIMARY KEY, " +
                     "comentario TEXT);";
             st.execute(sql);
 
-            // Crea la tabla "clase"
+            // Crea la tabla "CLASE"
             sql = "CREATE TABLE IF NOT EXISTS CLASE (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "numero INTEGER NOT NULL, " +
@@ -164,7 +164,7 @@ public class ConexionBD implements Cloneable{
                     "CHECK (jornada IS NOT NULL));";
             st.execute(sql);
 
-            // Crea la tabla "clase_alumno"
+            // Crea la tabla "CLASE_ALUMNO"
             sql = "CREATE TABLE IF NOT EXISTS CLASE_ALUMNO (" +
                     "clase_id INTEGER NOT NULL, " +
                     "alumno_id INTEGER NOT NULL, " +
@@ -624,12 +624,60 @@ public class ConexionBD implements Cloneable{
         return result;
     }
 
+
+    public boolean borrarJornada(Jornada jornada) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+        try {
+            conn.setAutoCommit(false);
+
+            String sqlForeignKey = "PRAGMA foreign_keys = ON;"; //No funciona con SqlCipher
+            st = conn.createStatement();
+            st.execute(sqlForeignKey);
+
+
+            for (Clase c : jornada.getClases()) {
+                
+                ps = conn.prepareStatement("DELETE FROM CLASE_ALUMNO WHERE clase_id = ?;");
+                ps.setInt(1, c.getId());
+                ps.executeUpdate();
+                
+
+                ps = conn.prepareStatement("DELETE FROM CLASE WHERE id = ?;");
+                ps.setInt(1, c.getId());
+                ps.executeUpdate();
+            }
+
+            ps = conn.prepareStatement("DELETE FROM JORNADA WHERE fecha = ?;");
+            ps.setString(1, jornada.getFecha().toString());
+            ps.executeUpdate();
+            
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            System.out.println("BD: Borrada Jornada " + jornada.getFecha().toString() + " en base de datos."); //Esto es temporal para pruebas.
+            result = true;
+
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally {
+            if(ps != null) ps.close();
+            if(st != null) st.close(); 
+            if(res != null) res.close();
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+        }
+        
+        cn.desconectar(conn);
+        return result;
+    }
+
     
     public boolean insertarJornada(Jornada jornada) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
+        conn = cn.conectar();
         try {
-            conn = cn.conectar();
             conn.setAutoCommit(false);
 
             //Insertamos la Jornada en la base de datos.
@@ -667,12 +715,147 @@ public class ConexionBD implements Cloneable{
         } finally {
             if(ps != null) ps.close();
             if(st != null) st.close(); 
+            if(res != null) res.close();
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
         }
         
         cn.desconectar(conn);
         return result;
     }
+
+
+    public boolean insertarJornadaCompleta(Jornada jornadaCopia) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+
+        try {
+            conn.setAutoCommit(false);
+
+            //Insertamos la Jornada en la base de datos.
+            ps = conn.prepareStatement("INSERT INTO JORNADA (fecha, comentario) VALUES (?,?);");
+            ps.setString(1, jornadaCopia.getFecha().toString());
+            ps.setString(2, jornadaCopia.getComentario());
+           
+            ps.executeUpdate();
+
+            //Insertamos las clases de la jornada en la base de datos.
+            ps = conn.prepareStatement("INSERT INTO CLASE (numero, tipo, hora, anotaciones, jornada) VALUES (?,?,?,?,?);");
+            st = conn.createStatement();
+
+            for(Clase clase : jornadaCopia.getClases()) {
+                ps.setInt(1, clase.getNumero());
+                ps.setString(2, clase.getTipo().toString());
+                ps.setString(3, clase.getHoraClase().toString());
+                ps.setString(4, clase.getAnotaciones());
+                ps.setString(5, jornadaCopia.getFecha().toString());
+                
+                ps.executeUpdate();
+
+                //Obtenemos el id que se le asignó a esta clase.
+                res = st.executeQuery("SELECT last_insert_rowid()");
+                clase.setId(res.getInt(1)); //Asignamos el id a la clase.
+            }
+
+            ps = conn.prepareStatement("INSERT INTO CLASE_ALUMNO (clase_id, alumno_id) VALUES (?,?);");
+
+            for(Clase clase : jornadaCopia.getClases()) {
+                if(clase.getListaAlumnos().size() > 0) {
+                    ps.setInt(1, clase.getId());
+                    for (Alumno alumno : clase.getListaAlumnos()) {
+                        ps.setInt(2, alumno.getId());
+                        ps.executeUpdate();
+                    }
+                }
+            }
+
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            System.out.println("BD: Insercion en base de datos"); //Esto es temporal para pruebas.
+            result = true;
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally {
+            if(ps != null) ps.close();
+            if(st != null) st.close(); 
+            if(res != null) res.close();
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+        }
+        
+        cn.desconectar(conn);
+        return result;
+    }
+
+
+    public boolean insertarListaJornadas(Jornada[] listaJornadas) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+
+        try {
+            conn.setAutoCommit(false);
+
+            for (Jornada jornada : listaJornadas) {
+                if (jornada != null) {
+                    //Insertamos la Jornada en la base de datos.
+                    ps = conn.prepareStatement("INSERT INTO JORNADA (fecha, comentario) VALUES (?,?);");
+                    ps.setString(1, jornada.getFecha().toString());
+                    ps.setString(2, jornada.getComentario());
+                
+                    ps.executeUpdate();
+
+                    //Insertamos las clases de la jornada en la base de datos.
+                    ps = conn.prepareStatement("INSERT INTO CLASE (numero, tipo, hora, anotaciones, jornada) VALUES (?,?,?,?,?);");
+                    st = conn.createStatement();
+
+                    for(Clase clase : jornada.getClases()) {
+                        ps.setInt(1, clase.getNumero());
+                        ps.setString(2, clase.getTipo().toString());
+                        ps.setString(3, clase.getHoraClase().toString());
+                        ps.setString(4, clase.getAnotaciones());
+                        ps.setString(5, jornada.getFecha().toString());
+                        
+                        ps.executeUpdate();
+
+                        //Obtenemos el id que se le asignó a esta clase.
+                        res = st.executeQuery("SELECT last_insert_rowid()");
+                        clase.setId(res.getInt(1)); //Asignamos el id a la clase.
+                    }
+
+                    ps = conn.prepareStatement("INSERT INTO CLASE_ALUMNO (clase_id, alumno_id) VALUES (?,?);");
+
+                    for(Clase clase : jornada.getClases()) {
+                        if(clase.getListaAlumnos().size() > 0) {
+                            ps.setInt(1, clase.getId());
+                            for (Alumno alumno : clase.getListaAlumnos()) {
+                                ps.setInt(2, alumno.getId());
+                                ps.executeUpdate();
+                            }
+                        }
+                    }
+                }                
+            }
+
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            System.out.println("BD: Inserción de Array de Jornadas en base de datos"); //Esto es temporal para pruebas.
+            result = true;
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally {
+            if(ps != null) ps.close();
+            if(st != null) st.close(); 
+            if(res != null) res.close();
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+        }
+        
+        cn.desconectar(conn);
+        return result;
+    }
+
+    
 
     public boolean insertarAlumno(Alumno alumno) throws SQLException {
         ConexionBD cn = INSTANCE;
@@ -739,28 +922,29 @@ public class ConexionBD implements Cloneable{
     }
 
 
-    public boolean insertarAlumnoEnClase(Alumno alumno, Clase clase, Jornada jornada) throws SQLException {
+    public boolean insertarAlumnoEnClase(Alumno alumno, Clase clase) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
         try {
             conn = cn.conectar();
             conn.setAutoCommit(false);
-
+            /* 
             //Obtenemos el id que se le asignó a esa dirección.
             st = conn.createStatement();
             res = st.executeQuery("SELECT id FROM CLASE WHERE numero = " + clase.getNumero() + " and jornada = " + jornada.getFecha().toString() + ";");
             int clase_id = res.getInt(1); //Guardo el valor de id obtenido en la consulta en la variable.
+            */
 
             //Insertamos el Alumno en la base de datos.
             ps = conn.prepareStatement("INSERT INTO CLASE_ALUMNO (clase_id, alumno_id) VALUES (?,?);");
-            ps.setInt(1, clase_id);
+            ps.setInt(1, clase.getId());
             ps.setInt(2, alumno.getId());
             
             ps.executeUpdate();
             
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            System.out.println("Insercion en base de datos"); //Esto es temporal para pruebas.
+            System.out.println("BD: Insercion alumno: " + alumno.getId() + " en clase id: " + clase.getId() + "."); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
             //aqui poner la insercion en el .log
@@ -775,28 +959,29 @@ public class ConexionBD implements Cloneable{
     }
 
 
-    public boolean borrarAlumnoEnClase(Alumno alumno, Clase clase, Jornada jornada) throws SQLException {
+    public boolean borrarAlumnoEnClase(Alumno alumno, Clase clase) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
         try {
             conn = cn.conectar();
             conn.setAutoCommit(false);
-
+            /* 
             //Obtenemos el id que se le asignó a esa dirección.
             st = conn.createStatement();
             res = st.executeQuery("SELECT id FROM CLASE WHERE numero = " + clase.getNumero() + " and jornada = " + jornada.getFecha().toString() + ";");
             int clase_id = res.getInt(1); //Guardo el valor de id obtenido en la consulta en la variable.
+            */
 
             //Insertamos el Alumno en la base de datos.
             ps = conn.prepareStatement("DELETE FROM CLASE_ALUMNO WHERE clase_id = ? AND alumno_id = ?;");
-            ps.setInt(1, clase_id);
+            ps.setInt(1, clase.getId());
             ps.setInt(2, alumno.getId());
             
             ps.executeUpdate();
             
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            System.out.println("BD: borrado alumno en clase."); //Esto es temporal para pruebas.
+            System.out.println("BD: borrado alumno en clase id: " + clase.getId() + "."); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
             //aqui poner la insercion en el .log
@@ -816,10 +1001,21 @@ public class ConexionBD implements Cloneable{
     public boolean actualizarAlumnosEnClase(ArrayList<Alumno> nuevaListaAlumnos, int idClase) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
-        ArrayList<Alumno> listaAlumnos = getListadoAlumnos(idClase);
-        try {
-            conn = cn.conectar();
+        ArrayList<Alumno> listaAlumnos;
+        conn = cn.conectar();
+
+        try {    
             conn.setAutoCommit(false);
+
+            st = conn.createStatement();
+            res = st.executeQuery("SELECT id FROM ALUMNO A JOIN CLASE_ALUMNO C ON(A.id = C.alumno_id) WHERE C.clase_id = " + idClase + " ;"); //consulta sql a tabla ALUMNO.
+
+            listaAlumnos = new ArrayList<Alumno>();
+            while (res.next()) {
+                Alumno a = new Alumno();
+                a.setId(res.getInt(1));
+                listaAlumnos.add(a);
+            }
 
             //Borrar fila de la tabla CLASE_ALUMNO.
             for (Alumno alumno : listaAlumnos) {
@@ -1093,6 +1289,154 @@ public class ConexionBD implements Cloneable{
         cn.desconectar(conn);
         return listaDirecciones;
     }
+
+
+    /**
+     * Recupera de la base de datos las jornadas que coinciden con las fechas pasadas en el Array de LocalDate.
+     * 
+     * @param fechas Array de LocalDate con las fechas de las jornadas que se quieren recuperar. 
+     * @return Un array de Jornada con las Jornadas recuperadas de la base de datos. Si una jornada no esta creada, devuelve una jornada a null.
+     * @throws SQLException
+     */
+    public Jornada[] getJornadasCompletas(LocalDate[] fechas) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        Jornada[] semana = new Jornada[fechas.length];
+        conn = cn.conectar();
+
+        try { 
+
+            for (int i = 0; i < fechas.length; i++) {
+                Jornada jornada = null;
+                Clase[] listaClases = new Clase[8];
+                ArrayList<Alumno> listaAlumnos = null;
+                ArrayList<Direccion> listaDirecciones = null;
+            
+                //Obtengo la jornada ------------------- 
+                st = conn.createStatement();
+                res = st.executeQuery("SELECT * FROM JORNADA WHERE fecha = '" + fechas[i].toString() + "';"); //consulta sql a tabla JORNADA.
+
+                while (res.next()) {
+                    jornada = new Jornada(LocalDate.parse(res.getString(1)), res.getString(2));
+                }
+                
+                if(jornada != null) {
+                    boolean resultadoOk = false;
+                    int posicionArrayClases = 0;
+
+                    //Obtengo la lista de clases ------------------
+                    res = st.executeQuery("SELECT id, numero, tipo, hora, anotaciones FROM CLASE WHERE jornada = '" + jornada.getFecha().toString() + "' ORDER BY numero;"); //consulta sql a tabla CLASE.
+
+                    //Recorre las filas devueltas por la consulta a la tabla CLASE y crea por cada fila un Objeto de tipo Clase añadiendolo al Array listaClases.
+                    while (res.next()) {
+                        resultadoOk = true; //pongo a true si hay resultados en la consulta a la tabla CLASE.
+
+                        //Crea un Enumerado de tipo TipoClase a partir del valor rescatado en el campo tipo del registro que se esta recorriendo.
+                        TipoClase tipo;
+                        try {
+                            tipo = TipoClase.valueOf(res.getString(3));
+                        } catch (IllegalArgumentException e) {
+                            //poner esto en el log.
+                            tipo = null;
+                        }
+
+                        //Crea un Enumerado de tipo HoraClase a partir del valor rescatado en el campo tipo del registro que se esta recorriendo.
+                        HoraClase hora;
+                        try {
+                            String[] partes = res.getString(4).split(":"); //Crea un Array con la hora y los minutos
+                            hora = HoraClase.getHoraClase(Integer.parseInt(partes[0]), Integer.parseInt(partes[1]));
+                        } catch (IllegalArgumentException e) {
+                            //poner esto en el log.
+                            System.out.println("BD: Fallo - No se asigna la hora de la clase.");
+                            hora = null;
+                        }
+
+                        //Añade una nueva Clase al Array ListaClases en la posicion posicionArrayClase.
+                        listaClases[posicionArrayClases] = new Clase(res.getInt(1), res.getInt(2), tipo, hora, res.getString(5));
+                        posicionArrayClases++;
+                    }
+
+                    //Si no hay registros, ponemos la listaClases a null.
+                    if(!resultadoOk) listaClases = null;
+
+                    if(listaClases != null) {
+                        res = st.executeQuery("SELECT D.id, D.calle, D.numero, L.nombre, P.nombre, D.codigo_postal " 
+                                    + "FROM DIRECCION D JOIN LOCALIDAD L ON(D.localidad_id = L.id) "
+                                    + "JOIN PROVINCIA P ON(L.provincia_id = P.id)"); //consulta sql a tablas DIRECCION, LOCALIDAD Y PROVINCIA.
+
+                        listaDirecciones = new ArrayList<Direccion>();
+
+                        //Recorro las filas de la consulta a la tabla DIRECCION y guardo el resultado en listaDirecciones.
+                        while (res.next()) {
+                            listaDirecciones.add(new Direccion(res.getInt(1), res.getString(2), res.getInt(3), 
+                            res.getString(4), res.getString(5), res.getInt(6)));
+                        }
+
+                        for (int j = 0; j < listaClases.length; j++) {
+                            res = st.executeQuery("SELECT * FROM ALUMNO A JOIN CLASE_ALUMNO C ON(A.id = C.alumno_id) WHERE C.clase_id = " + listaClases[j].getId() + " ;"); //consulta sql a tabla ALUMNO.
+
+                            listaAlumnos = new ArrayList<Alumno>();
+
+                            while (res.next()) {
+                                Direccion direccion = null; //Por defecto la direccion es null;
+
+                                //Si la lista de direcciones no es null, creo los objetos Direccion con los valores de los objetos de la lista para cada Alumno.
+                                if(listaDirecciones != null) {
+                                    int idDireccion = res.getInt(6); //Obtengo el id de Direccion del registro que se esta recorriendo..
+                        
+                                    //Recorro la lista de direcciones comparando el direccion_id del registro que se esta recorriendo con el id de los objetos de la listaDirecciones.
+                                    for(Direccion d : listaDirecciones) {
+                                        if(d.getId() == idDireccion) {
+                                            direccion = new Direccion(d);
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                //Genero un Enumerado de tipo Genero a partir del valor rescatado en el campo genero del registro que se esta recorriendo.
+                                Genero genero;
+                                try {
+                                    genero = Genero.valueOf(res.getString(5));
+                                } catch (IllegalArgumentException e) {
+                                    //poner esto en el log.
+                                    genero = null;
+                                }
+
+                                //Genero un Enumerado de tipo EstadoAlumno a partir del valor rescatado en el campo genero del registro que se esta recorriendo.
+                                EstadoAlumno estado;
+                                try {
+                                    estado = EstadoAlumno.valueOf(res.getString(10));
+                                } catch (IllegalArgumentException e) {
+                                    //poner esto en el log.
+                                    estado = null;
+                                }
+
+                                //Creo el alumno con los datos del registro que se esta recorriendo y lo añado a la lista de Alumnos.
+                                listaAlumnos.add(new Alumno(res.getInt(1), res.getString(2), res.getString(3), res.getString(4), 
+                                    genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8), res.getString(9), estado, res.getInt(11)));
+                            }
+
+                            listaClases[j].setListaAlumnos(listaAlumnos); //añado la lista de alumnos a su Clase.
+                        }
+                    }
+                    jornada.setClases(listaClases); //añado la lista de clases a la Jornada
+                }
+
+                semana[i] = jornada; //añado la jornada a la semana.(Array de Jornada).
+            } 
+            System.out.println("BD: Obtencion de Jornadas de semana " + fechas[0].get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) + " de base de datos."); //Esto es temporal para pruebas.
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            e.printStackTrace();
+            semana = null;
+        } finally { 
+            if(st != null) st.close();
+            if(res != null) res.close(); 
+        }
+
+        cn.desconectar(conn);
+        return semana;
+    }
+
 
     public Jornada getJornadaCompleta(String fecha) throws SQLException {
         ConexionBD cn = INSTANCE;
@@ -1377,6 +1721,59 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    public boolean comprobarJornada(LocalDate fecha) throws SQLException{
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+        try {
+            st = conn.createStatement();
+            res = st.executeQuery("SELECT * FROM JORNADA WHERE fecha = '" + fecha.toString() + "';");
+
+            while (res.next()) {
+                result = true;
+            }
+
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            e.printStackTrace();
+        } finally { 
+            if(st != null) st.close();
+            if(res != null) res.close(); 
+        }
+        
+        cn.desconectar(conn);
+        return result;
+    }
+
+
+    public boolean comprobarJornadas(LocalDate[] fechas) throws SQLException{
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+
+        try {
+            ps = conn.prepareStatement("SELECT * FROM JORNADA WHERE fecha = ?;");
+            for (int i = 0; i < fechas.length; i++) {
+                ps.setString(1, fechas[i].toString());
+                res = ps.executeQuery();
+
+                while (res.next()) {
+                    result = true;
+                }
+            }
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            e.printStackTrace();
+        } finally { 
+            if(ps != null) ps.close();
+            if(res != null) res.close(); 
+        }
+        
+        cn.desconectar(conn);
+        return result;
+    }
+
+
     public ArrayList<String> getProvincias() throws SQLException {
         ConexionBD cn = INSTANCE;
         ArrayList<String> listaProvincias = null;
@@ -1504,6 +1901,10 @@ public class ConexionBD implements Cloneable{
             ps.setInt(1, alumno.getDireccion().getId());
             ps.executeUpdate();
 
+            ps = conn.prepareStatement("DELETE FROM CLASE_ALUMNO WHERE alumno_id = ?;"); //Esto esta porque no funciona ON DELETE CASCADE en SqlCipher.
+            ps.setInt(1, alumno.getId());
+            ps.executeUpdate();
+
             conn.commit(); //Confirma la transacción de la inserción de los datos.
            
             System.out.println("BD: Borrado Alumno de la base de datos"); //Esto es temporal para pruebas.
@@ -1530,7 +1931,7 @@ public class ConexionBD implements Cloneable{
      * @return int con el numero de clases que esta incrito el alumno en la semana de la jornada pasada como parametro o -1 si hay algun problema.
      * @throws SQLException
      */
-    public int numeroClasesIsncrito(int idAlumno, Jornada jornada ) throws SQLException {
+    public int numeroClasesInscrito(int idAlumno, Jornada jornada ) throws SQLException {
         ConexionBD cn = INSTANCE;
         conn = cn.conectar();
         int result = -1;
@@ -1560,6 +1961,56 @@ public class ConexionBD implements Cloneable{
         
         cn.desconectar(conn);
         return result;
+    }
+
+    /**
+     * Crea una lista con los alumnos que superarían el número de sus asistencias semanales si se realiza la copia de la jornada.
+     * @param jornada jornada de donde se obtienen los alumnos a comprobar.
+     * @return un ArrayList<Alumno> con los alumnos que superarían su número de asistencias semanales si se copia la jornada.
+     * @throws SQLException
+     */
+    public ArrayList<Alumno> controlCopiaJornada(Jornada jornada ) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+        ArrayList<Alumno> alunosMacht = null;
+
+        try {  
+            alunosMacht = new ArrayList<Alumno>();
+
+            //Consulta a base de datos.
+            //strftime('%W', fecha) -> devuelve el numero de semana.
+            //strftime('%Y', feha) -> devuelve el año.
+            String sql = "SELECT count(CS.alumno_id) FROM CLASE_ALUMNO CS JOIN CLASE C ON(CS.clase_id = C.id)"
+                    + "WHERE CS.alumno_id = ? AND strftime('%W', C.jornada) = ? AND strftime('%Y', C.jornada) = ?;";
+
+            ps = conn.prepareStatement(sql);
+            ps.setString(2, Integer.toString(jornada.getFecha().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)));
+            ps.setString(3, Integer.toString(jornada.getFecha().getYear()));
+            for (Clase clase : jornada.getClases()) {
+                for (Alumno alumno : clase.getListaAlumnos()) {
+                    ps.setInt(1, alumno.getId());
+                    res = ps.executeQuery();
+
+                    int result = res.getInt(1);
+                    if(result >= alumno.getAsistenciaSemanal()) {
+                        alunosMacht.add(alumno);
+                    }
+                }
+            }
+            
+            System.out.println("BD: Control copia jornada. alumnos: " + alunosMacht.size());
+
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            e.printStackTrace();
+            alunosMacht = null;
+        } finally { 
+            if(ps != null) st.close();
+            if(res != null) res.close(); 
+        }
+        
+        cn.desconectar(conn);
+        return alunosMacht;
     }
 
 }

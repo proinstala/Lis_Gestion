@@ -21,6 +21,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -68,6 +69,9 @@ public class AlumnoFormControlador implements Initializable {
 
     @FXML
     private GridPane gpFormAlumno;
+
+    @FXML
+    private Pane pSeparador;
     
     @FXML
     private Label lbTitulo;
@@ -134,6 +138,7 @@ public class AlumnoFormControlador implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
     	btnCancelar.getStyleClass().add("boton_rojo");
     	gpFormAlumno.getStyleClass().add("fondo_ventana_degradado_toRight");
+        pSeparador.getStyleClass().add("panelSeparador");
 
         conexionBD = ConexionBD.getInstance();
         toast = new Toast();
