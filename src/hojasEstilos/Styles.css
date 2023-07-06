@@ -57,8 +57,8 @@ BorderPane {
 }
 
 .fondo_border_pane {
-	/*-fx-background-image: url("/recursos/fondo_circulos_lila_1.png");*/
-	-fx-background-image: url("../recursos/fondo_circulos_lila_1.png");
+	-fx-background-image: url("/recursos/fondo_circulos_lila_1.png");/*FORMA PARA EXPORTAR */
+	/*-fx-background-image: url("../recursos/fondo_circulos_lila_1.png"); */
     -fx-background-position: center;
     /*-fx-background-repeat: stretch;*/
     -fx-background-size: cover;

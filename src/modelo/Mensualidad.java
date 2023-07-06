@@ -11,6 +11,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 /**
  * Esta es una clase que representa una Mensualidad
@@ -28,20 +30,22 @@ public class Mensualidad {
      private ObjectProperty<EstadoPago> estadoPago;
      private IntegerProperty asistenciasSemanales;
      private DoubleProperty importe;
+     private StringProperty anotacion;
 
      public Mensualidad() {
           this.id = new SimpleIntegerProperty(-1);
           this.idAlumno = new SimpleIntegerProperty(-1);
-          this.fecha = new SimpleObjectProperty<YearMonth>(YearMonth.of(0, null));
+          this.fecha = new SimpleObjectProperty<YearMonth>(YearMonth.now());
           this.fechaPago = new SimpleObjectProperty<LocalDate>(null);
           this.formaPago = new SimpleObjectProperty<FormaPago>(null);
           this.estadoPago = new SimpleObjectProperty<EstadoPago>(null);
           this.asistenciasSemanales = new SimpleIntegerProperty(0);
           this.importe = new SimpleDoubleProperty(0.0);
+          this.anotacion = new SimpleStringProperty("");
      }
 
-     public Mensualidad(int id, int idAlumno, YearMonth fecha, FormaPago formaPago, LocalDate fechaPago, EstadoPago estadoPago,
-               int asistenciasSemanales, Double importe) {
+     public Mensualidad(int id, int idAlumno, YearMonth fecha, LocalDate fechaPago, FormaPago formaPago, EstadoPago estadoPago,
+               int asistenciasSemanales, Double importe, String anotacion) {
           this.id = new SimpleIntegerProperty(id);
           this.idAlumno = new SimpleIntegerProperty(idAlumno);
           this.fecha = new SimpleObjectProperty<YearMonth>(fecha);
@@ -50,6 +54,7 @@ public class Mensualidad {
           this.estadoPago = new SimpleObjectProperty<EstadoPago>(estadoPago);
           this.asistenciasSemanales = new SimpleIntegerProperty(asistenciasSemanales);
           this.importe = new SimpleDoubleProperty(importe);
+          this.anotacion = new SimpleStringProperty(anotacion);
      }
 
      public Mensualidad(Mensualidad m) {
@@ -61,6 +66,7 @@ public class Mensualidad {
           this.estadoPago = new SimpleObjectProperty<EstadoPago>(m.getEstadoPago());
           this.asistenciasSemanales = new SimpleIntegerProperty(m.getAsistenciasSemanales());
           this.importe = new SimpleDoubleProperty(m.getImporte());
+          this.anotacion = new SimpleStringProperty(m.getAnotacion());
      }
 
      /**
@@ -75,8 +81,9 @@ public class Mensualidad {
           this.fechaPago.set(m.getFechaPago());
           this.formaPago.set(m.getFormaPago());
           this.estadoPago.set(m.getEstadoPago());
-          this.asistenciasSemanales.set(m.getIdAlumno());
-          this.importe.set(m.getIdAlumno());
+          this.asistenciasSemanales.set(m.getAsistenciasSemanales());
+          this.importe.set(m.getImporte());
+          this.anotacion.set(m.getAnotacion());
      }
 
      // id -----------------------------------------
@@ -307,6 +314,35 @@ public class Mensualidad {
      }
 
 
+     // anotacion -----------------------------------
+	/**
+     * Obtiene la propiedad de la anotacion de la Mensualidad.
+     *
+     * @return La propiedad de la anotacion de la Mensualidad.
+     */
+	public StringProperty anotacionProperty() {
+		return anotacion;
+	}
+
+	/**
+     * Obtiene la anotacion de la Mensualidad.
+     *
+     * @return La anotacion de la Mensualidad.
+     */
+	public String getAnotacion() {
+		return this.anotacion.get();
+	}
+
+	/**
+     * Establece la anotacion de la Mensualidad.
+     *
+     * @param anotaciones La nueva anotacion para la Mensualidad.
+     */
+	public void setAnotacion(String anotacion) {
+		this.anotacion.set(anotacion);
+	}
+
+
      /**
       * Traduce al castellano el mes de esta mensualidad y lo devueve en forma de String.
       *
@@ -316,13 +352,16 @@ public class Mensualidad {
           return this.fecha.get().getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "ES"));
      }
 
-     
 
      @Override
      public String toString() {
-          return "Mensualidad [id=" + id + ", idAlumno=" + idAlumno + ", fecha=" + fecha + ", formaPago=" + formaPago
-                    + ", estadoPago=" + estadoPago + ", asistenciasSemanales=" + asistenciasSemanales + ", importe="
-                    + importe + "]";
+          return "Mensualidad [id=" + id + ", idAlumno=" + idAlumno + ", fecha=" + fecha + ", fechaPago=" + fechaPago
+                    + ", formaPago=" + formaPago + ", estadoPago=" + estadoPago + ", asistenciasSemanales="
+                    + asistenciasSemanales + ", importe=" + importe + ", anotacion=" + anotacion + "]";
      }
+
+     
+
+     
 
 }

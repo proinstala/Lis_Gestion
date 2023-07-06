@@ -26,3 +26,7 @@ nbactions.xml
 # Visual Studio Code
 .vscode/
 .code-workspace
+
+# proyecto LIS_GESTION archivos de prueba
+david/
+appdata/

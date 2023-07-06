@@ -2,6 +2,7 @@ package modelo;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.YearMonth;
 import java.util.ArrayList;
 
 import javafx.beans.property.IntegerProperty;
@@ -30,6 +31,7 @@ public class Alumno implements Cloneable {
 	private StringProperty email;
 	private ObjectProperty<EstadoAlumno> estado;
 	private IntegerProperty asistenciaSemanal;
+	private ObjectProperty<FormaPago> formaPago;
 
 	private ArrayList<Mensualidad> listaMensualidades;
 	
@@ -50,6 +52,8 @@ public class Alumno implements Cloneable {
 		this.email = new SimpleStringProperty(null);
 		this.estado = new SimpleObjectProperty<EstadoAlumno>(null);
 		this.asistenciaSemanal = new SimpleIntegerProperty(1);
+		this.formaPago = new SimpleObjectProperty<FormaPago>(null);
+
 		this.listaMensualidades = new ArrayList<Mensualidad>();
 	}
 	
@@ -68,9 +72,10 @@ public class Alumno implements Cloneable {
 	 * @param email Direccion de correo electronico del alumno.
 	 * @param estado Estado del alumno.
 	 * @param asistenciaSemanal Numero de asistencia semanal del alumno.
+	 * @param formaPago Forma de pago de las mensualidades del alumno.
 	 */
-	public Alumno(int id, String nombre, String apellido1, String apellido2, Genero genero, 
-			Direccion direccion, LocalDate fechaNacimiento, int telefono, String email, EstadoAlumno estado,  int asistenciaSemanal) {
+	public Alumno(int id, String nombre, String apellido1, String apellido2, Genero genero, Direccion direccion,
+			LocalDate fechaNacimiento, int telefono, String email, EstadoAlumno estado,  int asistenciaSemanal, FormaPago formaPago) {
 		this.id = new SimpleIntegerProperty(id);
 		this.nombre = new SimpleStringProperty(nombre);
 		this.apellido1 = new SimpleStringProperty(apellido1);
@@ -83,6 +88,7 @@ public class Alumno implements Cloneable {
 		this.email = new SimpleStringProperty(email);
 		this.estado = new SimpleObjectProperty<EstadoAlumno>(estado);
 		this.asistenciaSemanal = new SimpleIntegerProperty(asistenciaSemanal);
+		this.formaPago = new SimpleObjectProperty<FormaPago>(formaPago);
 		this.listaMensualidades = new ArrayList<Mensualidad>();
 	}
 
@@ -102,10 +108,11 @@ public class Alumno implements Cloneable {
 	 * @param email Direccion de correo electronico del alumno.
 	 * @param estado Estado del alumno.
 	 * @param asistenciaSemanal Numero de asistencia semanal del alumno.
+	 * @param formaPago Forma de pago de las mensualidades del alumno.
 	 * @param listaMensualidades Lista de mensualidades del alumno.
 	 */
-	public Alumno(int id, String nombre, String apellido1, String apellido2, Genero genero, 
-			Direccion direccion, LocalDate fechaNacimiento, int telefono, String email, EstadoAlumno estado, int asistenciaSemanal, ArrayList<Mensualidad> listaMensualidades) {
+	public Alumno(int id, String nombre, String apellido1, String apellido2, Genero genero, Direccion direccion, LocalDate fechaNacimiento,
+			int telefono, String email, EstadoAlumno estado, int asistenciaSemanal, FormaPago formaPago, ArrayList<Mensualidad> listaMensualidades) {
 		this.id = new SimpleIntegerProperty(id);
 		this.nombre = new SimpleStringProperty(nombre);
 		this.apellido1 = new SimpleStringProperty(apellido1);
@@ -118,6 +125,7 @@ public class Alumno implements Cloneable {
 		this.email = new SimpleStringProperty(email);
 		this.estado = new SimpleObjectProperty<EstadoAlumno>(estado);
 		this.asistenciaSemanal = new SimpleIntegerProperty(asistenciaSemanal);
+		this.formaPago = new SimpleObjectProperty<FormaPago>(formaPago);
 		this.listaMensualidades = new ArrayList<Mensualidad>(listaMensualidades);
 	}
 	
@@ -139,6 +147,7 @@ public class Alumno implements Cloneable {
 		email = new SimpleStringProperty(a.getEmail());
 		estado = new SimpleObjectProperty<EstadoAlumno>(a.getEstado());
 		asistenciaSemanal = new SimpleIntegerProperty(a.getAsistenciaSemanal());
+		formaPago = new SimpleObjectProperty<FormaPago>(a.getFormaPago());
 		listaMensualidades = new ArrayList<Mensualidad>(a.getListaMensualidades());
 	}
 
@@ -153,11 +162,12 @@ public class Alumno implements Cloneable {
 		obj.setGenero(this.genero.getValue());
 		obj.setFechaNacimiento(this.fechaNacimiento.getValue());
 		obj.setDireccion(new Direccion(this.direccion.getValue()));
-		//obj.setDireccion(this.direccion.getValue());
+		obj.setDireccion(this.direccion.getValue());
 		obj.setTelefono(this.telefono.getValue().intValue());
 		obj.setEmail(this.email.getValue());
 		obj.setEstado(this.estado.getValue());
 		obj.setAsistenciaSemanal(this.asistenciaSemanal.getValue());
+		obj.setFormaPago(this.formaPago.getValue());
 		obj.setListaMensualidades(new ArrayList<Mensualidad>(this.getListaMensualidades()));
 		return obj;
 	}
@@ -450,32 +460,61 @@ public class Alumno implements Cloneable {
 	}
 
 	// asistenciaSemanal -----------------------------------------
-     /**
-      * Obtiene la propiedad de la asistenciaSemanal del alumno.
-      *
-      * @return La propiedad de la asistenciaSemanal del alumno.
-      */
-     public IntegerProperty asistenciaSemanalProperty() {
-          return asistenciaSemanal;
-     }
+	/**
+	 * Obtiene la propiedad de la asistenciaSemanal del alumno.
+	 *
+	 * @return La propiedad de la asistenciaSemanal del alumno.
+	 */
+	public IntegerProperty asistenciaSemanalProperty() {
+		return asistenciaSemanal;
+	}
 
-     /**
-      * Obtiene la asistenciaSemanal del alumno.
-      *
-      * @return La asistenciaSemanal del alumno.
-      */
-     public int getAsistenciaSemanal() {
-          return asistenciaSemanal.get();
-     }
+	/**
+	 * Obtiene la asistenciaSemanal del alumno.
+	 *
+	 * @return La asistenciaSemanal del alumno.
+	 */
+	public int getAsistenciaSemanal() {
+		return asistenciaSemanal.get();
+	}
 
-     /**
-      * Establece la asistenciaSemanal del alumno.
-      *
-      * @param asistenciaSemanal La nueva asistenciaSemanal para el alumno.
-      */
-     public void setAsistenciaSemanal(int asistenciaSemanal) {
-          this.asistenciaSemanal.set(asistenciaSemanal);
-     }
+	/**
+	 * Establece la asistenciaSemanal del alumno.
+	 *
+	 * @param asistenciaSemanal La nueva asistenciaSemanal para el alumno.
+	 */
+	public void setAsistenciaSemanal(int asistenciaSemanal) {
+		this.asistenciaSemanal.set(asistenciaSemanal);
+	}
+
+
+	 // formaPago ------------------------------------
+	/**
+     * Obtiene la propiedad de formaPago del alumno.
+     *
+     * @return La propiedad de formaPago del alumno.
+     */
+	public ObjectProperty<FormaPago> formaPagoProperty() {
+		return formaPago;
+	}
+
+	/**
+     * obtiene la formaPago del alumno.
+     *
+     * @return La formaPago del alumno.
+     */
+	public FormaPago getFormaPago() {
+		return formaPago.get();
+	}
+
+	/**
+     * Establece el formaPago del alumno.
+     *
+     * @param genero La nueva formaPago para el alumno.
+     */
+	public void setFormaPago(FormaPago formaPago) {
+		this.formaPago.set(formaPago);
+	}
 
 
 	public ArrayList<Mensualidad> getListaMensualidades() {
@@ -485,6 +524,72 @@ public class Alumno implements Cloneable {
 	public void setListaMensualidades(ArrayList<Mensualidad> lista) {
 		this.listaMensualidades = lista;
 	}
+
+
+	/**
+	 * Elimina una Mensualidad de la lista por su ID.
+	 *
+	 * @param id el ID de la Mensualidad a eliminar
+	 * @return true si se encontró y eliminó la Mensualidad, false en caso contrario.
+	 */
+	public boolean removeMensualidadPorId(int id) {
+		int posicion = -1;
+
+		// Buscar la posición de la Mensualidad con el ID especificado
+		for (int i = 0; i < listaMensualidades.size(); i++) {
+			if (listaMensualidades.get(i).getId() == id) {
+				posicion = i;
+				break;
+			}
+		}
+
+		if (posicion != -1) {
+			// Se encontró la Mensualidad, eliminarla
+			listaMensualidades.remove(posicion);
+			return true;
+		} else {
+			// No se encontró la Mensualidad con el ID especificado
+			return false;
+		}
+	}
+
+
+	/**
+	 * Agrega una Mensualidad a la lista.
+	 *
+	 * @param mensualidad la Mensualidad a agregar
+	 * @return true si se agrega exitosamente, false si la Mensualidad ya existe en la lista o hay una mensualidad con el mismo id o con la misma fecha.
+	 */
+	public boolean addMensualidad(Mensualidad mensualidad) {
+		if (listaMensualidades.contains(mensualidad)) {
+			return false; // La Mensualidad ya existe, no se puede agregar
+		}
+
+		for (Mensualidad m : listaMensualidades) {
+			if(m.getId() == mensualidad.getId() || m.getFecha().equals(mensualidad.getFecha())) {
+				return false; // Ya contiene una mensualidad con la misma fecha o el mismo id.
+			}
+		}
+		
+		return listaMensualidades.add(mensualidad); // Mensualidad agregada exitosamente
+	}
+
+
+	/**
+	 * Comprueba si existe una Mensualidad con la fecha pasada como parametro en la lista de mensualidades.
+	 *
+	 * @param fecha la fecha a comprobar
+	 * @return false si ya existe una Mensualidad con la misma fecha, true en caso contrario
+	 */
+	public boolean fechaMensualidadDisponible(YearMonth fecha) {
+		for (Mensualidad m : listaMensualidades) {
+			if(m.getFecha().equals(fecha)) {
+				return false; // Ya contiene una mensualidad con la misma fecha.
+			}
+		}
+		return true;
+	}
+
 
 	/**
 	 * Obtiene la edad del Alumno
@@ -506,11 +611,10 @@ public class Alumno implements Cloneable {
 		return getNombre() + " " + getApellido1() + " " + getApellido2();
 	}
 
+	
 	@Override
 	public String toString() {
 		return getId() + " " + getNombre() + " " + getApellido1() + " " + getApellido2();
 	}
 	
-	
-
 }

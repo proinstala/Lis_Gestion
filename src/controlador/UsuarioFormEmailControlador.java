@@ -84,16 +84,17 @@ public class UsuarioFormEmailControlador implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         btnCancelar.getStyleClass().add("boton_rojo");
-        conexionBD = ConexionBD.getInstance();
-        toast = new Toast();
+
         Image imagenEdit;
         Image correo;
         try {
-            imagenEdit = new Image("/recursos/usuario_edit_1_128.png");
-            correo = new Image("/recursos/email_3_128.png");
-        } catch (Exception e) {
+            //Forma desde IDE y JAR.
             imagenEdit = new Image(getClass().getResourceAsStream("/recursos/usuario_edit_1_128.png"));
             correo = new Image(getClass().getResourceAsStream("/recursos/email_3_128.png"));
+        } catch (Exception e) {
+            //Forma desde el JAR.
+            imagenEdit = new Image("/recursos/usuario_edit_1_128.png");
+            correo = new Image("/recursos/email_3_128.png");
         }
         ivImagenUser.setImage(imagenEdit);
         ivEmail.setImage(correo);
@@ -107,6 +108,9 @@ public class UsuarioFormEmailControlador implements Initializable {
             escenario.setX(mouseEvent.getScreenX() - x);
             escenario.setY(mouseEvent.getScreenY() - y);
         });
+
+        conexionBD = ConexionBD.getInstance();
+        toast = new Toast();
 
         //Pone oculto los TextFiel que muestran los password.
         tfPasswordVisible.setVisible(false);

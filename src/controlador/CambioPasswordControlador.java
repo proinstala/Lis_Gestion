@@ -89,14 +89,15 @@ public class CambioPasswordControlador implements Initializable {
         btnCancelar.getStyleClass().add("boton_rojo");
         conexionBD = ConexionBD.getInstance();
         toast = new Toast();
+        
         Image imagenEdit;
         Image padlock;
         try {
-            imagenEdit = new Image("/recursos/usuario_edit_1_128.png");
-            padlock = new Image("/recursos/candado_1_64.png");
-        } catch (Exception e) {
-            imagenEdit = new Image(getClass().getResourceAsStream("/recursos/usuario_edit_1_128.png"));
+            imagenEdit = new Image(getClass().getResourceAsStream("/recursos/usuario_edit_1_128.png")); //Forma desde IDE y JAR.
             padlock = new Image(getClass().getResourceAsStream("/recursos/candado_1_64.png"));
+        } catch (Exception e) {
+            imagenEdit = new Image("/recursos/usuario_edit_1_128.png"); //Forma desde el JAR.
+            padlock = new Image("/recursos/candado_1_64.png");
         }
         ivImagenUser.setImage(imagenEdit);
         ivPadloock.setImage(padlock);

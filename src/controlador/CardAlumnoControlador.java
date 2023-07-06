@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -76,15 +77,35 @@ public class CardAlumnoControlador implements Initializable {
     @FXML
     private Label lbTelefono;
 
-     @FXML
+    @FXML
     private Label lbAsistencias;
+
+    @FXML
+    private Label lbFormaPago;
+
+    @FXML
+    private Label lbEstadoLabel;
+
+    @FXML
+    private Label lbAsistenciasLabel;
 
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        
         apCardAlumno.getStyleClass().add("fondo_ventana_degradado_toRight");
+        lbEstadoLabel.getStyleClass().add("color_texto_negro");
+        lbAsistenciasLabel.getStyleClass().add("color_texto_negro");
         formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");//Formato dd/MM/yy
+
+        Image imagenUser;
+        try {
+        	imagenUser = new Image(getClass().getResourceAsStream("/recursos/usuario_info_1_128.png")); //Forma desde IDE y JAR.
+            
+        } catch (Exception e) {
+        	imagenUser = new Image("/recursos/usuario_info_1_128.png"); //Forma desde el JAR.
+        	
+        }
+        ivImagenUser.setImage(imagenUser); 
 
         apCardAlumno.setOnMousePressed(mouseEvent -> {
             x = mouseEvent.getSceneX();
@@ -122,6 +143,7 @@ public class CardAlumnoControlador implements Initializable {
 
         lbEstado.setText(alumno.getEstado().toString());
         lbAsistencias.setText(Integer.toString(alumno.getAsistenciaSemanal()));
+        lbFormaPago.setText(alumno.getFormaPago().toString());
 
 
     }

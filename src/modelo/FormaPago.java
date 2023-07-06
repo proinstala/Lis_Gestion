@@ -5,5 +5,6 @@ public enum FormaPago {
     EFECTIVO,
     TARJETA,
     BIZUM,
-    TRANSFERENCIA
+    TRANSFERENCIA,
+    OTRO
 }

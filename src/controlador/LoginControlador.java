@@ -62,11 +62,13 @@ public class LoginControlador implements Initializable {
         Image imagenLogin;
         Image imagenLogo;
         try {
-            imagenLogin = new Image("/recursos/user_1_512.png");
-            imagenLogo = new Image("/recursos/logo_nuevo_letras_color.png");
-        } catch (Exception e) {
+            //Forma desde IDE y JAR.
             imagenLogin = new Image(getClass().getResourceAsStream("/recursos/user_1_512.png"));
             imagenLogo = new Image(getClass().getResourceAsStream("/recursos/logo_nuevo_letras_color.png"));
+        } catch (Exception e) {
+            //Forma desde el JAR.
+            imagenLogin = new Image("/recursos/user_1_512.png");
+            imagenLogo = new Image("/recursos/logo_nuevo_letras_color.png");
         }
         ivImagenLogin.setImage(imagenLogin);
         ivImagenLogo.setImage(imagenLogo);

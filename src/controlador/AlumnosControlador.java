@@ -130,9 +130,9 @@ public class AlumnosControlador implements Initializable {
     	//Cargar imagenes en ImageView.
         Image imagenLupa;
         try {
-        	imagenLupa = new Image("/recursos/lupa_lila_2_128.png");
+            imagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png")); //Forma desde IDE y JAR.
         } catch (Exception e) {
-        	imagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png"));
+        	imagenLupa = new Image("/recursos/lupa_lila_2_128.png"); //Forma desde el JAR.
         }
         ivLupa.setImage(imagenLupa);
         
@@ -194,8 +194,10 @@ public class AlumnosControlador implements Initializable {
             alerta = new Alert(AlertType.CONFIRMATION);
             alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
             alerta.setTitle("Borrar Alumno");
-            alerta.setHeaderText("¿Quieres borrar el alumno seleccionado?");
-            alerta.setContentText("Id: " + alumnoSeleccionado.getId() + "\nNombre: " + alumnoSeleccionado.getNombre() + " " + alumnoSeleccionado.getApellido1() + " " + alumnoSeleccionado.getApellido2());
+            alerta.setHeaderText("¿Seguro que quieres borrar el alumno seleccionado?");
+            alerta.setContentText("Esto borrará la Información del Alumno, las mensualidades asociadas"
+                    + "\na este alumno y al alumno de todas las clases que este apuntado.\n" 
+                    +"\nAlumno:  (" + alumnoSeleccionado.getId() + ")  " + alumnoSeleccionado.getNombreCompleto());
             alerta.initStyle(StageStyle.DECORATED);
             alerta.initOwner(escenario);
             alerta.initModality(Modality.APPLICATION_MODAL);
@@ -204,7 +206,7 @@ public class AlumnosControlador implements Initializable {
     		if (result.get() == ButtonType.OK) {
                 try {
                     if(conexionBD.borrarAlumno(alumnoSeleccionado)) {
-                        listadoAlumnos.remove(i);
+                        listadoAlumnos.remove(alumnoSeleccionado);
                         toast.show(escenario, "Alumno eliminado!!.");
                     }
                 } catch (SQLException e) {
@@ -264,7 +266,6 @@ public class AlumnosControlador implements Initializable {
         int i = indiceSeleccionado();
         if(i != -1) {
             Alumno alumnoSeleccionado = tvAlumnos.getSelectionModel().getSelectedItem();
-            
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/alumnoFormVista.fxml"));
                 GridPane formAlumno;
@@ -293,7 +294,7 @@ public class AlumnosControlador implements Initializable {
                 e.printStackTrace();
             }
 
-            setupInformacionLista(); //configuro los bindign para que se actualice los labels de informacion de la tableViev.
+            setupDatosTalba(); //configuro los bindign para que se actualice los labels de informacion de la tableViev.
         }
         
     }
@@ -373,14 +374,14 @@ public class AlumnosControlador implements Initializable {
             }
         });
 
-        setupInformacionLista(); //configuro los bindign para que se actualice los labels de informacion de la tableViev.
+        setupDatosTalba(); //configuro los bindign para que se actualice los labels de informacion de la tableViev.
 	}
 
     /**
      * Configura los bindign para que se actualice los labels de informacion de la tableViev.
      * 
      */
-    private void setupInformacionLista() {
+    private void setupDatosTalba() {
         IntegerBinding hombresCount = Bindings.createIntegerBinding(
                 () -> (int) filtro.stream().filter(alumno -> alumno.getGenero() == Genero.HOMBRE).count(), filtro);
 

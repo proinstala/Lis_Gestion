@@ -84,9 +84,12 @@ public class RegistroUserControlador implements Initializable {
         //Cargar imagenes en ImageView.
         Image imagenRegistro;
         try {
-            imagenRegistro = new Image("/recursos/user_3_512.png");
-        } catch (Exception e) {
+            //Forma desde IDE y JAR.
             imagenRegistro = new Image(getClass().getResourceAsStream("/recursos/user_3_512.png"));
+        } catch (Exception e) {
+            //Forma desde el JAR.
+            imagenRegistro = new Image("/recursos/user_3_512.png");
+            
         }
         imImagenRegistro.setImage(imagenRegistro);
         

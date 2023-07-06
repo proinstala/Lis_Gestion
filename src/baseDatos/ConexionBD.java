@@ -9,19 +9,27 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.YearMonth;
 import java.time.temporal.IsoFields;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import modelo.Alumno;
 import modelo.Clase;
 import modelo.Direccion;
 import modelo.EstadoAlumno;
+import modelo.EstadoPago;
+import modelo.FormaPago;
 import modelo.Genero;
 import modelo.HoraClase;
 import modelo.Jornada;
+import modelo.Mensualidad;
 import modelo.TipoClase;
 import modelo.Usuario;
 import utilidades.Cifrador;
+import utilidades.Fechas;
 
 public class ConexionBD implements Cloneable{
 	private static final ConexionBD INSTANCE = new ConexionBD(); //Singleton
@@ -105,6 +113,12 @@ public class ConexionBD implements Cloneable{
                     "password_email_app TEXT);";
             st.execute(sql);
 
+            sql = "CREATE TABLE IF NOT EXISTS PRECIO_CLASE (" +
+                    "id INTEGER PRIMARY KEY, " +
+                    "numero_clases INTEGER NOT NULL UNIQUE, " +
+                    "precio DOUBLE NOT NULL);";
+            st.execute(sql);
+
             // Crea la tabla "PROVINCIA"
             sql = "CREATE TABLE IF NOT EXISTS PROVINCIA (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -117,6 +131,22 @@ public class ConexionBD implements Cloneable{
                     "nombre TEXT NOT NULL, " +
                     "provincia_id INTEGER NOT NULL, " +
                     "FOREIGN KEY (provincia_id) REFERENCES provincia (id));";
+            st.execute(sql);
+
+            // Crea la tabla "MENSUALIDAD"
+            sql = "CREATE TABLE IF NOT EXISTS MENSUALIDAD (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "alumno_id INTEGER NOT NULL, " +
+                    "mes TEXT NOT NULL, " +
+                    "anio TEXT NOT NULL, " +
+                    "fecha_pago TEXT, " +
+                    "forma_pago TEXT NOT NULL, " +
+                    "estado_pago TEXT NOT NULL, " +
+                    "asistencia_semanal INTEGER NOT NULL, " +
+                    "cuota DOUBLE NOT NULL, " +
+                    "anotacion TEXT, " +
+                    "UNIQUE (alumno_id, mes, anio), " +
+                    "FOREIGN KEY (alumno_id) REFERENCES alumno (id) ON DELETE CASCADE);";
             st.execute(sql);
 
             // Crea la tabla "DIRECCION"
@@ -142,6 +172,7 @@ public class ConexionBD implements Cloneable{
                     "email TEXT, " +
                     "estado TEXT NOT NULL, " +
                     "asistencia_semanal INTEGER NOT NULL, " +
+                    "forma_pago TEXT NOT NULL, " +
                     "FOREIGN KEY (direccion_id) REFERENCES direccion (id));";
             st.execute(sql);
 
@@ -192,6 +223,13 @@ public class ConexionBD implements Cloneable{
         } else {
             System.out.println("NO se han insertado las provincias y localidades.");
         }
+
+        if(insertPreciosClase()) {
+            System.out.println("insertado precios de clases.");
+        } else {
+            System.out.println("NO se han insertado los precios de las clases.");
+        }
+
         return result;
     }
 
@@ -217,6 +255,37 @@ public class ConexionBD implements Cloneable{
             st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Casillas" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
             st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Santomera" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
             st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Orihuela" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Alicante" + "'));");
+
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            result = true;
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            if(st != null) st.close();
+        }
+
+        cn.desconectar(conn);
+        return result;
+    }
+
+
+    private boolean insertPreciosClase() throws SQLException{
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+
+        try {
+            st = conn.createStatement();
+            conn.setAutoCommit(false);
+
+            st.execute("INSERT INTO PRECIO_CLASE (numero_clases, precio) VALUES (" + 1 + ", " + 25.00 + ");");
+            st.execute("INSERT INTO PRECIO_CLASE (numero_clases, precio) VALUES (" + 2 + ", " + 35.00 + ");");
+            st.execute("INSERT INTO PRECIO_CLASE (numero_clases, precio) VALUES (" + 3 + ", " + 40.00 + ");");
+            st.execute("INSERT INTO PRECIO_CLASE (numero_clases, precio) VALUES (" + 4 + ", " + 50.00 + ");");
+            
 
             conn.commit(); //Confirma la transacción de la inserción de los datos.
            
@@ -881,9 +950,10 @@ public class ConexionBD implements Cloneable{
             st = conn.createStatement();
             res = st.executeQuery("SELECT last_insert_rowid()");
             int idDirInsertada = res.getInt(1); //Guardo el valor de id obtenido en la consulta en la variable.
+            alumno.direccionProperty().get().setId(idDirInsertada);
 
             //Insertamos el Alumno en la base de datos.
-            ps = conn.prepareStatement("INSERT INTO ALUMNO (nombre, apellido1, apellido2, genero, direccion_id, fecha_nacimiento, telefono, email, estado, asistencia_semanal) VALUES (?,?,?,?,?,?,?,?,?,?);");
+            ps = conn.prepareStatement("INSERT INTO ALUMNO (nombre, apellido1, apellido2, genero, direccion_id, fecha_nacimiento, telefono, email, estado, asistencia_semanal, forma_pago) VALUES (?,?,?,?,?,?,?,?,?,?,?);");
             ps.setString(1, alumno.getNombre());
             ps.setString(2, alumno.getApellido1());
             ps.setString(3, alumno.getApellido2());
@@ -894,6 +964,7 @@ public class ConexionBD implements Cloneable{
             ps.setString(8, alumno.getEmail());
             ps.setString(9, alumno.getEstado().toString());
             ps.setInt(10, alumno.getAsistenciaSemanal());
+            ps.setString(11, alumno.getFormaPago().toString());
             
             ps.executeUpdate();
 
@@ -1178,9 +1249,19 @@ public class ConexionBD implements Cloneable{
                     estado = null;
                 }
 
+                //Genero un Enumerado de tipo FormaPago a partir del valor rescatado en el campo forma_pago del registro que se esta recorriendo.
+                FormaPago formaPago; //res.getString(6)
+                try {
+                    formaPago = FormaPago.valueOf(res.getString(12));
+                } catch (IllegalArgumentException e) {
+                    //poner esto en el log.
+                    formaPago = null;
+                }
+
                 //Creo el alumno con los datos del registro que se esta recorriendo y lo añado a la lista de Alumnos.
                 listaAlumnos.add(new Alumno(res.getInt(1), res.getString(2), res.getString(3), res.getString(4), 
-                    genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8), res.getString(9), estado, res.getInt(11)));
+                    genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8),
+                    res.getString(9), estado, res.getInt(11), formaPago));
             }
             
             System.out.println("BD: Obtencion de listaAlumnos."); //Esto es temporal para pruebas.
@@ -1242,9 +1323,19 @@ public class ConexionBD implements Cloneable{
                     estado = null;
                 }
 
+                //Genero un Enumerado de tipo FormaPago a partir del valor rescatado en el campo forma_pago del registro que se esta recorriendo.
+                FormaPago formaPago; //res.getString(6)
+                try {
+                    formaPago = FormaPago.valueOf(res.getString(12));
+                } catch (IllegalArgumentException e) {
+                    //poner esto en el log.
+                    formaPago = null;
+                }
+
                 //Creo el alumno con los datos del registro que se esta recorriendo y lo añado a la lista de Alumnos.
                 listaAlumnos.add(new Alumno(res.getInt(1), res.getString(2), res.getString(3), res.getString(4), 
-                    genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8), res.getString(9), estado, res.getInt(11)));
+                    genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8),
+                    res.getString(9), estado, res.getInt(11), formaPago));
             }
             
             System.out.println("BD: Obtencion de listaAlumnos de la Clase: " + idClase + "."); //Esto es temporal para pruebas.
@@ -1269,7 +1360,7 @@ public class ConexionBD implements Cloneable{
             st = conn.createStatement();
             res = st.executeQuery("SELECT D.id, D.calle, D.numero, L.nombre, P.nombre, D.codigo_postal " 
                                 + "FROM DIRECCION D JOIN LOCALIDAD L ON(D.localidad_id = L.id) "
-                                + "JOIN PROVINCIA P ON(L.provincia_id = P.id)"); //consulta sql a tablas DIRECCION, LOCALIDAD Y PROVINCIA.
+                                + "JOIN PROVINCIA P ON(L.provincia_id = P.id);"); //consulta sql a tablas DIRECCION, LOCALIDAD Y PROVINCIA.
 
             listaDirecciones = new ArrayList<Direccion>();
             while (res.next()) {
@@ -1288,6 +1379,69 @@ public class ConexionBD implements Cloneable{
         
         cn.desconectar(conn);
         return listaDirecciones;
+    }
+
+
+    public ArrayList<Mensualidad> getListadoMensualidades() throws SQLException {
+        ConexionBD cn = INSTANCE;
+        ArrayList<Mensualidad> listaMensualidades = null;
+        conn = cn.conectar();
+        try {
+
+            st = conn.createStatement();
+            res = st.executeQuery("SELECT id, alumno_id, mes, anio, fecha_pago, forma_pago, estado_pago, cuota, asistencia_semanal, anotacion " 
+                                + "FROM MENSUALIDAD"); //consulta sql a tabla MENSUALIDAD.
+
+            listaMensualidades = new ArrayList<Mensualidad>();
+            while (res.next()) {
+                YearMonth fecha = YearMonth.of(Integer.parseInt(res.getString(4)), Month.valueOf(Fechas.traducirMesAIngles(res.getString(3))));
+
+                //Genero un Enumerado de tipo FormaPago a partir del valor rescatado en el campo forma_pago del registro que se esta recorriendo.
+                FormaPago formaPago; //res.getString(6)
+                try {
+                    formaPago = FormaPago.valueOf(res.getString(6));
+                } catch (IllegalArgumentException e) {
+                    //poner esto en el log.
+                    formaPago = null;
+                }
+
+                //Genero un Enumerado de tipo EstadoPago a partir del valor rescatado en el campo estado_pago del registro que se esta recorriendo.
+                EstadoPago estadoPago;
+                try {
+                    estadoPago = EstadoPago.valueOf(res.getString(7));
+                } catch (IllegalArgumentException e) {
+                    //poner esto en el log.
+                    estadoPago = null;
+                }
+
+                LocalDate fechaPago = null;
+                if (res.getString(5) != null) {
+                    fechaPago = LocalDate.parse(res.getString(5));
+                }
+                /* 
+                try {
+                    System.out.println("culum 5: " + (res.getString(5)));
+                    fechaPago = LocalDate.parse(res.getString(5));
+                } catch (NullPointerException e) {
+                    // TODO: handle exception
+                }*/
+
+                listaMensualidades.add(new Mensualidad(res.getInt(1), res.getInt(2), fecha, 
+                    fechaPago , formaPago, estadoPago,
+                    res.getInt(9), res.getDouble(8), res.getString(10)));
+            }
+
+            System.out.println("BD: Obtencion de listaMensualidades de base de datos. Mensualidades obtenidas: " + listaMensualidades.size()); //Esto es temporal para pruebas.
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            e.printStackTrace();
+        } finally { 
+            if(st != null) st.close();
+            if(res != null) res.close(); 
+        }
+        
+        cn.desconectar(conn);
+        return listaMensualidades;
     }
 
 
@@ -1410,9 +1564,18 @@ public class ConexionBD implements Cloneable{
                                     estado = null;
                                 }
 
+                                //Genero un Enumerado de tipo FormaPago a partir del valor rescatado en el campo forma_pago del registro que se esta recorriendo.
+                                FormaPago formaPago; //res.getString(6)
+                                try {
+                                    formaPago = FormaPago.valueOf(res.getString(12));
+                                } catch (IllegalArgumentException e) {
+                                    //poner esto en el log.
+                                    formaPago = null;
+                                }
+
                                 //Creo el alumno con los datos del registro que se esta recorriendo y lo añado a la lista de Alumnos.
                                 listaAlumnos.add(new Alumno(res.getInt(1), res.getString(2), res.getString(3), res.getString(4), 
-                                    genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8), res.getString(9), estado, res.getInt(11)));
+                                    genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8), res.getString(9), estado, res.getInt(11), formaPago));
                             }
 
                             listaClases[j].setListaAlumnos(listaAlumnos); //añado la lista de alumnos a su Clase.
@@ -1546,9 +1709,18 @@ public class ConexionBD implements Cloneable{
                                 estado = null;
                             }
 
+                            //Genero un Enumerado de tipo FormaPago a partir del valor rescatado en el campo forma_pago del registro que se esta recorriendo.
+                            FormaPago formaPago; //res.getString(6)
+                            try {
+                                formaPago = FormaPago.valueOf(res.getString(12));
+                            } catch (IllegalArgumentException e) {
+                                //poner esto en el log.
+                                formaPago = null;
+                            }
+
                             //Creo el alumno con los datos del registro que se esta recorriendo y lo añado a la lista de Alumnos.
                             listaAlumnos.add(new Alumno(res.getInt(1), res.getString(2), res.getString(3), res.getString(4), 
-                                genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8), res.getString(9), estado, res.getInt(11)));
+                                genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8), res.getString(9), estado, res.getInt(11), formaPago));
                         }
 
                         listaClases[i].setListaAlumnos(listaAlumnos); //añado la lista de alumnos a su Clase.
@@ -1698,9 +1870,19 @@ public class ConexionBD implements Cloneable{
                         estado = null;
                     }
 
+                    //Genero un Enumerado de tipo FormaPago a partir del valor rescatado en el campo forma_pago del registro que se esta recorriendo.
+                    FormaPago formaPago; //res.getString(6)
+                    try {
+                        formaPago = FormaPago.valueOf(res.getString(12));
+                    } catch (IllegalArgumentException e) {
+                        //poner esto en el log.
+                        formaPago = null;
+                    }
+
                     //Creo el alumno con los datos del registro que se esta recorriendo y lo añado a la lista de Alumnos.
                     listaAlumnos.add(new Alumno(res.getInt(1), res.getString(2), res.getString(3), res.getString(4), 
-                        genero, new Direccion(), LocalDate.parse(res.getString(7)), res.getInt(8), res.getString(9), estado, res.getInt(11)));
+                        genero, new Direccion(), LocalDate.parse(res.getString(7)), res.getInt(8),
+                        res.getString(9), estado, res.getInt(11), formaPago));
                 }
 
             listaClases[i].setListaAlumnos(listaAlumnos);
@@ -1774,6 +1956,33 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    public Map<Integer, Double> getPrecioClases() throws SQLException {
+        ConexionBD cn = INSTANCE;
+        Map<Integer, Double> precios_clases = null;
+        conn = cn.conectar();
+        try {
+            st = conn.createStatement();
+            res = st.executeQuery("SELECT numero_clases, precio FROM PRECIO_CLASE");
+
+            precios_clases = new HashMap<Integer, Double>();
+            while (res.next()) {
+                precios_clases.put(res.getInt(1), res.getDouble(2));
+            }
+
+            System.out.println("BD: Obtencion de precios de clases de base de datos. Precios obtenidos: " + precios_clases.size()); //Esto es temporal para pruebas.
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            e.printStackTrace();
+        } finally { 
+            if(st != null) st.close();
+            if(res != null) res.close(); 
+        }
+        
+        cn.desconectar(conn);
+        return precios_clases;
+    }
+
+
     public ArrayList<String> getProvincias() throws SQLException {
         ConexionBD cn = INSTANCE;
         ArrayList<String> listaProvincias = null;
@@ -1842,7 +2051,7 @@ public class ConexionBD implements Cloneable{
         try {       
             conn.setAutoCommit(false);
 
-            ps = conn.prepareStatement("UPDATE ALUMNO SET nombre = ?, apellido1 = ?, apellido2 = ?, genero = ?, fecha_nacimiento = ?, telefono = ?, email = ?, estado = ?, asistencia_semanal = ? WHERE id = ?;");
+            ps = conn.prepareStatement("UPDATE ALUMNO SET nombre = ?, apellido1 = ?, apellido2 = ?, genero = ?, fecha_nacimiento = ?, telefono = ?, email = ?, estado = ?, asistencia_semanal = ?, forma_pago = ? WHERE id = ?;");
             ps.setString(1, alumno.getNombre());
             ps.setString(2, alumno.getApellido1());
             ps.setString(3, alumno.getApellido2());
@@ -1852,7 +2061,8 @@ public class ConexionBD implements Cloneable{
             ps.setString(7, alumno.getEmail());
             ps.setString(8, alumno.getEstado().toString());
             ps.setInt(9, alumno.getAsistenciaSemanal());
-            ps.setInt(10, alumno.getId());
+            ps.setString(10, alumno.getFormaPago().toString());
+            ps.setInt(11, alumno.getId());
             ps.executeUpdate();
 
             ps = conn.prepareStatement("UPDATE DIRECCION SET calle = ?, numero = ?, localidad_id = (SELECT id FROM LOCALIDAD WHERE nombre = ?), codigo_postal = ? WHERE id = ?;");
@@ -1880,9 +2090,9 @@ public class ConexionBD implements Cloneable{
 
 
     /**
-     * Borra el alumno pasado como parametro y su direccion de la base de datos.
+     * Borra el alumno pasado como parametro, sus mensualidades asociadas y su direccion de la base de datos.
      * @param alumno Alumno del que se va ha borrar sus datos de la base de datos.
-     * @return true si borra el alumno y la direccion o false si no.
+     * @return true si borra el alumno y sus datos, false si no.
      * @throws SQLException
      */
     public boolean borrarAlumno(Alumno alumno) throws SQLException {
@@ -1902,6 +2112,10 @@ public class ConexionBD implements Cloneable{
             ps.executeUpdate();
 
             ps = conn.prepareStatement("DELETE FROM CLASE_ALUMNO WHERE alumno_id = ?;"); //Esto esta porque no funciona ON DELETE CASCADE en SqlCipher.
+            ps.setInt(1, alumno.getId());
+            ps.executeUpdate();
+
+            ps = conn.prepareStatement("DELETE FROM MENSUALIDAD WHERE alumno_id = ?;"); //Esto esta porque no funciona ON DELETE CASCADE en SqlCipher.
             ps.setInt(1, alumno.getId());
             ps.executeUpdate();
 
@@ -2011,6 +2225,203 @@ public class ConexionBD implements Cloneable{
         
         cn.desconectar(conn);
         return alunosMacht;
+    }
+
+
+    public boolean insertarMensualidad(Mensualidad mensualidad) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+        try {
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement("INSERT INTO MENSUALIDAD " +
+                    "(alumno_id, mes, anio, fecha_pago, forma_pago, estado_pago, asistencia_semanal, cuota, anotacion) " +
+                    "VALUES (?,?,?,?,?,?,?,?,?);");
+
+            ps.setInt(1, mensualidad.getIdAlumno());
+            ps.setString(2, Fechas.obtenerNombreMes(mensualidad.getFecha().getMonthValue()));
+            ps.setString(3, Integer.toString(mensualidad.getFecha().getYear()));
+            ps.setString(4, (mensualidad.getFechaPago() == null)? null : mensualidad.getFechaPago().toString());
+            ps.setString(5, mensualidad.getFormaPago().toString());
+            ps.setString(6, mensualidad.getEstadoPago().toString());
+            ps.setInt(7, mensualidad.getAsistenciasSemanales());
+            ps.setDouble(8, mensualidad.getImporte());
+            ps.setString(9, mensualidad.getAnotacion());
+            
+            ps.executeUpdate();
+
+            //Obtenemos el id que se le asignó a esta Mensualidad.
+            st = conn.createStatement();
+            res = st.executeQuery("SELECT last_insert_rowid()");
+            int idMensualidadInsertada = res.getInt(1); //Guardo el valor de id obtenido en la consulta en la variable.
+            mensualidad.setId(idMensualidadInsertada); //Pongo el id al objeto Mensualidad.
+            
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            System.out.println("BD: Insercion de Mensualidad con id: " + mensualidad.getId() + " en base de datos"); //Esto es temporal para pruebas.
+            result = true;
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } catch (Exception e) {
+            //aqui poner la insercion en el .log
+            System.out.println("-- ERROR -- " + e.toString());
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally { 
+            if(ps != null) ps.close(); 
+            if(res != null) res.close();
+            if(st != null) st.close();
+        }
+        
+        cn.desconectar(conn);
+        return result;
+    }
+
+
+    /**
+     * Actualiza los datos de la mensualidad en la base de datos. 
+     * @param mensualidad Mensualidad de donde se obtine la informacion.
+     * @return true si se modifica y no hay errores, false si no.
+     * @throws SQLException
+     */
+    public boolean actualizarMensualidad(Mensualidad mensualidad) throws SQLException{
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+        boolean result = false;
+
+        try {       
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement("UPDATE MENSUALIDAD SET mes = ?, anio = ?, fecha_pago = ?, forma_pago = ?, estado_pago = ?, asistencia_semanal = ?, cuota = ?, anotacion = ? WHERE id = ?;");
+            ps.setString(1, Fechas.obtenerNombreMes(mensualidad.getFecha().getMonthValue()));
+            ps.setString(2, Integer.toString(mensualidad.getFecha().getYear()));
+            ps.setString(3, (mensualidad.getFechaPago() == null)? null : mensualidad.getFechaPago().toString());
+            ps.setString(4, mensualidad.getFormaPago().toString());
+            ps.setString(5, mensualidad.getEstadoPago().toString());
+            ps.setInt(6, mensualidad.getAsistenciasSemanales());
+            ps.setDouble(7, mensualidad.getImporte());
+            ps.setString(8, mensualidad.getAnotacion());
+            ps.setInt(9, mensualidad.getId());
+            ps.executeUpdate();
+            
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            result = true;
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } catch (Exception e) {
+            //aqui poner la insercion en el .log
+            System.out.println("-- ERROR -- " + e.toString());
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true);
+            if(ps != null) ps.close();
+        }
+
+        cn.desconectar(conn);
+        return result;
+    }
+
+    /**
+     * Borra la Mensualidad pasado como parametro.
+     * @param alumno Mensualidad ha borrar de la base de datos.
+     * @return true si borra la Menualidad, false si no.
+     * @throws SQLException
+     */
+    public boolean borrarMensualidad(Mensualidad mensualidad) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+        boolean result = false;
+
+        try {
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement("DELETE FROM MENSUALIDAD WHERE id = ?;"); //Esto esta porque no funciona ON DELETE CASCADE en SqlCipher.
+            ps.setInt(1, mensualidad.getId());
+            ps.executeUpdate();
+
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+           
+            System.out.println("BD: Borrado Mensualidad de la base de datos."); //Esto es temporal para pruebas.
+            
+            result = true;
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            System.out.println("-- ERROR -- " + e.toString());
+            e.printStackTrace();
+        } catch (Exception e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+            System.out.println("-- ERROR -- " + e.toString());
+        } finally {
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            if(ps != null) ps.close();
+        }
+
+        cn.desconectar(conn);
+        return result;
+    }
+
+
+    public boolean insertarListaMensualidades(ArrayList<Mensualidad> listaMensualidades) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+        try {
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement("INSERT INTO MENSUALIDAD " +
+                    "(alumno_id, mes, anio, fecha_pago, forma_pago, estado_pago, asistencia_semanal, cuota, anotacion) " +
+                    "VALUES (?,?,?,?,?,?,?,?,?);");
+
+            for (Mensualidad mensualidad : listaMensualidades) { 
+                ps.setInt(1, mensualidad.getIdAlumno());
+                ps.setString(2, Fechas.obtenerNombreMes(mensualidad.getFecha().getMonthValue()));
+                ps.setString(3, Integer.toString(mensualidad.getFecha().getYear()));
+                ps.setString(4, (mensualidad.getFechaPago() == null)? null : mensualidad.getFechaPago().toString());
+                ps.setString(5, mensualidad.getFormaPago().toString());
+                ps.setString(6, mensualidad.getEstadoPago().toString());
+                ps.setInt(7, mensualidad.getAsistenciasSemanales());
+                ps.setDouble(8, mensualidad.getImporte());
+                ps.setString(9, mensualidad.getAnotacion());
+                
+                ps.executeUpdate();
+
+                //Obtenemos el id que se le asignó a esta Mensualidad.
+                st = conn.createStatement();
+                res = st.executeQuery("SELECT last_insert_rowid()");
+                int idMensualidadInsertada = res.getInt(1); //Guardo el valor de id obtenido en la consulta en la variable.
+                mensualidad.setId(idMensualidadInsertada); //Pongo el id al objeto Mensualidad.
+            }
+
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            System.out.println("BD: Insercion de " + listaMensualidades.size() + " Mensualidades en base de datos"); //Esto es temporal para pruebas.
+            result = true;
+        } catch (SQLException e) {
+            //aqui poner la insercion en el .log
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } catch (Exception e) {
+            //aqui poner la insercion en el .log
+            System.out.println("-- ERROR -- " + e.toString());
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            e.printStackTrace();
+        } finally { 
+            if(ps != null) ps.close(); 
+            if(res != null) res.close();
+            if(st != null) st.close();
+        }
+        
+        cn.desconectar(conn);
+        return result;
     }
 
 }

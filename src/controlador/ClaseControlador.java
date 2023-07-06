@@ -139,17 +139,19 @@ public class ClaseControlador implements Initializable {
         Image ImagenGuardar;
         Image ImagenLupa;
         try {
+			//Forma desde IDE y JAR.
+			imagenFlecha = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_2.png")); 
+        	imagenFlechaAdd = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_1.png"));
+        	ImagenVolver = new Image(getClass().getResourceAsStream("/recursos/flceha_recarga_1.png"));
+        	ImagenGuardar = new Image(getClass().getResourceAsStream("/recursos/floppy_lila_1_128.png"));
+        	ImagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png"));
+        } catch (Exception e) {
+			//Forma desde el JAR.
         	imagenFlecha = new Image("/recursos/flecha_derecha_2.png");
         	imagenFlechaAdd = new Image("/recursos/flecha_derecha_1.png");
         	ImagenVolver = new Image("/recursos/flceha_recarga_1.png");
         	ImagenGuardar = new Image("/recursos/floppy_lila_1_128.png");
         	ImagenLupa = new Image("/recursos/upa_lila_2_128.png");
-        } catch (Exception e) {
-        	imagenFlecha = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_2.png"));
-        	imagenFlechaAdd = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_1.png"));
-        	ImagenVolver = new Image(getClass().getResourceAsStream("/recursos/flceha_recarga_1.png"));
-        	ImagenGuardar = new Image(getClass().getResourceAsStream("/recursos/floppy_lila_1_128.png"));
-        	ImagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png"));
         }
         ivFlechaIzquierda.setImage(imagenFlecha);
         ivFlechaDerecha.setImage(imagenFlecha);

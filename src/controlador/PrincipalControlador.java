@@ -23,6 +23,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import modelo.Alumno;
 import modelo.Jornada;
+import modelo.Mensualidad;
 import modelo.Toast;
 import modelo.Usuario;
 
@@ -32,6 +33,7 @@ public class PrincipalControlador implements Initializable {
 	private Stage escenario;
 	private String menuSeleccionado = "ninguno";
 	private ObservableList<Alumno> listadoAlumnos;
+	private ObservableList<Mensualidad> listadoMensualidades;
 	private ConexionBD conexionBD;
 	private Toast toast = new Toast();
 	
@@ -177,9 +179,6 @@ public class PrincipalControlador implements Initializable {
 	}
 
 	
-	
-
-
 	@FXML
     void menuMensualidad(MouseEvent event) {
 		if(menuSeleccionado != "mensualidad") {
@@ -192,6 +191,24 @@ public class PrincipalControlador implements Initializable {
 			lInformes.getStyleClass().remove("menuSeleccionado");
 			lUsuario.getStyleClass().remove("menuSeleccionado");
 			lAjustes.getStyleClass().remove("menuSeleccionado");
+
+			try {
+				FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/mensualidadesVista.fxml"));
+				BorderPane mensualidades;
+				
+				mensualidades = (BorderPane) loader.load();
+				bpPrincipal.setCenter(mensualidades);
+				
+				MensualidadesControlador controller = loader.getController(); // cargo el controlador.
+				//controller.setControladorPrincipal(this);
+				controller.setListaAlumnos(listadoAlumnos);
+				controller.setListaMensualidades(listadoMensualidades);
+				controller.setStage(escenario);
+				
+			} catch (IOException e) {
+				System.out.println("-ERROR- Fallo al cargar mensualidadesVista.fxml" + e.getMessage());
+				e.printStackTrace();
+			}
 		}
     }
 
@@ -222,7 +239,7 @@ public class PrincipalControlador implements Initializable {
 				controller.setStage(escenario);
 				
 			} catch (IOException e) {
-				System.out.println("-ERROR- Fallo al cargar jornadaVista.fxml" + e.getMessage());
+				System.out.println("-ERROR- Fallo al cargar alumnosVista.fxml\n" + e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -317,6 +334,12 @@ public class PrincipalControlador implements Initializable {
 		
 		try {
 			listadoAlumnos = FXCollections.observableArrayList(conexionBD.getListadoAlumnos());
+			listadoMensualidades = FXCollections.observableArrayList(conexionBD.getListadoMensualidades());
+			for (Alumno a : listadoAlumnos) {
+				for (Mensualidad m : listadoMensualidades) {
+					if(a.getId() == m.getIdAlumno()) {a.addMensualidad(m);}
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

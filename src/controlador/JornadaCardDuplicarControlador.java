@@ -101,11 +101,14 @@ public class JornadaCardDuplicarControlador implements Initializable {
         btnCancelar.getStyleClass().add("boton_rojo");
         conexionBD = ConexionBD.getInstance();
         toast = new Toast();
+
         Image imagenCopy;
         try {
-            imagenCopy = new Image("/recursos/copy_2_128.png");
+            //Forma desde IDE y JAR.
+            imagenCopy = new Image(getClass().getResourceAsStream("/recursos/copy_2_128.png"));    
         } catch (Exception e) {
-            imagenCopy = new Image(getClass().getResourceAsStream("/recursos/copy_2_128.png"));
+            //Forma desde el JAR.
+            imagenCopy = new Image("/recursos/copy_2_128.png");
         }
         ivImagenCopy.setImage(imagenCopy);
 

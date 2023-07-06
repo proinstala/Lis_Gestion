@@ -3,8 +3,6 @@ package controlador;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.SQLException;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 import baseDatos.ConexionBD;
@@ -16,11 +14,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -112,7 +107,17 @@ public class UsuarioControlador implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         conexionBD = ConexionBD.getInstance();
-        
+
+        Image imagenBorrarUsuario;
+        try {
+            //Forma desde IDE y JAR.
+        	imagenBorrarUsuario = new Image(getClass().getResourceAsStream("/recursos/boton_2_64.png"));
+        } catch (Exception e) {
+            //Forma desde el JAR.
+        	imagenBorrarUsuario = new Image("/recursos/circulo_flecha_1.png");
+        	
+        }
+        ivBorrarUsuario.setImage(imagenBorrarUsuario); 
     }
 
     @FXML

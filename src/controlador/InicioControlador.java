@@ -58,9 +58,11 @@ public class InicioControlador implements Initializable{
     	//Cargar imagenes en ImageView.
         Image imagenCarpetaConfig;
         try {
-        	imagenCarpetaConfig = new Image("/recursos/carpeta_lila_2_128.png");
+            //Forma desde IDE y JAR.
+            imagenCarpetaConfig = new Image(getClass().getResourceAsStream("/recursos/carpeta_lila_2_128.png"));
         } catch (Exception e) {
-        	imagenCarpetaConfig = new Image(getClass().getResourceAsStream("/recursos/carpeta_lila_2_128.png"));
+            //Forma desde el JAR.
+        	imagenCarpetaConfig = new Image("/recursos/carpeta_lila_2_128.png");
         }
         ivCarpetaConfig.setImage(imagenCarpetaConfig);
     	

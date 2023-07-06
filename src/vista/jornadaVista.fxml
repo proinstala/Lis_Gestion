@@ -32,18 +32,18 @@
         </columnConstraints>
         <rowConstraints>
             <RowConstraints maxHeight="20.0" minHeight="20.0" prefHeight="20.0" vgrow="NEVER" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+            <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+            <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
             <RowConstraints maxHeight="20.0" minHeight="20.0" prefHeight="20.0" vgrow="NEVER" />
-            <RowConstraints maxHeight="20.0" minHeight="10.0" prefHeight="20.0" vgrow="NEVER" />
-            <RowConstraints minHeight="200.0" prefHeight="200.0" vgrow="ALWAYS" />
+            <RowConstraints maxHeight="20.0" minHeight="20.0" prefHeight="20.0" vgrow="NEVER" />
+            <RowConstraints minHeight="160.0" prefHeight="200.0" vgrow="ALWAYS" />
           <RowConstraints maxHeight="40.0" minHeight="20.0" prefHeight="20.0" vgrow="ALWAYS" />
             <RowConstraints maxHeight="20.0" minHeight="20.0" prefHeight="20.0" vgrow="NEVER" />
             <RowConstraints maxHeight="20.0" minHeight="20.0" prefHeight="20.0" vgrow="NEVER" />
-          <RowConstraints minHeight="200.0" prefHeight="200.0" vgrow="ALWAYS" />
-            <RowConstraints maxHeight="40.0" minHeight="40.0" prefHeight="40.0" vgrow="NEVER" />
+          <RowConstraints minHeight="160.0" prefHeight="200.0" vgrow="ALWAYS" />
+            <RowConstraints maxHeight="40.0" minHeight="25.0" prefHeight="40.0" vgrow="NEVER" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-          <RowConstraints maxHeight="1.7976931348623157E308" minHeight="110.0" prefHeight="110.0" vgrow="ALWAYS" />
+          <RowConstraints maxHeight="1.7976931348623157E308" minHeight="100.0" prefHeight="110.0" vgrow="ALWAYS" />
         </rowConstraints>
          <children>
             <ListView fx:id="lvClase1" onMouseClicked="#clickClase1" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
@@ -54,17 +54,12 @@
             <ListView fx:id="lvClase6" onMouseClicked="#clickClase6" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="9" />
             <ListView fx:id="lvClase7" onMouseClicked="#clickClase7" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="5" GridPane.rowIndex="9" />
             <ListView fx:id="lvClase8" onMouseClicked="#clickClase8" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="7" GridPane.rowIndex="9" />
-            <TextArea fx:id="taComentarios" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="Escribe aqui los comentarios de Jornada ..." GridPane.columnIndex="1" GridPane.columnSpan="7" GridPane.rowIndex="12" GridPane.vgrow="ALWAYS">
+            <TextArea fx:id="taComentarios" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="Escribe aqui los comentarios de Jornada ..." wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="7" GridPane.rowIndex="12" GridPane.vgrow="ALWAYS">
                <GridPane.margin>
                   <Insets bottom="20.0" top="10.0" />
                </GridPane.margin>
             </TextArea>
-            <Button fx:id="btnGuardar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#botonGuardar" prefHeight="25.0" prefWidth="70.0" text="Guardar" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="11" GridPane.vgrow="NEVER" />
-            <Button fx:id="btnBorrar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#botonBorrar" prefHeight="25.0" prefWidth="70.0" text="Borrar" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="11" GridPane.vgrow="NEVER">
-               <GridPane.margin>
-                  <Insets left="80.0" />
-               </GridPane.margin>
-            </Button>
+            <Button fx:id="btnGuardarComentario" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#botonGuardarComentario" prefHeight="25.0" prefWidth="70.0" text="Guardar" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="11" GridPane.vgrow="NEVER" />
             <Label text="Hora:" GridPane.columnIndex="1" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets left="5.0" />

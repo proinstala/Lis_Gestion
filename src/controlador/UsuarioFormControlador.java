@@ -83,9 +83,12 @@ public class UsuarioFormControlador implements Initializable {
         //Establecer imagen formulario.
         Image imagen;
         try {
-            imagen = new Image("/recursos/usuario_edit_1_128.png");
-        } catch (Exception e) {
+            //Forma desde IDE y JAR.
             imagen = new Image(getClass().getResourceAsStream("/recursos/usuario_edit_1_128.png"));
+        } catch (Exception e) {
+            //Forma desde el JAR.
+            imagen = new Image("/recursos/usuario_edit_1_128.png");
+            
         }
         ivImagenTipoFormulario.setImage(imagen);
 

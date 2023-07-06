@@ -97,15 +97,19 @@ public class SemanaCardDuplicarControlador implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         btnCancelar.getStyleClass().add("boton_rojo");
-        conexionBD = ConexionBD.getInstance();
-        toast = new Toast();
+    
         Image imagenCopy;
         try {
-            imagenCopy = new Image("/recursos/copy_2_128.png");
-        } catch (Exception e) {
+            //Forma desde IDE y JAR.
             imagenCopy = new Image(getClass().getResourceAsStream("/recursos/copy_2_128.png"));
+        } catch (Exception e) {
+            //Forma desde el JAR.
+            imagenCopy = new Image("/recursos/copy_2_128.png");
         }
         ivImagenCopy.setImage(imagenCopy);
+
+        conexionBD = ConexionBD.getInstance();
+        toast = new Toast();
 
         apCopiarJornada.setOnMousePressed(mouseEvent -> {
             x = mouseEvent.getSceneX();

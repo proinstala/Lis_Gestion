@@ -3,6 +3,7 @@ package controlador;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,20 +26,23 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.converter.LocalDateStringConverter;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Alumno;
 import modelo.Direccion;
 import modelo.EstadoAlumno;
+import modelo.FormaPago;
 import modelo.Genero;
 import modelo.Toast;
 import javafx.fxml.Initializable;
 
 public class AlumnoFormControlador implements Initializable {
 
-    public final String MODO_NUEVO_ALUMNO = "crear";
-    public final String MODO_EDITAR_ALUMNO = "editar";
+    public final String MODO_NUEVO_ALUMNO = "CREAR";
+    public final String MODO_EDITAR_ALUMNO = "EDITAR";
 
     private String modoControlador;
+    DateTimeFormatter formatter;
     private ConexionBD conexionBD;
     private Toast toast;
     private Stage escenario;
@@ -64,6 +68,7 @@ public class AlumnoFormControlador implements Initializable {
     private int codigoPostal;
 
     private EstadoAlumno estado;
+    private FormaPago formaPago;
     private int asistenciaSemanal;
 
 
@@ -96,6 +101,9 @@ public class AlumnoFormControlador implements Initializable {
 
     @FXML
     private ComboBox<Integer> cbAsistencia;
+
+    @FXML
+    private ComboBox<FormaPago> cbFormaPago;
 
     @FXML
     private DatePicker dpFechaNacimiento;
@@ -138,12 +146,17 @@ public class AlumnoFormControlador implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
     	btnCancelar.getStyleClass().add("boton_rojo");
     	gpFormAlumno.getStyleClass().add("fondo_ventana_degradado_toRight");
-        pSeparador.getStyleClass().add("panelSeparador");
+        pSeparador.getStyleClass().add("panelSeparador"); //Panel separador de barra superior.
+
+        //Modifica el formato en el que se muestra la fecha en el DatePicker.
+        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");//Formato dd/MM/yy
+        dpFechaNacimiento.setConverter(new LocalDateStringConverter(formatter, null));
 
         conexionBD = ConexionBD.getInstance();
         toast = new Toast();
         cbGenero.setItems(FXCollections.observableArrayList(Genero.values()));
         cbEstado.setItems(FXCollections.observableArrayList(EstadoAlumno.values()));
+        cbFormaPago.setItems(FXCollections.observableArrayList(FormaPago.values()));
         tfIdAlumno.setDisable(true);
         tfIdDireccion.setDisable(true);
         dpFechaNacimiento.setEditable(false);
@@ -241,7 +254,6 @@ public class AlumnoFormControlador implements Initializable {
 	}
     
     public void setAlumno(Alumno alumno) {
-
         oldAlumno = alumno;
         newAlumno = (Alumno)(alumno.clone());
         //newAlumno = new Alumno(alumno);
@@ -250,6 +262,7 @@ public class AlumnoFormControlador implements Initializable {
         cbLocalidad.setValue(newAlumno.getDireccion().getLocalidad());
         cbProvincia.setValue(newAlumno.getDireccion().getProvincia());
         cbEstado.setValue(newAlumno.getEstado());
+        cbFormaPago.setValue(newAlumno.getFormaPago());
         cbAsistencia.setValue(newAlumno.getAsistenciaSemanal());
 
         tfIdAlumno.setText(Integer.toString(newAlumno.getId()));
@@ -284,6 +297,10 @@ public class AlumnoFormControlador implements Initializable {
             newAlumno.estadoProperty().set(ov);
         });
 
+        cbFormaPago.getSelectionModel().selectedItemProperty().addListener((o,nv, ov) -> {
+            newAlumno.formaPagoProperty().set(ov);
+        });
+
         cbAsistencia.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
             newAlumno.asistenciaSemanalProperty().set(ov);
         });
@@ -306,7 +323,7 @@ public class AlumnoFormControlador implements Initializable {
                 break;
         
             default:
-
+                setupModoNuevoAlumno();
                 break;
         }
     }
@@ -323,9 +340,9 @@ public class AlumnoFormControlador implements Initializable {
         //Establecer imagen formulario.
         Image imagen;
         try {
-            imagen = new Image("/recursos/usuario_add_1_128.png");
+            imagen = new Image(getClass().getResourceAsStream("/recursos/usuario_add_1_128.png")); //Forma desde IDE y JAR.
         } catch (Exception e) {
-            imagen = new Image(getClass().getResourceAsStream("/recursos/usuario_add_1_128.png"));
+            imagen = new Image("/recursos/usuario_add_1_128.png"); //Forma desde el JAR.
         }
         ivImagenTipoFormulario.setImage(imagen);
     }
@@ -342,9 +359,9 @@ public class AlumnoFormControlador implements Initializable {
         //Establecer imagen formulario.
         Image imagen;
         try {
-            imagen = new Image("/recursos/usuario_edit_1_128.png");
+            imagen = new Image(getClass().getResourceAsStream("/recursos/usuario_edit_1_128.png")); //Forma desde IDE y JAR.
         } catch (Exception e) {
-            imagen = new Image(getClass().getResourceAsStream("/recursos/usuario_edit_1_128.png"));
+            imagen = new Image("/recursos/usuario_edit_1_128.png"); //Forma desde el JAR.
         }
         ivImagenTipoFormulario.setImage(imagen);
     }
@@ -422,6 +439,10 @@ public class AlumnoFormControlador implements Initializable {
             mensajeAviso("Estado no escogido.",
             "",
             "Escoge un estado para el Alumno.");
+        } else if(cbFormaPago.getValue() == null) {
+            mensajeAviso("Forma Pago no escogido.",
+            "",
+            "Escoge una forma de pago para el Alumno.");
         } else {
             camposCorrectos = true;
         }
@@ -441,6 +462,7 @@ public class AlumnoFormControlador implements Initializable {
             provincia = cbProvincia.getValue().toString();
             codigoPostal = (tfCodigoPostal.getText().isBlank()) ? 0 : Integer.parseInt(tfCodigoPostal.getText());
             estado = (EstadoAlumno) cbEstado.getValue();
+            formaPago = (FormaPago) cbFormaPago.getValue();
             asistenciaSemanal = cbAsistencia.getValue();
 
         }
@@ -455,7 +477,7 @@ public class AlumnoFormControlador implements Initializable {
      */
     private boolean crearAlumno() {
         Direccion direccion = new Direccion(-1, calle, numeroVivienda, localidad, provincia, codigoPostal);
-        Alumno alumno = new Alumno(-1, nombre, apellido1, apellido2, genero, direccion, fechaNac, telefono, email, estado, asistenciaSemanal);
+        Alumno alumno = new Alumno(-1, nombre, apellido1, apellido2, genero, direccion, fechaNac, telefono, email, estado, asistenciaSemanal, formaPago);
 
         try {
             if(conexionBD.insertarAlumno(alumno)) {
@@ -483,6 +505,7 @@ public class AlumnoFormControlador implements Initializable {
                 oldAlumno.getDireccion().setValoresDireccion(newAlumno.getDireccion());
                 oldAlumno.setEstado(newAlumno.getEstado());
                 oldAlumno.setAsistenciaSemanal(newAlumno.getAsistenciaSemanal());
+                oldAlumno.setFormaPago(newAlumno.getFormaPago());
                 return true;
             }
         } catch (SQLException e) {

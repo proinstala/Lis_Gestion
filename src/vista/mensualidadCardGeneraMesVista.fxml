@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="apCardGenerarMensualidad" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="430.0" prefWidth="600.0" styleClass="fondo_ventana_degradado_masBorde" stylesheets="@../hojasEstilos/Styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.MensualidadCardGeneraMesControlador">
+   <children>
+      <AnchorPane fx:id="apIzquierda" prefHeight="310.0" prefWidth="200.0" styleClass="fondo_panel_izquierda" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="400.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <ImageView fx:id="ivImagenPago" fitHeight="150.0" fitWidth="174.0" layoutX="23.0" layoutY="24.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="21.0" AnchorPane.topAnchor="25.0">
+               <image>
+                  <Image url="@../recursos/pago_3_128.png" />
+               </image>
+            </ImageView>
+            <Label fx:id="lbAlumnosVista" alignment="CENTER" layoutX="84.0" layoutY="263.0" text="1" textFill="WHITE" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="225.0">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+            <Label fx:id="lbAlumnosLabel" alignment="CENTER" layoutX="84.0" layoutY="213.0" text="Alumnos Activos" underline="true" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="210.0">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <Label fx:id="lbGenerarLabel" alignment="CENTER" layoutX="66.0" layoutY="283.0" text="Mensualidades a Generar" underline="true" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="275.0">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <Label fx:id="lbGenerarVista" alignment="CENTER" layoutX="57.0" layoutY="319.0" text="1" textFill="WHITE" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="290.0">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutX="318.0" layoutY="107.0" prefHeight="400.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Label alignment="CENTER" layoutX="125.0" layoutY="34.0" text="GENERAR MENSUALIDADES" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+            <Separator layoutX="98.0" layoutY="63.0" prefWidth="200.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0" />
+            <Label alignment="CENTER_RIGHT" layoutX="33.0" layoutY="92.0" text="Mes" AnchorPane.leftAnchor="36.0" AnchorPane.topAnchor="105.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER_RIGHT" layoutX="34.0" layoutY="155.0" text="Año" AnchorPane.leftAnchor="36.0" AnchorPane.topAnchor="165.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Button fx:id="btnCerrar" layoutX="296.0" layoutY="369.0" mnemonicParsing="false" prefWidth="80.0" text="Cancelar" AnchorPane.rightAnchor="36.0" AnchorPane.topAnchor="370.0" />
+            <ComboBox fx:id="cbMes" layoutX="33.0" layoutY="116.0" prefWidth="200.0" AnchorPane.leftAnchor="36.0" AnchorPane.topAnchor="125.0" />
+            <ComboBox fx:id="cbYear" layoutX="30.0" layoutY="175.0" prefWidth="200.0" AnchorPane.leftAnchor="36.0" AnchorPane.topAnchor="185.0" />
+            <CheckBox fx:id="chbAddAnotacion" layoutX="34.0" layoutY="251.0" mnemonicParsing="false" text="Añadir anotación generica" AnchorPane.leftAnchor="36.0" AnchorPane.topAnchor="250.0" />
+            <CheckBox fx:id="chbAddFecha" layoutX="34.0" layoutY="280.0" mnemonicParsing="false" text="Añadir fecha de creación" AnchorPane.leftAnchor="36.0" AnchorPane.topAnchor="280.0" />
+            <Label alignment="CENTER_RIGHT" layoutX="30.0" layoutY="73.0" text="Fecha Actual:" AnchorPane.leftAnchor="36.0" AnchorPane.topAnchor="75.0">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label fx:id="lbFechaActual" layoutX="136.0" layoutY="75.0" text="Label" AnchorPane.leftAnchor="120.0" AnchorPane.topAnchor="75.0" />
+            <Button fx:id="btnGenerar" layoutX="201.0" layoutY="370.0" mnemonicParsing="false" prefWidth="80.0" text="Generar" AnchorPane.rightAnchor="135.0" AnchorPane.topAnchor="370.0" />
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>

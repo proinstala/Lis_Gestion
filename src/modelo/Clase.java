@@ -260,7 +260,7 @@ public class Clase {
 		try {
 			listaAlumnos.remove(posicion);
 		} catch (IndexOutOfBoundsException e) {
-			
+			posicion = -1;
 		}
 
 		return (posicion != 1) ? true : false;

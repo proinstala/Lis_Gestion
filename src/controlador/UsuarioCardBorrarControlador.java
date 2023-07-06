@@ -78,14 +78,18 @@ public class UsuarioCardBorrarControlador implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         conexionBD = ConexionBD.getInstance();
         toast = new Toast();
+        
         Image imagenDelete;
         Image bin;
         try {
-            imagenDelete = new Image("/recursosusuario_delete_1_128.png");
-            bin = new Image("/recursos/papelera_1_128.png");
-        } catch (Exception e) {
+            //Forma desde IDE y JAR.
             imagenDelete = new Image(getClass().getResourceAsStream("/recursos/usuario_delete_1_128.png"));
             bin = new Image(getClass().getResourceAsStream("/recursos/papelera_1_128.png"));
+        } catch (Exception e) {
+            //Forma desde el JAR.
+            imagenDelete = new Image("/recursosusuario_delete_1_128.png");
+            bin = new Image("/recursos/papelera_1_128.png");
+            
         }
         ivImagenUser.setImage(imagenDelete);
         ivPapelera.setImage(bin);

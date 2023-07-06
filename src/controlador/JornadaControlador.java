@@ -75,10 +75,7 @@ public class JornadaControlador implements Initializable {
     private ImageView ivSiguienteJornada;
 
     @FXML
-    private Button btnBorrar;
-
-    @FXML
-    private Button btnGuardar;
+    private Button btnGuardarComentario;
 	
 	@FXML
 	private BorderPane bdJornada;
@@ -174,17 +171,36 @@ public class JornadaControlador implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		//Cargar imagenes en ImageView. //FALTA CARGAR LAS IMAGENES DEL RESTO DE BOTONES.
-        Image imagenCrearJornada;
+		//Cargar imagenes en ImageView.
+        Image flechaRetroceder;
+		Image flechaAvnazar;
+		Image copiaSemana;
+		Image copiaJornada;
+		Image borrarJornada;
+		Image imagenCrearJornada;
         try {
-        	imagenCrearJornada = new Image("/recursos/circulo_flecha_1.png");
+			//Forma desde IDE y JAR.
+			flechaRetroceder = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_2.png"));
+			flechaAvnazar = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_2.png"));
+			copiaSemana = new Image(getClass().getResourceAsStream("/recursos/bd_add_1_128.png"));
+			copiaJornada = new Image(getClass().getResourceAsStream("/recursos/floppy_lila_1_128.png"));
+			borrarJornada = new Image(getClass().getResourceAsStream("/recursos/boton_2_64.png"));
+			imagenCrearJornada = new Image(getClass().getResourceAsStream("/recursos/circulo_flecha_1.png"));
         } catch (Exception e) {
-        	imagenCrearJornada = new Image(getClass().getResourceAsStream("/recursos/circulo_flecha_1.png"));
+			//Forma desde el JAR.
+			flechaRetroceder = new Image("/recursos/flecha_derecha_2.png");
+			flechaAvnazar = new Image("/recursos/flecha_derecha_2.png");
+			copiaSemana = new Image("/recursos/bd_add_1_128.png");
+			copiaJornada = new Image("/recursos/floppy_lila_1_128.png");
+			borrarJornada = new Image("/recursos/boton_2_64.png");
+			imagenCrearJornada = new Image("/recursos/circulo_flecha_1.png");
         }
-
+		ivAnteriorJornada.setImage(flechaRetroceder);
+		ivSiguienteJornada.setImage(flechaAvnazar);
+		ivBotonCopiarSemana.setImage(copiaSemana);
+		ivBotonCopiarJornada.setImage(copiaJornada);
+		ivBotonBorrarJornada.setImage(borrarJornada);
         ivBotonCrearJornada.setImage(imagenCrearJornada);
-        
-        btnBorrar.getStyleClass().add("boton_rojo");
 		
 		conexionBD = ConexionBD.getInstance(); //Obtenemos una istancia de la Conexion a BD.
 		
@@ -325,14 +341,7 @@ public class JornadaControlador implements Initializable {
     }
 
 	@FXML
-	void botonBorrar(MouseEvent event) {
-		if(jornada != null) {
-			jornada.setComentario("");
-		}
-	}
-
-	@FXML
-	void botonGuardar(MouseEvent event) {
+	void botonGuardarComentario(MouseEvent event) {
 		try {
 			conexionBD.actualizarComentarioJornada(jornada);
 			toast.show((Stage) bdJornada.getScene().getWindow(), "Comentario modificado!!.");
@@ -534,7 +543,7 @@ public class JornadaControlador implements Initializable {
 	
 	public void inicializacion(Jornada jorn) {
 		if(jorn == null) {
-			//toast.show((Stage) bdJornada.getScene().getWindow(), "Esta jornada no esta creada");
+			btnGuardarComentario.setDisable(true);
 			toast.show(escenario, "Esta jornada no esta creada");
 			//Si ya hay cargado datos en pantalla, borra los datos.
 			if(jornada != null) {
@@ -643,6 +652,7 @@ public class JornadaControlador implements Initializable {
 		
 		//Si la jornada pasada como parametro no es null, hacemos el proceso de binding
 		if(jorn != null) {
+			btnGuardarComentario.setDisable(false);
 			this.jornadaOriginal = jorn; //Asignamos la jornada pasada como parametro a jornadaOriginal.
 			jornada = new Jornada(jornadaOriginal); //pasamos los datos de jornadaOriginal a jornada para que los cambios no afecten directamente a jornadaOriginal
 			dpFecha.setValue(jornada.getFecha());	//Asignamos la fecha de la jornada al datePiker.
