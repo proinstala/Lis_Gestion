@@ -8,6 +8,7 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import baseDatos.ConexionBD;
 import javafx.beans.binding.Bindings;
@@ -42,6 +43,7 @@ import modelo.Alumno;
 import modelo.EstadoAlumno;
 import modelo.Genero;
 import modelo.Toast;
+import utilidades.Constants;
 import javafx.fxml.Initializable;
 
 public class AlumnosControlador implements Initializable {
@@ -50,6 +52,7 @@ public class AlumnosControlador implements Initializable {
     private ObservableList<Alumno> listadoAlumnos;
     private DateTimeFormatter formatter;
     private ConexionBD conexionBD;
+    private Logger logUser;
     private PrincipalControlador controladorPincipal;
     private Toast toast;
     private Stage escenario;
@@ -127,7 +130,9 @@ public class AlumnosControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-    	//Cargar imagenes en ImageView.
+    	btnBorrar.getStyleClass().add("boton_rojo");
+
+        //Cargar imagenes en ImageView.
         Image imagenLupa;
         try {
             imagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png")); //Forma desde IDE y JAR.
@@ -135,9 +140,8 @@ public class AlumnosControlador implements Initializable {
         	imagenLupa = new Image("/recursos/lupa_lila_2_128.png"); //Forma desde el JAR.
         }
         ivLupa.setImage(imagenLupa);
-        
-        btnBorrar.getStyleClass().add("boton_rojo");
 
+        logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
         conexionBD = ConexionBD.getInstance();
         toast = new Toast();
 
@@ -176,12 +180,6 @@ public class AlumnosControlador implements Initializable {
         		
         	});
         });
-
-        //Binding de los label de conteo datos del listadoAlumnos.
-        //lbNumTotalAlumnos.textProperty().bind(listadoAlumnos.filtered(p -> p.getGenero().toString().equals("HOMBRE")));
-        //IntegerProperty tamLista = new SimpleIntegerProperty(listadoAlumnos.size());
-        //lbNumTotalAlumnos.textProperty().bind(tamLista.asString());
-
     }
 
 
@@ -207,10 +205,15 @@ public class AlumnosControlador implements Initializable {
                 try {
                     if(conexionBD.borrarAlumno(alumnoSeleccionado)) {
                         listadoAlumnos.remove(alumnoSeleccionado);
+                        logUser.config("Eliminado Alumno. " + alumnoSeleccionado.toString());
                         toast.show(escenario, "Alumno eliminado!!.");
+                    } else {
+                        logUser.warning("Fallo al eliminar Alumno. " + alumnoSeleccionado.toString());
                     }
                 } catch (SQLException e) {
-                    // meter en log.
+                    logUser.severe("Excepción: " + e.toString());
+                    e.printStackTrace();
+
                     alerta = new Alert(Alert.AlertType.ERROR);
                     alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
                     alerta.setTitle("Borrar Alumno");
@@ -219,13 +222,10 @@ public class AlumnosControlador implements Initializable {
                     alerta.initOwner(escenario);
                     alerta.initModality(Modality.APPLICATION_MODAL);
                     alerta.showAndWait();
-                    
-                    e.printStackTrace();
-                }
-    			
-    		} else {
-    			
-    		}
+                } catch (Exception e) {
+                    logUser.severe("Excepción: " + e.toString());
+                }	
+    		} 
         } 
     }
 
@@ -246,7 +246,6 @@ public class AlumnosControlador implements Initializable {
                 ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
                 ventana.initStyle(StageStyle.UNDECORATED);
     
-                controller.setStage(ventana);
                 controller.setAlumno(alumnoSeleccionado);
     
                 Scene scene = new Scene(cardAlumno);
@@ -254,11 +253,12 @@ public class AlumnosControlador implements Initializable {
                 ventana.setScene(scene);
                 ventana.showAndWait();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                logUser.severe("Excepción: " + e.toString());
                 e.printStackTrace();
-            }
+            } catch (Exception e) {
+                logUser.severe("Excepción: " + e.toString());
+            }	
         }
-        
     }
 
     @FXML
@@ -280,7 +280,7 @@ public class AlumnosControlador implements Initializable {
                 URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
                 ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
                 
-                controller.setStage(ventana);
+                //controller.setStage(ventana);
                 controller.modoFormulario(controller.MODO_EDITAR_ALUMNO);
                 controller.setAlumno(alumnoSeleccionado);
     
@@ -290,14 +290,15 @@ public class AlumnosControlador implements Initializable {
                 ventana.setTitle("Editar Alumno");
                 ventana.showAndWait();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                logUser.severe("Excepción: " + e.toString());
                 e.printStackTrace();
-            }
-
+            } catch (Exception e) {
+                logUser.severe("Excepción: " + e.toString());
+            }	
             setupDatosTalba(); //configuro los bindign para que se actualice los labels de informacion de la tableViev.
         }
-        
     }
+
 
     @FXML
     void nuevoAlumno(MouseEvent event) {
@@ -315,7 +316,7 @@ public class AlumnosControlador implements Initializable {
             URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
             ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
 
-            controller.setStage(ventana);
+            //controller.setStage(ventana);
             controller.modoFormulario(controller.MODO_NUEVO_ALUMNO);
             controller.setListaAlumnos(listadoAlumnos);
 
@@ -325,9 +326,11 @@ public class AlumnosControlador implements Initializable {
             ventana.setTitle("Nuevo Alumno");
             ventana.showAndWait();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
-        }
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
+        }	
     }    
 
     /**

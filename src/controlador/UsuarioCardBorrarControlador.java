@@ -5,6 +5,8 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Handler;
+import java.util.logging.Logger;
 
 import baseDatos.ConexionBD;
 import javafx.beans.property.SimpleStringProperty;
@@ -27,17 +29,18 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import modelo.Toast;
 import modelo.Usuario;
+import utilidades.Constants;
 import javafx.fxml.Initializable;
 
 public class UsuarioCardBorrarControlador implements Initializable {
 
     private double x, y;
+    private Logger logRoot;
     private ConexionBD conexionBD;
     private Toast toast;
     private Alert alerta;
     private Usuario usuario;
     private Usuario usuarioRoot;
-    private Stage escenario;
     private StringProperty password;
     private PrincipalControlador controladorPincipal;
 
@@ -76,33 +79,43 @@ public class UsuarioCardBorrarControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        conexionBD = ConexionBD.getInstance();
-        toast = new Toast();
-        
+        //Añadir clases de estilo CSS a elementos.
+        btnCancelar.getStyleClass().add("boton_rojo");
+
+        //Establecer imagen en ImageView.
         Image imagenDelete;
         Image bin;
         try {
-            //Forma desde IDE y JAR.
+            //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
             imagenDelete = new Image(getClass().getResourceAsStream("/recursos/usuario_delete_1_128.png"));
             bin = new Image(getClass().getResourceAsStream("/recursos/papelera_1_128.png"));
         } catch (Exception e) {
-            //Forma desde el JAR.
+            //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
             imagenDelete = new Image("/recursosusuario_delete_1_128.png");
             bin = new Image("/recursos/papelera_1_128.png");
             
         }
+        //Establecer las imagenes cargadas en los ImageView.
         ivImagenUser.setImage(imagenDelete);
         ivPapelera.setImage(bin);
 
+        //Configurar el evento cuando se presiona el ratón en el panel apBorrarUsuario.
         apBorrarUsuario.setOnMousePressed(mouseEvent -> {
+            //Obtener las coordenadas X e Y del ratón en relación con la escena.
             x = mouseEvent.getSceneX();
             y = mouseEvent.getSceneY();
         });
 
+        //Configurar el evento cuando se arrastra el ratón en el panel apBorrarUsuario.
         apBorrarUsuario.setOnMouseDragged(mouseEvent -> {
-            escenario.setX(mouseEvent.getScreenX() - x);
-            escenario.setY(mouseEvent.getScreenY() - y);
+            //Obtener la referencia al Stage actual y establecer las nuevas coordenadas X e Y.
+            ((Stage) apBorrarUsuario.getScene().getWindow()).setX(mouseEvent.getScreenX() - x);
+            ((Stage) apBorrarUsuario.getScene().getWindow()).setY(mouseEvent.getScreenY() - y);
         });
+
+        logRoot = Logger.getLogger(Constants.USER_ROOT); //Crea una instancia de la clase Logger asociada al nombre de registro.
+        conexionBD = ConexionBD.getInstance();
+        toast = new Toast();
 
         //Inicializa los StringProperty
         password = new SimpleStringProperty("");
@@ -124,13 +137,19 @@ public class UsuarioCardBorrarControlador implements Initializable {
                 tfPasswordVisible.setVisible(false);
             }
         });
+
+        //Configurar un evento de clic del ratón para el botón "Cancelar".
+        btnCancelar.setOnMouseClicked(e -> {
+            ((Stage) apBorrarUsuario.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
+        });
     }
 
-    @FXML
-    void cerrarVentana(MouseEvent event) {
-        escenario.close();
-    }
 
+    /**
+     * Método para borrar un usuario.
+     * 
+     * @param event El evento de clic del ratón.
+     */
     @FXML
     void borrarUsuario(MouseEvent event) {
         if (comporbarPassword()) {
@@ -141,7 +160,7 @@ public class UsuarioCardBorrarControlador implements Initializable {
             alerta.setHeaderText("Esta Acción es irreversible.\n\nSi no estas seguro de si quieres BORRAR el usuario,\nhaz cliz en el botón Cancelar.");
             alerta.setContentText("¿Estas seguro de que quieres borrar al Usuario?");
             alerta.initStyle(StageStyle.DECORATED);
-            alerta.initOwner(escenario);
+            alerta.initOwner((Stage) apBorrarUsuario.getScene().getWindow());
 
             ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
             ButtonType buttonTypeConfirmar = new ButtonType("Confirmar", ButtonData.YES);
@@ -151,50 +170,86 @@ public class UsuarioCardBorrarControlador implements Initializable {
             // Si pulsamos el boton confirmar:
             if (result.get() == buttonTypeConfirmar) {
 
+                //Cierra el log asociado al usuario.
+                Logger logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
+                //cierra cada uno de los controladores y detiene la emisión de registros a través de ellos.
+                for (Handler h : logUser.getHandlers()) {
+                    h.close();
+                }
+
                 // LLamo al metodo para borrar todo el contenido del directorio del usuario.
                 if (borrarFicherosUsuario(usuario.getDirectorio())) {
+                    logRoot.info("Borrado ficheros de usuario. (id: " + usuario.getId() + ", nombre: " + usuario.getNombreUsuario() + ")");
                     conexionBD.setUsuario(usuarioRoot);
                     try {
                         // Borro los datos de usuario de la base de datos de la aplición.
                         if (!conexionBD.borrarUsuario(usuario.getId())) {
-                            // Poner mensaje de error;
+                            logUser.warning("Fallo al intentar borrar Usuario de la BD. (id: " + usuario.getId() + ", nombre: " + usuario.getNombreUsuario() + ")");
                         }
                     } catch (SQLException e) {
-                        // TODO Auto-generated catch block
+                        logRoot.severe("Excepción: " + e.toString());
                         e.printStackTrace();
+                    } catch (Exception e) {
+                        logRoot.severe("Excepción: " + e.toString());
                     }
                     controladorPincipal.cerrarSesion();
-                    escenario.close();
+                    ((Stage) apBorrarUsuario.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
                 } else {
-                    // MENSAJE NO SE HA PODIDO BORRAR LOS FICHEROS DE USUARIO.
+                    logUser.warning("Fallo al intentar borrar ficheros de Usuario. (id: " + usuario.getId() + ", nombre: " + usuario.getNombreUsuario() + ")");
                 }
             }
         }
     }
 
+
+    /**
+     * Elimina de forma recursiva todos los archivos y directorios dentro del directorio especificado
+     * y luego elimina el directorio principal.
+     *
+     * @param fichero El directorio a borrar.
+     * @return true si se eliminó el directorio con éxito, false en caso contrario.
+     */
     private boolean borrarFicherosUsuario(File fichero) {
+        String nombreFichero;
+
+        //Iterar sobre los archivos y directorios dentro de 'fichero'.
         for(File f : fichero.listFiles()) {
-            System.out.println(f.getName());
+            nombreFichero = f.getName();
+            logRoot.config("Borrar fichero: " + nombreFichero);
+
+            //Si es un directorio, llamar recursivamente a 'borrarFicherosUsuario' para eliminar su contenido.
             if(f.isDirectory()) {
                 borrarFicherosUsuario(f);
             } else {
-                f.delete();
+                //Si es un archivo, eliminarlo.
+                if(f.delete()) {
+                    logRoot.config("Borrar Archivo: " + nombreFichero);
+                } else {
+                    logRoot.warning("Fallo al borrar Archivo: " + nombreFichero);
+                }
             }
         }
         
+        nombreFichero = fichero.getName();
+
+        //Eliminar el directorio 'fichero' después de eliminar todos los archivos y directorios dentro de él.
         if(fichero.delete()) {
-            System.out.println("Borrado directorio");
+            logRoot.config("Borrar directorio: " + nombreFichero);
             return true;
         } else {
-            System.out.println("No se ha borrado el directorio.");
+            logRoot.warning("Fallo al borrar directorio: " + nombreFichero);
             return false;
         }
     }
 
     
+    /**
+     * Comprueba si la contraseña ingresada coincide con la contraseña del usuario.
+     *
+     * @return true si la contraseña es correcta, false en caso contrario.
+     */
     private boolean comporbarPassword() {
         if(usuario.getPassword().equals(password.get())) {
-            //toast.show(escenario, "El password de Usuario correcto!!.");
             return true;
         } else if(password.get().isBlank()) {
             toast.show((Stage) apBorrarUsuario.getScene().getWindow(), "El campo Password esta vacío.!!.");
@@ -205,19 +260,18 @@ public class UsuarioCardBorrarControlador implements Initializable {
         }
     }
 
-    private void iniciar() {
-        lbIdUsuario.setText(Integer.toString(usuario.getId()));
-        lbNombreUsuario.setText(usuario.getNombreUsuario());
-    }
 
     /**
-	 * Etablece el usuario que esta usando la aplicación.
-	 * @param usuario
-	 */
+     * Establece el usuario actual y actualiza los elementos de la interfaz de usuario correspondientes.
+     *
+     * @param usuarioActual El objeto Usuario que representa al usuario actual.
+     */
 	public void setUsuarioActual(Usuario usuarioActual) {
 		this.usuario = usuarioActual;
-        iniciar();
+        lbIdUsuario.setText(Integer.toString(usuario.getId()));
+        lbNombreUsuario.setText(usuario.getNombreUsuario());
 	}
+
 
     /**
      * Establece el usuarioRoot para este controlador.
@@ -227,14 +281,6 @@ public class UsuarioCardBorrarControlador implements Initializable {
         this.usuarioRoot = usuarioRoot;
     }
 
-    /**
-     * Establece un Stage para este controlador.
-     * 
-     * @param stage Stage que se establece.
-     */
-    public void setStage(Stage stage) {
-    	this.escenario = stage;
-    }
 
     /**
 	 * Establece para este controlador, el controlador principal de la aplicacion.

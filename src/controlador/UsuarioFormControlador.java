@@ -3,6 +3,7 @@ package controlador;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,20 +23,18 @@ import javafx.stage.StageStyle;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Toast;
 import modelo.Usuario;
+import utilidades.Constants;
 import javafx.fxml.Initializable;
 
 public class UsuarioFormControlador implements Initializable {
 
     private ConexionBD conexionBD;
+    private Logger logUser;
     private Toast toast;
-    private Stage escenario;
 
     private Usuario oldUsuario;
     private Usuario newUsuario;
 
-    private String nombre;
-    private String apellido1;
-    private String apellido2;
     private int telefono;
     private String email;
 
@@ -74,37 +73,41 @@ public class UsuarioFormControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //Añadir clases de estilo CSS a elementos.
         btnCancelar.getStyleClass().add("boton_rojo");
     	gpFormUsuario.getStyleClass().add("fondo_ventana_degradado_toRight");
-
-        conexionBD = ConexionBD.getInstance();
-        toast = new Toast();
 
         //Establecer imagen formulario.
         Image imagen;
         try {
-            //Forma desde IDE y JAR.
-            imagen = new Image(getClass().getResourceAsStream("/recursos/usuario_edit_1_128.png"));
+            //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
+            imagen = new Image(getClass().getResourceAsStream("/recursos/usuario_edit_1_128.png")); //Forma desde IDE y JAR.
         } catch (Exception e) {
-            //Forma desde el JAR.
-            imagen = new Image("/recursos/usuario_edit_1_128.png");
+            //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
+            imagen = new Image("/recursos/usuario_edit_1_128.png"); //Forma desde el JAR.
             
         }
-        ivImagenTipoFormulario.setImage(imagen);
+        ivImagenTipoFormulario.setImage(imagen); //Establecer la imagen cargada en el ImageView.
+
+        logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
+        conexionBD = ConexionBD.getInstance();
+        toast = new Toast();
 
         tfIdUsuario.setDisable(true);
+
+        //Configurar un evento de clic del ratón para el botón "Cancelar".
+        btnCancelar.setOnMouseClicked(e -> {
+            ((Stage) gpFormUsuario.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
+        });
     }
 
-    @FXML
-    void cancelar(MouseEvent event) {
-        escenario.close();
-    }
 
     @FXML
     void confirmacion(MouseEvent event) {
         if(comprobarCampos() && guardarCambios()) {
-            toast.show(escenario, "Datos de usuario modificados.");
-            escenario.close();
+            logUser.config("Datos de usuario modificados");
+            toast.show((Stage) ((Stage) gpFormUsuario.getScene().getWindow()).getOwner(), "Datos de usuario modificados.");
+            ((Stage) gpFormUsuario.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
         }
     }
 
@@ -182,10 +185,14 @@ public class UsuarioFormControlador implements Initializable {
                 oldUsuario.setTelefono(newUsuario.getTelefono());
                 oldUsuario.setEmail(newUsuario.getEmail());
                 return true;
+            } else {
+                logUser.warning("Fallo al intentar modificar Usuario en BD.");
             }
         } catch (SQLException e) {
-            // AÑADIR LOG
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
         }
         return false;
     }
@@ -199,25 +206,13 @@ public class UsuarioFormControlador implements Initializable {
      */
     private void mensajeAviso(String tiutlo, String cabecera, String cuerpo) {
         Alert alerta = new Alert(Alert.AlertType.ERROR);
-        alerta.initOwner(escenario);
+        alerta.initOwner((Stage) gpFormUsuario.getScene().getWindow());
         alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
         alerta.setTitle(tiutlo);
         alerta.setHeaderText(cabecera);
         alerta.setContentText(cuerpo);
         alerta.initStyle(StageStyle.DECORATED);
-        alerta.initOwner(escenario);
         alerta.initModality(Modality.APPLICATION_MODAL);
         alerta.showAndWait();
     }
-
-    
-    /**
-     * Establece un Stage para este controlador.
-     * 
-     * @param stage Stage que se establece.
-     */
-    public void setStage(Stage stage) {
-    	this.escenario = stage;
-    }
-    
 }

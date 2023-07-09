@@ -5,6 +5,7 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import baseDatos.ConexionBD;
 import javafx.fxml.FXML;
@@ -12,6 +13,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -24,6 +26,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import modelo.Toast;
 import modelo.Usuario;
+import utilidades.Constants;
 import javafx.fxml.Initializable;
 
 public class LoginControlador implements Initializable {
@@ -31,11 +34,14 @@ public class LoginControlador implements Initializable {
     private String[] camposLogin = new String[2]; //[0]nombre, [1]password
     private Usuario usuario;
     private Usuario usuarioRoot;
+    private Logger loggerRoot;
     private ConexionBD conexionBD;
     private PrincipalControlador controladorPincipal;
     private Toast toast;
-    private Stage escenario;
 
+    
+    @FXML
+    private Label lbPasswordLost;
 
     @FXML
     private ImageView ivImagenLogin;
@@ -62,20 +68,25 @@ public class LoginControlador implements Initializable {
         Image imagenLogin;
         Image imagenLogo;
         try {
-            //Forma desde IDE y JAR.
-            imagenLogin = new Image(getClass().getResourceAsStream("/recursos/user_1_512.png"));
+            //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
+            imagenLogin = new Image(getClass().getResourceAsStream("/recursos/user_1_512.png")); //Forma desde IDE y JAR.
             imagenLogo = new Image(getClass().getResourceAsStream("/recursos/logo_nuevo_letras_color.png"));
         } catch (Exception e) {
-            //Forma desde el JAR.
-            imagenLogin = new Image("/recursos/user_1_512.png");
+            //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
+            imagenLogin = new Image("/recursos/user_1_512.png"); //Forma desde el JAR.
             imagenLogo = new Image("/recursos/logo_nuevo_letras_color.png");
         }
+        //Establecer las imagenes cargadas en los ImageView.
         ivImagenLogin.setImage(imagenLogin);
         ivImagenLogo.setImage(imagenLogo);
 
+        loggerRoot = Logger.getLogger(Constants.USER_ROOT); //Crea una instancia de la clase Logger asociada al nombre de registro.
         conexionBD = ConexionBD.getInstance();
         toast = new Toast();
-        
+
+        //olvidado password.
+        lbPasswordLost.setDisable(true); //EN CONSTRUCCION. deshabilitado
+        lbPasswordLost.setVisible(false);//No visible.
     }
 
     @FXML
@@ -90,63 +101,65 @@ public class LoginControlador implements Initializable {
                 }
                 logueoOK = true;
             } catch (SQLException e) {
-                // poner log.
+                loggerRoot.severe("Excepción: " + e.toString());
                 e.printStackTrace();
             } catch (NoSuchAlgorithmException e) {
-                // poner log.
+                loggerRoot.severe("Excepción: " + e.toString());
                 e.printStackTrace();
+            } catch (Exception e) {
+                loggerRoot.severe("Excepción: " + e.toString());
             }
 
             if(logueoOK && usuario != null) {
                 toast.show((Stage) bdLogin.getScene().getWindow(), "Usuario Logueado!!.");
                 controladorPincipal.iniciarSesion(usuario);
+                loggerRoot.info("Usuario logueado en la aplicación. (id: " + usuario.getId() + ", nombre: " + usuario.getNombreUsuario() + ").");
             } else {
                 toast.show((Stage) bdLogin.getScene().getWindow(), "Algo a salido mal!!.");
+                loggerRoot.severe("Error: fallo al intentar acceder con usuario " + camposLogin[0]);
             }
         }
     }
 
-    
 
     @FXML
     void recuperarPassword(MouseEvent event) {
 
+        //El label para acceder a esta parte esta deshabilitado y no visible en el metodo initialize.
+        /* 
         if(escenario == null) {
             setStage(controladorPincipal.getStage());
-        }
+        }*/
 
         Alert alerta = new Alert(Alert.AlertType.ERROR);
         alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
         alerta.setTitle("Recuperar password");
         alerta.setContentText("En construcción.");
         alerta.initStyle(StageStyle.DECORATED);
-        alerta.initOwner(escenario);
+        //alerta.initOwner(escenario);
         alerta.initModality(Modality.APPLICATION_MODAL);
         alerta.showAndWait();
         
     }
 
+
     @FXML
     void registrarse(MouseEvent event) {
         try {
-            if(escenario == null) {
-                setStage(controladorPincipal.getStage());
-            }
-            
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/registroUserVista.fxml"));
 		    AnchorPane registroUser;
             registroUser = (AnchorPane) loader.load();
             RegistroUserControlador controller = loader.getController(); // cargo el controlador.
             
             Stage ventana= new Stage();
-            ventana.initOwner(escenario);
+            //ventana.initOwner(escenario);
+            ventana.initOwner((Stage) bdLogin.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.UNDECORATED);
 
             URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
             ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
                 
-            controller.setStage(ventana);
             controller.setUsuarioRoot(usuarioRoot);
 
             Scene scene = new Scene(registroUser);
@@ -155,8 +168,10 @@ public class LoginControlador implements Initializable {
             
             ventana.showAndWait();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            loggerRoot.severe("Excepción al intentar cargar la Scene registroUser. " + e.toString());
             e.printStackTrace();
+        } catch (Exception e) {
+            loggerRoot.severe("Excepción: " + e.toString());
         }
     }
     
@@ -190,15 +205,18 @@ public class LoginControlador implements Initializable {
             
             if(!conexionBD.comprobarUsuario(camposLogin)) {
                 toast.show((Stage) bdLogin.getScene().getWindow(), "El password es incorrecto!!.");
+                loggerRoot.info("Intento de acceso a usuario " + camposLogin[0] + " con password incorrecto.");
                 return false;
             }
 
         } catch (SQLException e) {
-            // poner log
+            loggerRoot.severe("Excepción: " + e.toString());
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
-            // poner log
+            loggerRoot.severe("Excepción: " + e.toString());
             e.printStackTrace();
+        } catch (Exception e) {
+            loggerRoot.severe("Excepción: " + e.toString());
         }
         return true;
     }
@@ -221,14 +239,4 @@ public class LoginControlador implements Initializable {
     public void setUsuarioRoot(Usuario usuarioRoot) {
         this.usuarioRoot = usuarioRoot;
     }
-
-    /**
-     * Establece un Stage para este controlador.
-     * 
-     * @param s Stage que se establece.
-     */
-    public void setStage(Stage stage) {
-    	this.escenario = stage;
-    }
-
 }

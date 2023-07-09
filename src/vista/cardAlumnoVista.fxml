@@ -103,7 +103,7 @@
                   <Font name="System Bold" size="12.0" />
                </font>
             </Label>
-            <Button fx:id="btnCerrar" layoutX="296.0" layoutY="369.0" mnemonicParsing="false" onMouseClicked="#cerrarVentana" prefWidth="70.0" text="Cerrar" AnchorPane.topAnchor="370.0" />
+            <Button fx:id="btnCerrar" layoutX="296.0" layoutY="369.0" mnemonicParsing="false" prefWidth="70.0" text="Cerrar" AnchorPane.topAnchor="370.0" />
             <Label fx:id="lbNombre" layoutX="95.0" layoutY="80.0" text="Label" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="75.0" />
             <Label fx:id="lbIdAlumno" layoutX="282.0" layoutY="80.0" text="Label" AnchorPane.leftAnchor="275.0" AnchorPane.topAnchor="75.0" />
             <Label fx:id="lbApellidos" layoutX="100.0" layoutY="115.0" text="Label" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="105.0" />

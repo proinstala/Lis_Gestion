@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import baseDatos.ConexionBD;
 import javafx.beans.binding.Bindings;
@@ -34,20 +35,20 @@ import modelo.EstadoAlumno;
 import modelo.EstadoPago;
 import modelo.Mensualidad;
 import modelo.Toast;
+import utilidades.Constants;
 import utilidades.Fechas;
 
 public class MensualidadCardGeneraMesControlador implements Initializable {
 
     private double x, y;
     private DateTimeFormatter formatter;
-    private Stage escenario;
-    private Stage stagePrincipal;
-    IntegerBinding alumnoActivos;
-    IntegerBinding numeroMensualidades;
+    private IntegerBinding alumnoActivos;
+    private IntegerBinding numeroMensualidades;
     private ObservableList<Alumno> listadoAlumnosGeneral;
     private ObservableList<Mensualidad> listadoMensualidadesGeneral;
     private ConexionBD conexionBD;
-    Map<Integer, Double> precios_clases;
+    private Logger logUser;
+    private Map<Integer, Double> precios_clases;
     private Toast toast;
     private LocalDate fechaActual;
     private YearMonth fechaSeleccionada;
@@ -97,34 +98,37 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
-        //Carga los estilos a los Labels.
+        //Añadir clases de estilo CSS a elementos.
         lbAlumnosLabel.getStyleClass().add("color_texto_negro");
         lbGenerarLabel.getStyleClass().add("color_texto_negro");
-
-        //Configuro que la ventana se pueda mover.
-        apCardGenerarMensualidad.setOnMousePressed(mouseEvent -> {
-            x = mouseEvent.getSceneX();
-            y = mouseEvent.getSceneY();
-        });
-
-        apCardGenerarMensualidad.setOnMouseDragged(mouseEvent -> {
-            escenario.setX(mouseEvent.getScreenX() - x);
-            escenario.setY(mouseEvent.getScreenY() - y);
-        });
 
         //Carga la imagen.
         Image imagePago;
         try {
-            //Forma desde IDE y JAR.
-            imagePago = new Image(getClass().getResourceAsStream("/recursos/pago_3_128.png"));
+            //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
+            imagePago = new Image(getClass().getResourceAsStream("/recursos/pago_3_128.png")); //Forma desde IDE y JAR.
         } catch (Exception e) {
-            //Forma desde el JAR.
-            imagePago = new Image("/recursos/pago_3_128.png");
+            //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
+            imagePago = new Image("/recursos/pago_3_128.png"); //Forma desde el JAR.
             
         }
-        ivImagenPago.setImage(imagePago);
+        ivImagenPago.setImage(imagePago); //Establecer la imagen cargada en el ImageView.
 
+        //Configurar el evento cuando se presiona el ratón en el panel apCardGenerarMensualidad.
+        apCardGenerarMensualidad.setOnMousePressed(mouseEvent -> {
+            //Obtener las coordenadas X e Y del ratón en relación con la escena.
+            x = mouseEvent.getSceneX();
+            y = mouseEvent.getSceneY();
+        });
+
+        //Configurar el evento cuando se arrastra el ratón en el panel apCardGenerarMensualidad.
+        apCardGenerarMensualidad.setOnMouseDragged(mouseEvent -> {
+            //Obtener la referencia al Stage actual y establecer las nuevas coordenadas X e Y.
+            ((Stage) apCardGenerarMensualidad.getScene().getWindow()).setX(mouseEvent.getScreenX() - x);
+            ((Stage) apCardGenerarMensualidad.getScene().getWindow()).setY(mouseEvent.getScreenY() - y);
+        });
+
+        logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
         conexionBD = ConexionBD.getInstance();
         toast = new Toast();
 
@@ -135,15 +139,16 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
 
         configurarComboBox();
 
-        //Listener para el Button btnCerrar. Cierra la ventana al hacer click. 
+        //Configurar un evento de clic del ratón para el botón "Cerrar".
         btnCerrar.setOnMouseClicked(e -> {
-            escenario.close();
+            ((Stage) apCardGenerarMensualidad.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
         });
 
+        //Configurar un evento de clic del ratón para el botón "Generar".
         btnGenerar.setOnMouseClicked(e -> {
             if (generarMensualidades()) {
-                toast.show(stagePrincipal, "Mensualidades generadas correctamente!!.");
-                escenario.close();
+                toast.show((Stage) ((Stage) apCardGenerarMensualidad.getScene().getWindow()).getOwner(), "Mensualidades generadas correctamente!!.");
+                ((Stage) apCardGenerarMensualidad.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
             }
         });
         
@@ -156,6 +161,7 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
             "Generar Mensualidades",
             "No hay mensualidades ha generar..",
             "El número de mensualidades a generar es 0.");
+            
             return false;
         }
         
@@ -196,23 +202,26 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
                     }
                 }
             } else {
+                logUser.warning("Fallo al insertar lista mensualidades en BD.");
                 mensajeAviso(Alert.AlertType.ERROR,
                     "Generar Mensualidades",
                     "Error al insertar mensualidades en base de datos.",
                     "No se ha podido insertar las mensualidades en la base de datos.");
+                
+                return false;
             }
         } catch (SQLException e) {
+            logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
             mensajeAviso(Alert.AlertType.ERROR,
                 "Generar Mensualidades",
                 "Error al insertar mensualidades en base de datos.",
                 "No se ha podido insertar las mensualidades en la base de datos.");
-            //poner en ele log
-            System.out.println("ERROR: " + e.toString());
-            e.printStackTrace();
             return false;
-           
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
+            return false;
         }
-
         return true;
     }
 
@@ -227,14 +236,13 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
             precios_clases = conexionBD.getPrecioClases();
             if(precios_clases != null) {return true;} //Se obtuvieron los precios exitosamente.
         } catch (SQLException e) {
-            //poner en el log.
-            System.out.println("ERROR: " + e.toString());
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
         } catch (Exception e) {
-            //poner en ele log
-            System.out.println("ERROR: " + e.toString());
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
         }
+        logUser.warning("Fallo al recuperar precios de clases de BD.");
         return false; //No se pudieron obtener los precios.
     }//FIN obtenerPreciosClase.
 
@@ -330,25 +338,4 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
         listadoMensualidadesGeneral = lista;
         
 	}
-
-
-    /**
-     * Establece un Stage para este controlador.
-     * 
-     * @param stage Stage que se establece.
-     */
-    public void setStage(Stage stage) {
-    	this.escenario = stage;
-    }
-
-
-    /**
-     * Establece el Stage principal para este controlador.
-     * 
-     * @param stage Stage que se establece.
-     */
-    public void setStagePrincipal(Stage stage) {
-    	this.stagePrincipal = stage;
-    }
-    
 }

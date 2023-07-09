@@ -46,7 +46,7 @@
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor></Label>
-                  <Label layoutX="27.0" layoutY="357.0" onMouseClicked="#recuperarPassword" styleClass="label_resaltado" text="¿Has perdido la contraseña?" underline="true">
+                  <Label fx:id="lbPasswordLost" layoutX="27.0" layoutY="357.0" onMouseClicked="#recuperarPassword" styleClass="label_resaltado" text="¿Has perdido la contraseña?" underline="true">
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor></Label>

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import baseDatos.ConexionBD;
 import javafx.beans.binding.Bindings;
@@ -26,10 +27,12 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import modelo.Toast;
 import modelo.Usuario;
+import utilidades.Constants;
 import javafx.fxml.Initializable;
 
 public class UsuarioControlador implements Initializable {
 
+    private Logger logUser;
     private ConexionBD conexionBD;
     private Usuario usuario;
     private Usuario usuarioRoot;
@@ -106,8 +109,7 @@ public class UsuarioControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        conexionBD = ConexionBD.getInstance();
-
+        //Establecer imagen en ImageView.
         Image imagenBorrarUsuario;
         try {
             //Forma desde IDE y JAR.
@@ -118,6 +120,9 @@ public class UsuarioControlador implements Initializable {
         	
         }
         ivBorrarUsuario.setImage(imagenBorrarUsuario); 
+
+        logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
+        conexionBD = ConexionBD.getInstance();
     }
 
     @FXML
@@ -136,7 +141,6 @@ public class UsuarioControlador implements Initializable {
             URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
             ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
             
-            controller.setStage(ventana);
             controller.setUsuarioActual(usuario);
             controller.setUsuarioRoot(usuarioRoot);
             controller.setControladorPrincipal(controladorPincipal);
@@ -146,44 +150,11 @@ public class UsuarioControlador implements Initializable {
             ventana.setScene(scene);
             ventana.showAndWait();
         } catch (IOException e) {
-            //poner log.
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
         }
-        /*
-        alerta = new Alert(AlertType.CONFIRMATION);
-        alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); //Añade hoja de estilos.
-        alerta.setTitle("Borrar Usuario");
-        alerta.setHeaderText("Id: " + usuario.getId() + "\nNombre: " + usuario.getNombreUsuario());
-        alerta.setContentText("¿Estas seguro de que quieres borrar al Usuario?");
-        alerta.initStyle(StageStyle.DECORATED);
-        alerta.initOwner(escenario);
-
-        ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-        ButtonType buttonTypeConfirmar = new ButtonType("Confirmar", ButtonData.YES);
-        alerta.getButtonTypes().setAll(buttonTypeConfirmar, buttonTypeCancel);
-        Optional<ButtonType> result = alerta.showAndWait();
-        
-        //Si pulsamos el boton confirmar:
-        if (result.get() == buttonTypeConfirmar){
-            
-            //LLamo al metodo para borrar todo el contenido del directorio del usuario.
-            if(borrarFicherosUsuario(usuario.getDirectorio())) {
-                conexionBD.setUsuario(usuarioRoot);
-                try {
-                    //Borro los datos de usuario de la base de datos de la aplición.
-                    if(!conexionBD.borrarUsuario(usuario.getId())) {
-                        //Poner mensaje de error;
-                    }
-                } catch (SQLException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                controladorPincipal.cerrarSesion();
-            } else {
-                //MENSAJE NO SE HA PODIDO BORRAR LOS FICHEROS DE USUARIO.
-            }
-        } 
-        */
     }
 
     private boolean borrarFicherosUsuario(File fichero) {
@@ -228,8 +199,10 @@ public class UsuarioControlador implements Initializable {
             ventana.setScene(scene);
             ventana.showAndWait();
         } catch (IOException e) {
-            //poner log.
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
         }
     }
 
@@ -246,7 +219,6 @@ public class UsuarioControlador implements Initializable {
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.UNDECORATED);
 
-            controller.setStage(ventana);
             controller.setUsuario(usuario);
 
             Scene scene = new Scene(formEmailApp);
@@ -254,8 +226,10 @@ public class UsuarioControlador implements Initializable {
             ventana.setScene(scene);
             ventana.showAndWait();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
         }
     }
 
@@ -275,7 +249,6 @@ public class UsuarioControlador implements Initializable {
             URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
             ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
 
-            controller.setStage(ventana);
             controller.setUsuario(usuario);
 
             Scene scene = new Scene(formUsuario);
@@ -284,8 +257,10 @@ public class UsuarioControlador implements Initializable {
             ventana.setTitle("Editar Usuario");
             ventana.showAndWait();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
         }
     }
 

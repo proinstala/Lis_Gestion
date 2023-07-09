@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,6 +45,7 @@ import modelo.EstadoPago;
 import modelo.FormaPago;
 import modelo.Mensualidad;
 import modelo.Toast;
+import utilidades.Constants;
 import utilidades.Fechas;
 
 /**
@@ -58,7 +60,6 @@ public class MensualidadFormControlador implements Initializable {
     public final String MODO_EDITAR_MENSUALIDAD = "EDITAR";
 
     private String modoControlador;
-    private Stage escenario;
     private Mensualidad oldMensualidad;
     private Mensualidad newMensualidad;
     private Alumno oldAlumno;
@@ -67,7 +68,8 @@ public class MensualidadFormControlador implements Initializable {
     private DateTimeFormatter formatter;
     private DecimalFormat decimalFormat;
     private ConexionBD conexionBD;
-    Map<Integer, Double> precios_clases;
+    private Logger logUser;
+    private Map<Integer, Double> precios_clases;
     private Toast toast;
 
     @FXML
@@ -132,6 +134,7 @@ public class MensualidadFormControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //Añadir clases de estilo CSS a elementos.
         btnCancelar.getStyleClass().add("boton_rojo");
     	gpFormMensualidad.getStyleClass().add("fondo_ventana_degradado_toRight");
         pSeparador.getStyleClass().add("panelSeparador"); //Panel separador de barra superior.
@@ -139,15 +142,16 @@ public class MensualidadFormControlador implements Initializable {
         //Establecer imagen formulario.
         Image imagenMensualidad;
         try {
-            //Forma desde IDE y JAR.
+            //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
             imagenMensualidad = new Image(getClass().getResourceAsStream("/recursos/pago_1_128.png"));
         } catch (Exception e) {
-            //Forma desde el JAR.
+            //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR..
             imagenMensualidad = new Image("/recursos/pago_1_128.png");
             
         }
-        ivImagenTipoFormulario.setImage(imagenMensualidad);
+        ivImagenTipoFormulario.setImage(imagenMensualidad); //Establecer la imagen cargada en el ImageView.
 
+        logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
         conexionBD = ConexionBD.getInstance();
         toast = new Toast();
 
@@ -196,31 +200,29 @@ public class MensualidadFormControlador implements Initializable {
 
         dpFechaPago.setEditable(false);
 
-        //Listener para el Button btnCancelar. Cierra la ventana al hacer click. 
+        //Configurar un evento de clic del ratón para el botón "Cerrar".
         btnCancelar.setOnMouseClicked(e -> {
-            escenario.close();
+            ((Stage) gpFormMensualidad.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
         });
 
-        //Listener para el Button btnConfirmacion.
+        //Configurar un evento de clic del ratón para el botón "Confirmar".
         btnConfirmacion.setOnMouseClicked(e -> {
             if(comporobarCampos()) {
                 if(modoControlador == MODO_EDITAR_MENSUALIDAD) {
                     if (modificarMensualidad()) {
-                        toast.show(escenario, "Mensualidad modificada!!.");
-                        //hay que actualizar el filtro en mensulidadesControlador
-                        escenario.close();
+                        toast.show((Stage) ((Stage) gpFormMensualidad.getScene().getWindow()).getOwner(), "Mensualidad modificada!!.");
+                        ((Stage) gpFormMensualidad.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
                     } else {
-                        toast.show(escenario, "No se ha modificado la Mensualidad!!.");
-                        //mostrar mensaje
+                        toast.show(((Stage) gpFormMensualidad.getScene().getWindow()), "No se ha modificado la Mensualidad!!.");
                     }
                 }
                 if(modoControlador == MODO_NUEVA_MENSUALIDAD) {
                     if (nuevaMensualidad()) {
-                        toast.show(escenario, "Mensualidad creada!!.");
+                        toast.show((Stage) ((Stage) gpFormMensualidad.getScene().getWindow()).getOwner(), "Mensualidad creada!!.");
                         System.out.println("CREA NUEVA MENSUALIDAD");
-                        escenario.close();
+                        ((Stage) gpFormMensualidad.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
                     } else {
-                        toast.show(escenario, "No se ha creado la Mensualidad!!.");
+                        toast.show(((Stage) gpFormMensualidad.getScene().getWindow()), "No se ha creado la Mensualidad!!.");
                     }
                 }
             }
@@ -283,14 +285,13 @@ public class MensualidadFormControlador implements Initializable {
             precios_clases = conexionBD.getPrecioClases();
             if(precios_clases != null) {return true;} //Se obtuvieron los precios exitosamente.
         } catch (SQLException e) {
-            //poner en el log.
-            System.out.println("ERROR: " + e.toString());
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
         } catch (Exception e) {
-            //poner en ele log
-            System.out.println("ERROR: " + e.toString());
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
         }
+        logUser.warning("Fallo al obtener los precios de clases de BD.");
         return false; //No se pudieron obtener los precios.
     }//FIN obtenerPreciosClase.
 
@@ -373,6 +374,7 @@ public class MensualidadFormControlador implements Initializable {
                 oldMensualidad.setValoresMensualidad(newMensualidad);
                 return true;
             } else {
+                logUser.warning("Fallo al intentar modificar la mensualidad.");
                 mensajeAviso(
                         AlertType.ERROR,
                         "Error de Mensualidad",
@@ -380,14 +382,15 @@ public class MensualidadFormControlador implements Initializable {
                         "Se ha producido un error al intentar modificar la mensualidad.");
             }
         } catch (SQLException e) {
-            System.out.println("-- ERROR -- " + e.getMessage());
-            // poner en log.
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
             mensajeAviso(
                     AlertType.ERROR,
                     "Error de Mensualidad",
                     "Se ha producido un error al intentar modicar la Mensualidad en la base de datos.",
                     "ERROR:\n" + e.toString());
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
         }
         return false;
     }//FIN modificarMensualidad.
@@ -406,7 +409,7 @@ public class MensualidadFormControlador implements Initializable {
                     if(oldAlumno.addMensualidad(newMensualidad) && listadoMensualidadesGeneral.add(newMensualidad)) {
                         return true;
                     } else {
-                        //poner en log.
+                        logUser.warning("Fallo al crear nueva mensualidad. Guardada en base de datos pero no en app. (id_mensualidad: " + newMensualidad.getId() +").");
                         mensajeAviso(
                             AlertType.ERROR,
                             "Error de Mensualidad",
@@ -415,6 +418,7 @@ public class MensualidadFormControlador implements Initializable {
                                 + "\npero no se ha guardado en la aplicación.");
                     }
                 } else {
+                    logUser.warning("Fallo al intentar crear mensualidad en la base de datos.");
                      mensajeAviso(
                         AlertType.ERROR,
                         "Error de Mensualidad",
@@ -422,13 +426,15 @@ public class MensualidadFormControlador implements Initializable {
                         "Se ha producido un error al intentar crear la mensualidad en la base de datos.");
                 }
             } catch (SQLException e) {
+                logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
                 mensajeAviso(
                     AlertType.ERROR,
                     "Error de Mensualidad",
                     "Se ha producido un error al intentar crear la Mensualidad en la base de datos.",
                     "ERROR:\n" + e.toString());
-                //poner en el log.
-                e.printStackTrace();
+            } catch (Exception e) {
+                logUser.severe("Excepción: " + e.toString());
             }
             
         } else {
@@ -585,8 +591,7 @@ public class MensualidadFormControlador implements Initializable {
      */
     public void setListaAlumnos(ObservableList<Alumno> lista) {
         listadoAlumnosGeneral = lista;
-        
-        cbAlumnos.setItems(listadoAlumnosGeneral); //Porbar a poner esto en en initialize
+        cbAlumnos.setItems(listadoAlumnosGeneral); 
 	}
 
 
@@ -599,15 +604,4 @@ public class MensualidadFormControlador implements Initializable {
         listadoMensualidadesGeneral = lista; 
 		
 	}
-
-
-    /**
-     * Establece un Stage para este controlador.
-     * 
-     * @param s Stage que se establece.
-     */
-    public void setStage(Stage stage) {
-    	this.escenario = stage;
-    }
-    
 }

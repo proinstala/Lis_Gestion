@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import baseDatos.ConexionBD;
 import javafx.collections.FXCollections;
@@ -41,21 +42,28 @@ import modelo.HoraClase;
 import modelo.Jornada;
 import modelo.TipoClase;
 import modelo.Toast;
+import utilidades.Constants;
 
 public class ClaseControlador implements Initializable {
 
 	private PrincipalControlador controladorPincipal;
-	private Stage escenario;
+	private ObservableList<Alumno> listadoAlumnos;
+	private ObservableList<Alumno> listaClase;
 	private int numeroClase;
 	private DateTimeFormatter formatter;
 	private Clase claseOriginal;
 	private Clase clase;
 	private ConexionBD conexionBD;
+	private Logger logUser;
 	private Jornada jornada;
 	private FilteredList<Alumno> filtro;
 	private Toast toast;
 	private Alert alerta;
 	
+
+	@FXML
+    private BorderPane bpClase;
+
 	@FXML
     private TextField tfBusqueda;
 
@@ -77,7 +85,7 @@ public class ClaseControlador implements Initializable {
 	@FXML
 	private TableColumn<Alumno, String> colNombre;
 
-	  @FXML
+	@FXML
     private TableColumn<Alumno, Number> colAsistencias;
 
     @FXML
@@ -124,11 +132,9 @@ public class ClaseControlador implements Initializable {
 
 	@FXML
 	private ListView<Alumno> lvClase;
-	private ObservableList listaClase;
 
 	@FXML
 	private TableView<Alumno> tvAlumnos;
-	private ObservableList<Alumno> listadoAlumnos;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -139,20 +145,21 @@ public class ClaseControlador implements Initializable {
         Image ImagenGuardar;
         Image ImagenLupa;
         try {
-			//Forma desde IDE y JAR.
-			imagenFlecha = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_2.png")); 
+			//Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
+			imagenFlecha = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_2.png")); //Forma desde IDE y JAR.
         	imagenFlechaAdd = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_1.png"));
         	ImagenVolver = new Image(getClass().getResourceAsStream("/recursos/flceha_recarga_1.png"));
         	ImagenGuardar = new Image(getClass().getResourceAsStream("/recursos/floppy_lila_1_128.png"));
         	ImagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png"));
         } catch (Exception e) {
-			//Forma desde el JAR.
-        	imagenFlecha = new Image("/recursos/flecha_derecha_2.png");
+			//Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
+        	imagenFlecha = new Image("/recursos/flecha_derecha_2.png"); //Forma desde el JAR.
         	imagenFlechaAdd = new Image("/recursos/flecha_derecha_1.png");
         	ImagenVolver = new Image("/recursos/flceha_recarga_1.png");
         	ImagenGuardar = new Image("/recursos/floppy_lila_1_128.png");
         	ImagenLupa = new Image("/recursos/upa_lila_2_128.png");
         }
+		//Establecer la imagenes cargadas en los ImageView.
         ivFlechaIzquierda.setImage(imagenFlecha);
         ivFlechaDerecha.setImage(imagenFlecha);
         ivFlechaAdd.setImage(imagenFlechaAdd);
@@ -162,7 +169,8 @@ public class ClaseControlador implements Initializable {
         ivLupa.setImage(ImagenLupa);
 		
 		toast = new Toast();
-		conexionBD = ConexionBD.getInstance(); //Obtenemos una istancia de la Conexion a BD.
+		conexionBD = ConexionBD.getInstance();		//Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
+		logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
 
 		//Cargo en los comboBox los dataos.
 		cbHora.setItems(FXCollections.observableArrayList(HoraClase.values()));
@@ -187,9 +195,8 @@ public class ClaseControlador implements Initializable {
         //Con esto la busqueda es automatica al insertar texto en el tfBusqueda.
         tfBusqueda.textProperty().addListener( (o, ov, nv) -> {
         	filtro.setPredicate(obj -> {
-        		if (obj.getNombre().toLowerCase().contains(nv.toLowerCase())) return true;
-        		else return false;
-        		
+        		if (obj.getNombre().toLowerCase().contains(nv.toLowerCase())) {return true;}
+        		else {return false;}
         	});
         });
 
@@ -203,7 +210,7 @@ public class ClaseControlador implements Initializable {
 			cargarClase(numeroClase); //llama a la funcion cargarClase pasandole el numero de la clase que tiene que cargar.
 			
 		} else {
-			toast.show((Stage) tvAlumnos.getScene().getWindow(), "No puedes retroceder más.\n" + "La Clase 1 es la primera.");
+			toast.show((Stage) bpClase.getScene().getWindow(), "No puedes retroceder más.\n" + "La Clase 1 es la primera.");
 		}
 	}
 
@@ -215,7 +222,7 @@ public class ClaseControlador implements Initializable {
 			cargarClase(numeroClase); //llama a la funcion cargarClase pasandole el numero de la clase que tiene que cargar.
 			
 		} else {
-			toast.show((Stage) tvAlumnos.getScene().getWindow(), "No hay siguiente clase.\n" + "La Clase 8 es la ultima.");
+			toast.show((Stage) bpClase.getScene().getWindow(), "No hay siguiente clase.\n" + "La Clase 8 es la ultima.");
 		}
 	}
 	
@@ -231,15 +238,17 @@ public class ClaseControlador implements Initializable {
 			try {
 				numeroIncripciones = conexionBD.numeroClasesInscrito(alumno.getId(), jornada);	 
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				logUser.severe("Excepción: " + e.toString());
 				e.printStackTrace();
+			} catch (Exception e) {
+				logUser.severe("Excepción: " + e.toString());
 			}
 
 
 			if(listaClase.contains(alumno)) {
-				toast.show((Stage) tvAlumnos.getScene().getWindow(), "El alumno ya esta inscrito en esta Clase.");
+				toast.show((Stage) bpClase.getScene().getWindow(), "El alumno ya esta inscrito en esta Clase.");
 			} else if(jornada.alumnoEnJornada(alumno) != -1){
-				toast.show((Stage) tvAlumnos.getScene().getWindow(), "El alumno ya esta inscrito en una Clase de esta Jornada.\n" + "Inscrito en Clase " + jornada.alumnoEnJornada(alumno) + ".");
+				toast.show((Stage) bpClase.getScene().getWindow(), "El alumno ya esta inscrito en una Clase de esta Jornada.\n" + "Inscrito en Clase " + jornada.alumnoEnJornada(alumno) + ".");
 			} else if(numeroIncripciones >= alumno.getAsistenciaSemanal()) {
 				alerta = new Alert(AlertType.CONFIRMATION);
 				alerta.getDialogPane().getStylesheets()
@@ -248,7 +257,7 @@ public class ClaseControlador implements Initializable {
 				alerta.setHeaderText("Este Alumno ya esta inscrito a su maximo de clases semanales.");
 				alerta.setContentText("¿Quieres añadirlo a esta clase?");
 				alerta.initStyle(StageStyle.DECORATED);
-				alerta.initOwner(escenario);
+				alerta.initOwner((Stage) bpClase.getScene().getWindow());
 
 				ButtonType buttonTypeCancel = new ButtonType("No", ButtonData.CANCEL_CLOSE);
 				ButtonType buttonTypeConfirmar = new ButtonType("Si", ButtonData.YES);
@@ -258,13 +267,13 @@ public class ClaseControlador implements Initializable {
 				// Si pulsamos el boton confirmar:
 				if (result.get() == buttonTypeConfirmar) {
 					listaClase.add(alumno); // Añado el alumno a la lista de clase
-					toast.show((Stage) tvAlumnos.getScene().getWindow(),
+					toast.show((Stage) bpClase.getScene().getWindow(),
 							"Alumno añadido a Clase " + clase.getNumero() + ".");
 				}
 				
 			} else {
 				listaClase.add(alumno); //Añado el alumno a la lista de clase
-				toast.show((Stage) tvAlumnos.getScene().getWindow(), "Alumno añadido a Clase " + clase.getNumero() + ".");
+				toast.show((Stage) bpClase.getScene().getWindow(), "Alumno añadido a Clase " + clase.getNumero() + ".");
 			}
 		}
 	}
@@ -277,28 +286,16 @@ public class ClaseControlador implements Initializable {
 		if(i != -1) {
 			Alumno alumno = lvClase.getSelectionModel().getSelectedItem();
 			listaClase.remove(alumno);
-			toast.show((Stage) tvAlumnos.getScene().getWindow(), "Alumno eliminado de Clase " + clase.getNumero() + ".");
+			toast.show((Stage) bpClase.getScene().getWindow(), "Alumno eliminado de Clase " + clase.getNumero() + ".");
 		}
 	}
 
 
 	@FXML
 	void guardar(MouseEvent event) {
-		
 		try {
 			boolean actualizar = false;
-			if(claseOriginal.getHoraClase() != clase.getHoraClase()) {
-				System.out.println("la hora es diferente");
-				actualizar = true;
-			}
-
-			if(claseOriginal.getTipo() != clase.getTipo()) {
-				System.out.println("El tipo es diferente");
-				actualizar = true;
-			}
-
-			if(claseOriginal.getAnotaciones() != clase.getAnotaciones()) {
-				System.out.println("Las anotaciones son diferentes");
+			if(claseOriginal.getHoraClase() != clase.getHoraClase() || claseOriginal.getTipo() != clase.getTipo() || claseOriginal.getAnotaciones() != clase.getAnotaciones()) {
 				actualizar = true;
 			}
 
@@ -312,12 +309,13 @@ public class ClaseControlador implements Initializable {
 			claseOriginal.setTipo(clase.getTipo());
 			claseOriginal.setAnotaciones(clase.getAnotaciones());
 			claseOriginal.setListaAlumnos(new ArrayList<Alumno>(listaClase));
-			toast.show((Stage) tvAlumnos.getScene().getWindow(), "Cambios guardados en Clase " + clase.getNumero());
+			toast.show((Stage) bpClase.getScene().getWindow(), "Cambios guardados en Clase " + clase.getNumero());
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
+		} catch (Exception e) {
+			logUser.severe("Excepción: " + e.toString());
 		}
-
 	}
 
 	@FXML
@@ -331,14 +329,15 @@ public class ClaseControlador implements Initializable {
 			JornadaControlador controller = loader.getController(); //cargo el controlador.
 			controller.setControladorPrincipal(controladorPincipal);
 			controller.setListaAlumnos(listadoAlumnos);
-			controller.setStage(escenario);
+			//controller.setStage((Stage) bpClase.getScene().getWindow());
 			controller.inicializacion(jornada);
 			
 		} catch (IOException e) {
-			System.out.println("-ERROR- Fallo al cargar jornadaVista.fxml" + e.getMessage());
+			logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
+		} catch (Exception e) {
+			logUser.severe("Excepción: " + e.toString());
 		}
-
 	}
 	
 	
@@ -350,6 +349,7 @@ public class ClaseControlador implements Initializable {
 	public void setJornada(Jornada jornada) {
 		this.jornada = jornada;
 	}
+	
 	
 	/**
 	 * Caraga los datos de una clase en la ventana.
@@ -398,6 +398,7 @@ public class ClaseControlador implements Initializable {
 		return nuevaListaAlumnos;
 	}
 	
+
 	/**
 	 * Establece la clase inicial para cargar los datos.
 	 * El rango de clases es de 0 a 7.
@@ -412,6 +413,7 @@ public class ClaseControlador implements Initializable {
 		cargarClase(numeroClase); //llama a la funcion cargarClase pasandole el numero de la clase que tiene que cargar.
 	}
 	
+
 	/**
 	 * Establece para este controlador, el controlador principal de la aplicacion.
 	 * 
@@ -421,6 +423,7 @@ public class ClaseControlador implements Initializable {
 		controladorPincipal = principal;
 	}
 	
+
 	/**
 	 * Establece la lista de Alumnos.
 	 * 
@@ -433,15 +436,4 @@ public class ClaseControlador implements Initializable {
 		tvAlumnos.setItems(filtro); //Añado la lista de alumnos TextView tvAlumnos.
 		
 	}
-
-	/**
-     * Establece un Stage para este controlador.
-     * 
-     * @param s Stage que se establece.
-     */
-    public void setStage(Stage stage) {
-    	this.escenario = stage;
-    }
-	
-
 }

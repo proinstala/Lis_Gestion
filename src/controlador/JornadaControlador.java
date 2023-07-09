@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import baseDatos.ConexionBD;
 import javafx.collections.FXCollections;
@@ -29,12 +30,11 @@ import javafx.stage.StageStyle;
 import javafx.util.converter.LocalDateStringConverter;
 import modelo.Alumno;
 import modelo.Clase;
-import modelo.Direccion;
-import modelo.Genero;
 import modelo.HoraClase;
 import modelo.Jornada;
 import modelo.TipoClase;
 import modelo.Toast;
+import utilidades.Constants;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -46,12 +46,12 @@ import javafx.scene.control.Label;
 public class JornadaControlador implements Initializable {
 	
 	private PrincipalControlador controladorPincipal;
-	private Stage escenario;
 	private DateTimeFormatter formatter;
 	private Jornada jornada = null;
 	private Jornada jornadaOriginal;
 	private ObservableList<Alumno> listadoAlumnosGeneral;
 	private ConexionBD conexionBD;
+	private Logger logUser;
 	private Alert alerta;
 	private Toast toast;
 	
@@ -78,7 +78,7 @@ public class JornadaControlador implements Initializable {
     private Button btnGuardarComentario;
 	
 	@FXML
-	private BorderPane bdJornada;
+	private BorderPane bpJornada;
 	
 	@FXML
     private DatePicker dpFecha;
@@ -179,22 +179,23 @@ public class JornadaControlador implements Initializable {
 		Image borrarJornada;
 		Image imagenCrearJornada;
         try {
-			//Forma desde IDE y JAR.
-			flechaRetroceder = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_2.png"));
+			//Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
+			flechaRetroceder = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_2.png")); //Forma desde IDE y JAR.
 			flechaAvnazar = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_2.png"));
 			copiaSemana = new Image(getClass().getResourceAsStream("/recursos/bd_add_1_128.png"));
 			copiaJornada = new Image(getClass().getResourceAsStream("/recursos/floppy_lila_1_128.png"));
 			borrarJornada = new Image(getClass().getResourceAsStream("/recursos/boton_2_64.png"));
 			imagenCrearJornada = new Image(getClass().getResourceAsStream("/recursos/circulo_flecha_1.png"));
         } catch (Exception e) {
-			//Forma desde el JAR.
-			flechaRetroceder = new Image("/recursos/flecha_derecha_2.png");
+			//Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
+			flechaRetroceder = new Image("/recursos/flecha_derecha_2.png"); //Forma desde el JAR.
 			flechaAvnazar = new Image("/recursos/flecha_derecha_2.png");
 			copiaSemana = new Image("/recursos/bd_add_1_128.png");
 			copiaJornada = new Image("/recursos/floppy_lila_1_128.png");
 			borrarJornada = new Image("/recursos/boton_2_64.png");
 			imagenCrearJornada = new Image("/recursos/circulo_flecha_1.png");
         }
+		//Establecer las imagenes cargadas en los ImageView.
 		ivAnteriorJornada.setImage(flechaRetroceder);
 		ivSiguienteJornada.setImage(flechaAvnazar);
 		ivBotonCopiarSemana.setImage(copiaSemana);
@@ -202,8 +203,8 @@ public class JornadaControlador implements Initializable {
 		ivBotonBorrarJornada.setImage(borrarJornada);
         ivBotonCrearJornada.setImage(imagenCrearJornada);
 		
+		logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
 		conexionBD = ConexionBD.getInstance(); //Obtenemos una istancia de la Conexion a BD.
-		
 		toast = new Toast();
 		
 		//deshabilita que se puedan seleccionar el contenido del los listView.
@@ -230,7 +231,6 @@ public class JornadaControlador implements Initializable {
 		lvClase7.setMouseTransparent(true);
 		lvClase8.setMouseTransparent(true);
 		
-		
 		lvClase1.setFocusTraversable(false);
 		lvClase2.setFocusTraversable(false);
 		lvClase3.setFocusTraversable(false);
@@ -254,16 +254,18 @@ public class JornadaControlador implements Initializable {
             lbDiaSemana.setText(obtenerDiaSemana(fechaSeleccionada)); //Pongo el dia de la semana de la fecha seleecionada en el label lbDiaSemana.
             
             //LLamar a base de datos para rescatar la jornada
-            //inicializacion(datos.getJornada(fechaSeleccionada));
 			try {
 				//inicializacion(conexionBD.getJornada(fechaSeleccionada.toString()));
 				inicializacion(conexionBD.getJornadaCompleta(fechaSeleccionada.toString()));
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				logUser.severe("Excepción: " + e.toString());
 				e.printStackTrace();
+			} catch (Exception e) {
+				logUser.severe("Excepción: " + e.toString());
 			}
         });
 	}
+
 
 	@FXML
     void anteriorJornada(MouseEvent event) {
@@ -273,14 +275,18 @@ public class JornadaControlador implements Initializable {
 			j = conexionBD.getJornadaCompleta(fechaAnterio.toString());
 			inicializacion(j);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
+		} catch (Exception e) {
+			logUser.severe("Excepción: " + e.toString());
 		}
+
 		if(j == null) {
 			dpFecha.setValue(fechaAnterio);
 			lbDiaSemana.setText(obtenerDiaSemana(fechaAnterio));
 		}
     }
+
 
 	@FXML
     void siguienteJornada(MouseEvent event) {
@@ -290,8 +296,10 @@ public class JornadaControlador implements Initializable {
 			j = conexionBD.getJornadaCompleta(fechaSiguiente.toString());
 			inicializacion(j);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
+		} catch (Exception e) {
+			logUser.severe("Excepción: " + e.toString());
 		}
 
 		if(j == null) {
@@ -344,46 +352,40 @@ public class JornadaControlador implements Initializable {
 	void botonGuardarComentario(MouseEvent event) {
 		try {
 			conexionBD.actualizarComentarioJornada(jornada);
-			toast.show((Stage) bdJornada.getScene().getWindow(), "Comentario modificado!!.");
+			toast.show((Stage) bpJornada.getScene().getWindow(), "Comentario modificado!!.");
+			logUser.config("Actualizado comentario de jornada: " + jornada.getFecha().format(formatter));
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
-			toast.show((Stage) bdJornada.getScene().getWindow(), "ERROR al intentar modificar el comentario de la jornada!!.");
+			toast.show((Stage) bpJornada.getScene().getWindow(), "ERROR al intentar modificar el comentario de la jornada!!.");
 		}
 	}
 
 	@FXML
     void crearJornadaBD(MouseEvent event) {
-
 		//Si la jornada que esta cargada es null(No esta creada)
 		if(jornada == null) {
-			
 			Jornada j = crearJornada();
-			
-			//Hacer que inserte la jornada en la base de datos
-			//datos.addJornada(j);
 			try {
 				conexionBD.insertarJornada(j);
 				inicializacion(j);
-				toast.show((Stage) bdJornada.getScene().getWindow(), "Jornada creada correctamente!!");
+				logUser.config("Creada Jornada: " + j.getFecha().format(formatter));
+				toast.show((Stage) bpJornada.getScene().getWindow(), "Jornada creada correctamente!!");
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				logUser.severe("Excepción: " + e.toString());
 				e.printStackTrace();
-				toast.show((Stage) bdJornada.getScene().getWindow(), "ERROR al intentar crear la jornada!!");
+				toast.show((Stage) bpJornada.getScene().getWindow(), "ERROR al intentar crear la jornada!!");
+			} catch (Exception e) {
+				logUser.severe("Excepción: " + e.toString());
 			}
-			//Si se ha insertado correctamente en la base de datos, llamar al metodo inicializacion de esta clase y pasarle la jornada.
-			
 		} else {
-			toast.show((Stage) bdJornada.getScene().getWindow(), "Esta Jornada ya esta creada!!");
+			toast.show((Stage) bpJornada.getScene().getWindow(), "Esta Jornada ya esta creada!!");
 		}
     }
 
 	@FXML
     void borrarJornadaBD(MouseEvent event) {
 		if(jornada != null) {
-			//llamar al bd para borrar la jornada
-			//si la borra mostrar mensaje y cargar todo a null
-			//si no la borra, mostrar mensaje de error.
 			boolean borradoOK = false;
 			
 			alerta = new Alert(AlertType.CONFIRMATION);
@@ -392,7 +394,7 @@ public class JornadaControlador implements Initializable {
             alerta.setHeaderText("Se va ha borrar los datos de la jornada " + jornada.getFecha().format(formatter) + " y sus clases.");
             alerta.setContentText("¿Estas seguro que Quieres borrar esta jornada?");
             alerta.initStyle(StageStyle.DECORATED);
-            alerta.initOwner(escenario);
+            alerta.initOwner((Stage) bpJornada.getScene().getWindow());
             alerta.initModality(Modality.APPLICATION_MODAL);
 
             Optional<ButtonType> result = alerta.showAndWait();
@@ -400,11 +402,14 @@ public class JornadaControlador implements Initializable {
                 try {
                     borradoOK = conexionBD.borrarJornada(jornada);
                 } catch (SQLException e) {
-                    // meter en log.
+                    logUser.severe("Excepción: " + e.toString());
                     e.printStackTrace();
-                }
+                } catch (Exception e) {
+					logUser.severe("Excepción: " + e.toString());
+				}
 
 				if (borradoOK) {
+					logUser.config("Borrada Jornada: " + jornada.getFecha().format(formatter));
 					Jornada j = null;
 					inicializacion(j);
 					mensajeAviso(Alert.AlertType.INFORMATION,
@@ -416,6 +421,7 @@ public class JornadaControlador implements Initializable {
 							"Borrar Jornada.",
 							"",
 							"No se ha podido borrar la Jornada.");
+					logUser.warning("Fallo al intentar borrar la jornada " + jornada.getFecha().format(formatter));
 				}
     			
     		} else {
@@ -423,14 +429,14 @@ public class JornadaControlador implements Initializable {
     		}
 
 		} else {
-			toast.show(escenario, "Esta Jornada No esta creada!!\nNo puedes borrar una Jornada que no esta creada.");
+			toast.show((Stage) bpJornada.getScene().getWindow(), "Esta Jornada No esta creada!!\nNo puedes borrar una Jornada que no esta creada.");
 		}
     }
 
 	@FXML
     void copiarJornada(MouseEvent event) {
 		if(jornada == null) {
-			toast.show(escenario, "Esta Jornada No esta creada!!\nNo puedes duplicar una Jornada que no esta creada.");
+			toast.show((Stage) bpJornada.getScene().getWindow(), "Esta Jornada No esta creada!!\nNo puedes duplicar una Jornada que no esta creada.");
 		} else {
 			try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/jornadaCardDuplicarVista.fxml"));
@@ -439,14 +445,13 @@ public class JornadaControlador implements Initializable {
             JornadaCardDuplicarControlador controller = loader.getController(); // cargo el controlador.
             
             Stage ventana= new Stage();
-            ventana.initOwner(escenario);
+            ventana.initOwner((Stage) bpJornada.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.UNDECORATED);
 
 			URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen
 			ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana	
             
-            controller.setStage(ventana);
 			controller.setJornada(jornada);
 			controller.iniciar();
 			
@@ -455,7 +460,7 @@ public class JornadaControlador implements Initializable {
             ventana.setScene(scene);
             ventana.showAndWait();
         } catch (IOException e) {
-            //poner log.
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
         }
 		}
@@ -464,7 +469,7 @@ public class JornadaControlador implements Initializable {
     @FXML
     void copiarSemana(MouseEvent event) {
 		if(jornada == null) {
-			toast.show(escenario, "Esta Jornada No esta creada!!\nNo puedes duplicar una semana desde una jornada que no esta creada.");
+			toast.show((Stage) bpJornada.getScene().getWindow(), "Esta Jornada No esta creada!!\nNo puedes duplicar una semana desde una jornada que no esta creada.");
 		} else {
 			try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/semanaCardDuplicarVista.fxml"));
@@ -473,14 +478,13 @@ public class JornadaControlador implements Initializable {
             SemanaCardDuplicarControlador controller = loader.getController(); // cargo el controlador.
             
             Stage ventana= new Stage();
-            ventana.initOwner(escenario);
+            ventana.initOwner((Stage) bpJornada.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.UNDECORATED);
 
 			URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen
 			ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana	
             
-            controller.setStage(ventana);
 			controller.setJornada(jornada);
 			controller.iniciar();
 			
@@ -489,7 +493,7 @@ public class JornadaControlador implements Initializable {
             ventana.setScene(scene);
             ventana.showAndWait();
         } catch (IOException e) {
-            //poner log.
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
         }
 		}
@@ -529,13 +533,12 @@ public class JornadaControlador implements Initializable {
 			
 			ClaseControlador controller = loader.getController(); //cargo el controlador.
 			controller.setControladorPrincipal(controladorPincipal);
-			controller.setStage(escenario);
 			controller.setJornada(jornada);
 			controller.setListaAlumnos(listadoAlumnosGeneral);
 			controller.setClaseIniciacion(numeroClase);
 			
 		} catch (IOException e) {
-			System.out.println("-ERROR- Fallo al cargar ClaseVista.fxml" + e.getMessage());
+			logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
 		}
 	}
@@ -544,7 +547,7 @@ public class JornadaControlador implements Initializable {
 	public void inicializacion(Jornada jorn) {
 		if(jorn == null) {
 			btnGuardarComentario.setDisable(true);
-			toast.show(escenario, "Esta jornada no esta creada");
+			toast.show((Stage) bpJornada.getScene().getWindow(), "Esta jornada no esta creada");
 			//Si ya hay cargado datos en pantalla, borra los datos.
 			if(jornada != null) {
 				listaClase1.clear();
@@ -631,23 +634,6 @@ public class JornadaControlador implements Initializable {
 				//La jornada que esta cargada la ponemos a null
 				jornada = null;
 			}
-			
-			
-			
-			/*
-			alerta = new Alert(Alert.AlertType.CONFIRMATION);
-			//alerta.getDialogPane().getStylesheets().add(getClass().getResource("/estilos/StylesAlert.css").toExternalForm()); //Añade hoja de estilos.
-			alerta.setTitle("Crear Jornada");
-			alerta.setHeaderText("No hay Jornada creada con fecha de " + LocalDate.now());
-			alerta.setContentText("¿Quieres crear la Jornada?");
-			
-			Optional<ButtonType> result = alerta.showAndWait();
-			if (result.get() == ButtonType.OK) {
-				crearJornada();
-			} else {
-				toast.show((Stage) bdJornada.getScene().getWindow(), "Cancelada la creacion de Jornada");
-			}
-			*/
 		} 
 		
 		//Si la jornada pasada como parametro no es null, hacemos el proceso de binding
@@ -692,11 +678,6 @@ public class JornadaControlador implements Initializable {
 			
 			listaClase8 = FXCollections.observableArrayList(jornada.getClase(7).getListaAlumnos());
 			lvClase8.setItems(listaClase8);
-			
-			//Forma sin binding de poner los datos en los label.
-			//lbHoraClase1.setText(jornada.getListaClases().get(0).getHoraClase().toString());
-			//lbTipoClase1.setText(jornada.getListaClases().get(0).getTipo().toString());
-			
 			
 			//Binding a Labels.
 			lbHoraClase1.textProperty().bind(jornada.getClase(0).horaClaseProperty().asString());
@@ -749,7 +730,6 @@ public class JornadaControlador implements Initializable {
 			lvClase6.setFocusTraversable(true);
 			lvClase7.setFocusTraversable(true);
 			lvClase8.setFocusTraversable(true);
-			
 		} 
 	}
 	
@@ -779,11 +759,10 @@ public class JornadaControlador implements Initializable {
         alerta = new Alert(tipo);
         alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
         alerta.setTitle(tiutlo);
-        alerta.initOwner(escenario);
+        alerta.initOwner((Stage) bpJornada.getScene().getWindow());
         alerta.setHeaderText(cabecera);
         alerta.setContentText(cuerpo);
         alerta.initStyle(StageStyle.DECORATED);
-        alerta.initOwner(escenario);
         alerta.initModality(Modality.APPLICATION_MODAL);
         alerta.showAndWait();
     }
@@ -815,18 +794,7 @@ public class JornadaControlador implements Initializable {
 		this.jornada = jornada;
 	}
 
-
-	/**
-     * Establece un Stage para este controlador.
-     * 
-     * @param s Stage que se establece.
-     */
-    public void setStage(Stage stage) {
-    	this.escenario = stage;
-    }
 	
-	
-	// ATENCION: El metodo obtenerDiaSemana es para borrar. lo he puesto en la clase Jornada.
 	/**
 	 * Obtiene un String con el dia de la semana a partir de la fecha pasada como parametro.
 	 * 

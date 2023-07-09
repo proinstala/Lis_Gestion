@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,6 +35,7 @@ import modelo.EstadoAlumno;
 import modelo.FormaPago;
 import modelo.Genero;
 import modelo.Toast;
+import utilidades.Constants;
 import javafx.fxml.Initializable;
 
 public class AlumnoFormControlador implements Initializable {
@@ -42,10 +44,10 @@ public class AlumnoFormControlador implements Initializable {
     public final String MODO_EDITAR_ALUMNO = "EDITAR";
 
     private String modoControlador;
-    DateTimeFormatter formatter;
+    private DateTimeFormatter formatter;
     private ConexionBD conexionBD;
+    private Logger logUser;
     private Toast toast;
-    private Stage escenario;
     private ObservableList<String> listadoProvincias;
     private ObservableList<String> listadoLocalidades;
     private ObservableList<Alumno> listadoAlumnos;
@@ -144,16 +146,19 @@ public class AlumnoFormControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //Añadir clases de estilo CSS a elementos.
     	btnCancelar.getStyleClass().add("boton_rojo");
     	gpFormAlumno.getStyleClass().add("fondo_ventana_degradado_toRight");
         pSeparador.getStyleClass().add("panelSeparador"); //Panel separador de barra superior.
+
+        logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
+        conexionBD = ConexionBD.getInstance();
+        toast = new Toast();
 
         //Modifica el formato en el que se muestra la fecha en el DatePicker.
         formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");//Formato dd/MM/yy
         dpFechaNacimiento.setConverter(new LocalDateStringConverter(formatter, null));
 
-        conexionBD = ConexionBD.getInstance();
-        toast = new Toast();
         cbGenero.setItems(FXCollections.observableArrayList(Genero.values()));
         cbEstado.setItems(FXCollections.observableArrayList(EstadoAlumno.values()));
         cbFormaPago.setItems(FXCollections.observableArrayList(FormaPago.values()));
@@ -169,28 +174,37 @@ public class AlumnoFormControlador implements Initializable {
             cbLocalidadSetup(cbProvincia.getValue());
         }
 
-        cbAsistencia.getItems().addAll(1,2,3);
+        cbAsistencia.getItems().addAll(1,2,3,4);
         cbAsistencia.setValue(1);
+
+        //Configurar un evento de clic del ratón para el botón "Cerrar".
+        btnCancelar.setOnMouseClicked(e -> {
+            ((Stage) gpFormAlumno.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
+        });
     }
 
 
-    @FXML
-    void cancelar(MouseEvent event) {
-        escenario.close();
-    }
-
+    /**
+     * Maneja el evento de confirmación para agregar o modificar un alumno.
+     * Verifica los campos antes de realizar la acción correspondiente.
+     * Muestra un mensaje de éxito y cierra la ventana si la acción se completa con éxito.
+     *
+     * @param event El evento del ratón que desencadenó la confirmación.
+     */
     @FXML
     void confirmacion(MouseEvent event) {
         if(comprobarCampos()) {
             if(modoControlador == MODO_NUEVO_ALUMNO) {
                 if(crearAlumno()) {
-                    toast.show(escenario, "Alumno añadido!!.");
-                    escenario.close();
+                    toast.show((Stage) ((Stage) gpFormAlumno.getScene().getWindow()).getOwner(), "Alumno añadido!!.");
+                    logUser.config("Nuevo Alumno. (id: " + newAlumno.getId() + " nombre: " + newAlumno.getNombre() + ")");
+                    ((Stage) gpFormAlumno.getScene().getWindow()).close();
                 }
             } else {
                 if(modificarAlumno()) {
-                    toast.show(escenario, "Alumno modificado!!.");
-                    escenario.close();
+                    logUser.config("Modificado Alumno. (id: " + oldAlumno.getId() + " nombre: " + oldAlumno.getNombre() + ")");
+                    toast.show((Stage) ((Stage) gpFormAlumno.getScene().getWindow()).getOwner(), "Alumno modificado!!.");
+                    ((Stage) gpFormAlumno.getScene().getWindow()).close();
                 }
             }
         }
@@ -205,6 +219,7 @@ public class AlumnoFormControlador implements Initializable {
         try {
 			listadoProvincias = FXCollections.observableArrayList(conexionBD.getProvincias());
 		} catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
 		}
 
@@ -227,6 +242,7 @@ public class AlumnoFormControlador implements Initializable {
         try {
 			listadoLocalidades = FXCollections.observableArrayList(conexionBD.getLocalidades(provincia));
 		} catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
 		}
 
@@ -234,15 +250,6 @@ public class AlumnoFormControlador implements Initializable {
         cbLocalidad.setItems(listadoLocalidades);
     }
 
-
-    /**
-     * Establece un Stage para este controlador.
-     * 
-     * @param stage Stage que se establece.
-     */
-    public void setStage(Stage stage) {
-    	this.escenario = stage;
-    }
 
     /**
 	 * Establece la lista de Alumnos.
@@ -253,11 +260,18 @@ public class AlumnoFormControlador implements Initializable {
         listadoAlumnos = lista; //Guado la lista pasada a la lista de Clasecontrolador.
 	}
     
+
+    /**
+     * Establece los valores del alumno y configura los enlaces de datos con los controles de la interfaz.
+     *
+     * @param alumno El objeto Alumno que se establecerá como alumno actual.
+     */
     public void setAlumno(Alumno alumno) {
         oldAlumno = alumno;
         newAlumno = (Alumno)(alumno.clone());
         //newAlumno = new Alumno(alumno);
         
+        //Configura los valores iniciales de los controles de la interfaz con los valores del nuevo alumno.
         cbGenero.setValue(newAlumno.getGenero());
         cbLocalidad.setValue(newAlumno.getDireccion().getLocalidad());
         cbProvincia.setValue(newAlumno.getDireccion().getProvincia());
@@ -265,7 +279,8 @@ public class AlumnoFormControlador implements Initializable {
         cbFormaPago.setValue(newAlumno.getFormaPago());
         cbAsistencia.setValue(newAlumno.getAsistenciaSemanal());
 
-        tfIdAlumno.setText(Integer.toString(newAlumno.getId()));
+        //Configura los enlaces de datos bidireccionales entre los campos de texto y las propiedades del nuevo alumno.
+        tfIdAlumno.setText(Integer.toString(newAlumno.getId())); //Este campo no es bindeado porque no va ha cambiar.
         tfNombre.textProperty().bindBidirectional(newAlumno.nombreProperty());
         tfApellido1.textProperty().bindBidirectional(newAlumno.apellido1Property());
         tfApellido2.textProperty().bindBidirectional(newAlumno.apellido2Property());
@@ -304,10 +319,9 @@ public class AlumnoFormControlador implements Initializable {
         cbAsistencia.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
             newAlumno.asistenciaSemanalProperty().set(ov);
         });
-
-        
     }
 
+    
     /**
      * Establece las caracteristicas del formulario segun la accion que se quiera hacer.
      * 
@@ -321,7 +335,6 @@ public class AlumnoFormControlador implements Initializable {
             case MODO_EDITAR_ALUMNO:
                 setupModoEditarAlumno();
                 break;
-        
             default:
                 setupModoNuevoAlumno();
                 break;
@@ -340,11 +353,13 @@ public class AlumnoFormControlador implements Initializable {
         //Establecer imagen formulario.
         Image imagen;
         try {
-            imagen = new Image(getClass().getResourceAsStream("/recursos/usuario_add_1_128.png")); //Forma desde IDE y JAR.
+            //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
+            imagen = new Image(getClass().getResourceAsStream("/recursos/usuario_add_1_128.png"));
         } catch (Exception e) {
-            imagen = new Image("/recursos/usuario_add_1_128.png"); //Forma desde el JAR.
+            //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
+            imagen = new Image("/recursos/usuario_add_1_128.png");
         }
-        ivImagenTipoFormulario.setImage(imagen);
+        ivImagenTipoFormulario.setImage(imagen); //Establecer la imagen cargada en el ImageView.
     }
 
 
@@ -359,16 +374,27 @@ public class AlumnoFormControlador implements Initializable {
         //Establecer imagen formulario.
         Image imagen;
         try {
+            //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
             imagen = new Image(getClass().getResourceAsStream("/recursos/usuario_edit_1_128.png")); //Forma desde IDE y JAR.
         } catch (Exception e) {
+            //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
             imagen = new Image("/recursos/usuario_edit_1_128.png"); //Forma desde el JAR.
         }
-        ivImagenTipoFormulario.setImage(imagen);
+        ivImagenTipoFormulario.setImage(imagen); //Establecer la imagen cargada en el ImageView.
     }
 
+
+    /**
+     * Comprueba la validez de los campos introducidos en el formulario.
+     * Muestra mensajes de advertencia en caso de que algún campo no sea válido.
+     * Si todos los campos son válidos, guarda la información en variables específicas.
+     *
+     * @return true si todos los campos son válidos, false en caso contrario.
+     */
     private Boolean comprobarCampos() {
         boolean camposCorrectos = false;
 
+        //Expresiones regulares para validar los campos.
         Pattern nombrePattern = Pattern.compile("[A-Z][a-z]{1,30}([\\s][A-Z][a-z]{1,30})?$"); //Expresion regular para comprobar un nombre simple o compuesto.
 		Matcher nombreMatch = nombrePattern.matcher(tfNombre.getText());
 
@@ -464,12 +490,12 @@ public class AlumnoFormControlador implements Initializable {
             estado = (EstadoAlumno) cbEstado.getValue();
             formaPago = (FormaPago) cbFormaPago.getValue();
             asistenciaSemanal = cbAsistencia.getValue();
-
         }
 
         return camposCorrectos;
     }
 
+    
     /**
      * Crea un objeto de tipo Alumno y lo añade a la base de datos y a la lista de Alumnos.
      * 
@@ -477,20 +503,29 @@ public class AlumnoFormControlador implements Initializable {
      */
     private boolean crearAlumno() {
         Direccion direccion = new Direccion(-1, calle, numeroVivienda, localidad, provincia, codigoPostal);
-        Alumno alumno = new Alumno(-1, nombre, apellido1, apellido2, genero, direccion, fechaNac, telefono, email, estado, asistenciaSemanal, formaPago);
+        newAlumno = new Alumno(-1, nombre, apellido1, apellido2, genero, direccion, fechaNac, telefono, email, estado, asistenciaSemanal, formaPago);
 
         try {
-            if(conexionBD.insertarAlumno(alumno)) {
-                return listadoAlumnos.add(alumno);
+            if(conexionBD.insertarAlumno(newAlumno)) {
+                return listadoAlumnos.add(newAlumno);
             }
         } catch (SQLException e) {
-            // añadir LOG
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
         }
+        logUser.warning("Fallo al crar Alumno.");
         return false;
     }
 
 
+    /**
+     * Modifica los datos del alumno actual en la base de datos.
+     * Actualiza los valores del objeto oldAlumno con los valores del objeto newAlumno.
+     *
+     * @return true si la modificación es exitosa, false en caso contrario.
+     */
     private boolean modificarAlumno() {
         try {
             if(conexionBD.modificarAlumno(newAlumno)) {
@@ -501,16 +536,19 @@ public class AlumnoFormControlador implements Initializable {
                 oldAlumno.setFechaNacimiento(newAlumno.getFechaNacimiento());
                 oldAlumno.setTelefono(newAlumno.getTelefono());
                 oldAlumno.setEmail(newAlumno.getEmail());
-                // oldAlumno.setDireccion(newAlumno.getDireccion());
                 oldAlumno.getDireccion().setValoresDireccion(newAlumno.getDireccion());
                 oldAlumno.setEstado(newAlumno.getEstado());
                 oldAlumno.setAsistenciaSemanal(newAlumno.getAsistenciaSemanal());
                 oldAlumno.setFormaPago(newAlumno.getFormaPago());
                 return true;
+            } else {
+                logUser.warning("Fallo al interntar modificar Alumno en BD. (id: " + oldAlumno.getId() + " nombre: " + oldAlumno.getNombre() + ")");
             }
         } catch (SQLException e) {
-            // AÑADIR LOG
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
         }
         return false;
     }
@@ -527,13 +565,11 @@ public class AlumnoFormControlador implements Initializable {
         Alert alerta = new Alert(Alert.AlertType.ERROR);
         alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
         alerta.setTitle(tiutlo);
-        alerta.initOwner(escenario);
+        alerta.initOwner((Stage) gpFormAlumno.getScene().getWindow());
         alerta.setHeaderText(cabecera);
         alerta.setContentText(cuerpo);
         alerta.initStyle(StageStyle.DECORATED);
-        alerta.initOwner(escenario);
         alerta.initModality(Modality.APPLICATION_MODAL);
         alerta.showAndWait();
     }
-
 }

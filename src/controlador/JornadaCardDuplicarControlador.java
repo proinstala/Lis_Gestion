@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
-
+import java.util.logging.Logger;
 
 import baseDatos.ConexionBD;
 import javafx.fxml.FXML;
@@ -34,6 +34,7 @@ import modelo.Alumno;
 import modelo.Clase;
 import modelo.Jornada;
 import modelo.Toast;
+import utilidades.Constants;
 import javafx.fxml.Initializable;
 
 public class JornadaCardDuplicarControlador implements Initializable {
@@ -41,9 +42,9 @@ public class JornadaCardDuplicarControlador implements Initializable {
     private Double x, y;
 
     private PrincipalControlador controladorPincipal;
-	private Stage escenario;
 	private DateTimeFormatter formatter;
 	private ConexionBD conexionBD;
+    private Logger logUser;
 	private Jornada jornada;
 	private Toast toast;
 	private Alert alerta;
@@ -98,43 +99,49 @@ public class JornadaCardDuplicarControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //Añadir clases de estilo CSS a elementos.
         btnCancelar.getStyleClass().add("boton_rojo");
-        conexionBD = ConexionBD.getInstance();
-        toast = new Toast();
-
+        
+        //Cargar imagenes en ImageView.
         Image imagenCopy;
         try {
-            //Forma desde IDE y JAR.
-            imagenCopy = new Image(getClass().getResourceAsStream("/recursos/copy_2_128.png"));    
+            //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
+            imagenCopy = new Image(getClass().getResourceAsStream("/recursos/copy_2_128.png")); //Forma desde IDE y JAR.
         } catch (Exception e) {
-            //Forma desde el JAR.
-            imagenCopy = new Image("/recursos/copy_2_128.png");
+            //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
+            imagenCopy = new Image("/recursos/copy_2_128.png"); //Forma desde el JAR.
         }
-        ivImagenCopy.setImage(imagenCopy);
+        ivImagenCopy.setImage(imagenCopy); //Establecer la imagen cargada en el ImageView.
 
+        //Configurar el evento cuando se presiona el ratón en el panel apCopiarJornada.
         apCopiarJornada.setOnMousePressed(mouseEvent -> {
+            //Obtener las coordenadas X e Y del ratón en relación con la escena.
             x = mouseEvent.getSceneX();
             y = mouseEvent.getSceneY();
         });
 
+        //Configurar el evento cuando se arrastra el ratón en el panel apCopiarJornada.
         apCopiarJornada.setOnMouseDragged(mouseEvent -> {
-            escenario.setX(mouseEvent.getScreenX() - x);
-            escenario.setY(mouseEvent.getScreenY() - y);
+            //Obtener la referencia al Stage actual y establecer las nuevas coordenadas X e Y.
+            ((Stage) apCopiarJornada.getScene().getWindow()).setX(mouseEvent.getScreenX() - x);
+            ((Stage) apCopiarJornada.getScene().getWindow()).setY(mouseEvent.getScreenY() - y);
         });
 
-        //Modifica el formato en el que se muestra la fecha en el dtFechaCompra
-        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");//Formato dd/MM/yy
-        dpFechaDestino.setConverter(new LocalDateStringConverter(formatter, null));
+        logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
+        conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
+        toast = new Toast();
+
+        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Crear un formateador de fecha con el patrón "dd/MM/yyyy".
+        dpFechaDestino.setConverter(new LocalDateStringConverter(formatter, null)); //Establecer un convertidor de cadena de fecha para el control DatePicker dpFechaDestino.
         
         //Para poder escribir directamente la fecha
         dpFechaDestino.setEditable(false); //-> Poner a true para que sea editable.
 
-		//dpFecha.setValue(LocalDate.now()); //Establece la fecha de hoy en el datePiker. 
-        
+        //Establecer un evento para cuando cambie la fecha seleccionada en el DatePicker dpFechaDestino.
         dpFechaDestino.setOnAction(event -> {
-        	fechaSeleccionada = dpFechaDestino.getValue(); //Guardo la fecha seleccionada en fechaSeleccionada.
-            lbDiaDestino.setText(fechaSeleccionada.getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES")));
-            lbSemanaDestino.setText(Integer.toString(fechaSeleccionada.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR))); 
+        	fechaSeleccionada = dpFechaDestino.getValue(); //Obtener la fecha seleccionada del DatePicker y guardarla en la variable fechaSeleccionada.
+            lbDiaDestino.setText(fechaSeleccionada.getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES"))); //Establece el texto del Label 'lbDiaDestino' con el nombre del día de la fecha seleccionada en español.
+            lbSemanaDestino.setText(Integer.toString(fechaSeleccionada.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR))); //Obtener el número de semana correspondiente a la fecha seleccionada.
         });
 
         //Establezco los CheckBox de copia de datos como seleccionados.
@@ -152,14 +159,21 @@ public class JornadaCardDuplicarControlador implements Initializable {
                 chbControlAsistencia.setDisable(true);
             }
         });
-        
+
+        //Configurar un evento de clic del ratón para el botón "Cancelar".
+        btnCancelar.setOnMouseClicked(e -> {
+            ((Stage) apCopiarJornada.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
+        });
     }
 
-    @FXML
-    void cerrarVentana(MouseEvent event) {
-        escenario.close();
-    }
 
+    /**
+     * Método que se ejecuta al hacer clic en el botón de "Duplicar".
+     * Realiza la acción de duplicar la jornada actual.
+     * Se verifica la jornada de destino y se configuran los comentarios según los CheckBox seleccionados.
+     * Si los CheckBox "chbAlumnos" y "chbControlAsistencia" están seleccionados, se realiza un control de asistencias y se muestra una alerta.
+     * Si solo el CheckBox "chbAlumnos" está seleccionado, se copian los datos de Alumnos de la jornada sin control de asistencia.
+     */
     @FXML
     void duplicar(MouseEvent event) {
         if(comprobarJornadaDestino()) {
@@ -172,11 +186,14 @@ public class JornadaCardDuplicarControlador implements Initializable {
                 try {
                     listaControlAlumnos = conexionBD.controlCopiaJornada(copiaJornada);
                 } catch (SQLException e) {
-                    // TODO Auto-generated catch block
+                    logUser.severe("Excepción: " + e.toString());
                     e.printStackTrace();
+                } catch (Exception e) {
+                    logUser.severe("Excepción: " + e.toString());
                 }
 
                 if(listaControlAlumnos != null && !listaControlAlumnos.isEmpty()) {
+                    //Construye el mensaje con los datos de los alumnos que superarán el número de asistencias semanales.
                     String datosAlumnos = "";
                     for (Alumno alumno : listaControlAlumnos) {
                         datosAlumnos = datosAlumnos.concat(alumno.toString() + "\n");
@@ -184,14 +201,14 @@ public class JornadaCardDuplicarControlador implements Initializable {
 
                     datosAlumnos = datosAlumnos.concat("\n\nElige una opción:");
                     
+                    //Crea y configura la alerta con los botones correspondientes.
                     alerta = new Alert(Alert.AlertType.WARNING);
                     alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
                     alerta.setTitle("Control asistencias");
-                    alerta.initOwner(escenario);
+                    alerta.initOwner((Stage) apCopiarJornada.getScene().getWindow());
                     alerta.setHeaderText("Se han encontrado Alumnos que superarán su número                 \nde asistencias semanales.");
                     alerta.setContentText(datosAlumnos);
                     alerta.initStyle(StageStyle.DECORATED);
-                    alerta.initOwner(escenario);
                     alerta.initModality(Modality.APPLICATION_MODAL);
                     
                     ButtonType buttonTypeCopiar = new ButtonType(" Copiar Alumnos ", ButtonData.LEFT);
@@ -218,9 +235,11 @@ public class JornadaCardDuplicarControlador implements Initializable {
                     }
 
                     if(copiaOk) {
-                        toast.show((Stage) apCopiarJornada.getScene().getWindow(), "Duplicado de jornada realizado.");
-                        escenario.close();
+                        logUser.config("Copiados datos Jornada: " + jornada.getFecha().format(formatter) + " en jornada: " + copiaJornada.getFecha().format(formatter));
+                        toast.show((Stage) ((Stage) apCopiarJornada.getScene().getWindow()).getOwner(), "Duplicado de jornada realizado.");
+                        ((Stage) apCopiarJornada.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
                     } else {
+                        logUser.warning("Fallo al duplicar Jornada.");
                         mensajeAviso(Alert.AlertType.ERROR,
                                 "Fallo al copiar Jornada.",
                                 "",
@@ -228,15 +247,18 @@ public class JornadaCardDuplicarControlador implements Initializable {
                     }
 
                 } else if(listaControlAlumnos == null) {
+                    logUser.warning("Fallo al duplicar Jornada.");
                     mensajeAviso(Alert.AlertType.ERROR,
                             "Fallo al copiar Jornada.",
                             "",
                             "No se ha podido copiar la Jornada.");
                 } else if(listaControlAlumnos.isEmpty()) {
                     if(copiarJornada(copiaJornada)) {
-                        toast.show((Stage) apCopiarJornada.getScene().getWindow(), "Duplicado de jornada realizado.");
-                        escenario.close();
+                        logUser.config("Copiados datos Jornada: " + jornada.getFecha().format(formatter) + " en jornada: " + copiaJornada.getFecha().format(formatter));
+                        toast.show((Stage) ((Stage) apCopiarJornada.getScene().getWindow()).getOwner(), "Duplicado de jornada realizado.");
+                        ((Stage) apCopiarJornada.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
                     } else {
+                        logUser.warning("Fallo al duplicar Jornada.");
                         mensajeAviso(Alert.AlertType.ERROR,
                                 "Fallo al copiar Jornada.",
                                 "",
@@ -246,9 +268,11 @@ public class JornadaCardDuplicarControlador implements Initializable {
 
             } else if (chbAlumnos.isSelected()){
                 if(copiarJornada(copiaJornada)) {
-                    toast.show((Stage) apCopiarJornada.getScene().getWindow(), "Duplicado de jornada realizado.");
-                    escenario.close();
+                    logUser.config("Copiados datos Jornada: " + jornada.getFecha().format(formatter) + " en jornada: " + copiaJornada.getFecha().format(formatter));
+                    toast.show((Stage) ((Stage) apCopiarJornada.getScene().getWindow()).getOwner(), "Duplicado de jornada realizado.");
+                    ((Stage) apCopiarJornada.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
                 } else {
+                    logUser.warning("Fallo al duplicar Jornada.");
                     mensajeAviso(Alert.AlertType.ERROR,
                             "Fallo al copiar Jornada.",
                             "",
@@ -260,15 +284,18 @@ public class JornadaCardDuplicarControlador implements Initializable {
                 try {
                     insetaOK = conexionBD.insertarJornada(copiaJornada);
                 } catch (SQLException e) {
-                    // TODO Auto-generated catch block
+                    logUser.severe("Excepción: " + e.toString());
                     e.printStackTrace();
-                    insetaOK = false;
+                } catch (Exception e) {
+                    logUser.severe("Excepción: " + e.toString());
                 }
 
                 if(insetaOK) {
-                    toast.show((Stage) apCopiarJornada.getScene().getWindow(), "Duplicado de jornada realizado.");
-                    escenario.close();
+                    logUser.config("Copiados datos Jornada: " + jornada.getFecha().format(formatter) + " en jornada: " + copiaJornada.getFecha().format(formatter));
+                    toast.show((Stage) ((Stage) apCopiarJornada.getScene().getWindow()).getOwner(), "Duplicado de jornada realizado.");
+                    ((Stage) apCopiarJornada.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
                 } else {
+                    logUser.warning("Fallo al duplicar Jornada.");
                     mensajeAviso(Alert.AlertType.ERROR,
                             "Fallo al copiar Jornada.",
                             "",
@@ -278,16 +305,33 @@ public class JornadaCardDuplicarControlador implements Initializable {
         }
     }
 
+
+    /**
+     * Realiza la copia de la jornada especificada en la base de datos.
+     * 
+     * @param jornadaCopia La jornada que se va a copiar.
+     * @return true si la copia se realiza correctamente, false en caso contrario.
+     */
     private boolean copiarJornada(Jornada jornadaCopia) {
         try {
             return conexionBD.insertarJornadaCompleta(jornadaCopia);        
         } catch (SQLException e) {
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
-            return false;
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
         }
+        return false;
     }
 
 
+    /**
+     * Configura los comentarios en la jornada especificada.
+     * Si la opción de comentario de jornada está desactivada, se elimina el comentario de la jornada.
+     * Si la opción de anotaciones de clases está desactivada, se eliminan las anotaciones de todas las clases de la jornada.
+     * 
+     * @param jornada La jornada en la que se van a configurar los comentarios.
+     */
     private void configurarComentarios(Jornada jornada) {
         if(!chbComentarioJornada.isSelected()) {
             jornada.setComentario("");
@@ -303,6 +347,15 @@ public class JornadaCardDuplicarControlador implements Initializable {
         
     }
 
+
+    /**
+     * Comprueba si la jornada de destino es válida para realizar la copia.
+     * Verifica que se haya seleccionado una fecha de destino.
+     * Verifica que la fecha de destino no sea igual a la fecha de origen.
+     * Verifica si ya existe una jornada en la fecha de destino.
+     * 
+     * @return true si la jornada de destino es válida, false de lo contrario.
+     */
     private boolean comprobarJornadaDestino() {
         boolean correcto = false;
         if (fechaSeleccionada == null) {
@@ -327,7 +380,10 @@ public class JornadaCardDuplicarControlador implements Initializable {
                 }
                 
             } catch (SQLException e) {
+                logUser.severe("Excepción: " + e.toString());
                 e.printStackTrace();
+            } catch (Exception e) {
+                logUser.severe("Excepción: " + e.toString());
             }
         }
         return correcto;
@@ -346,21 +402,25 @@ public class JornadaCardDuplicarControlador implements Initializable {
         alerta = new Alert(tipo);
         alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
         alerta.setTitle(tiutlo);
-        alerta.initOwner(escenario);
+        alerta.initOwner((Stage) apCopiarJornada.getScene().getWindow());
         alerta.setHeaderText(cabecera);
         alerta.setContentText(cuerpo);
         alerta.initStyle(StageStyle.DECORATED);
-        alerta.initOwner(escenario);
         alerta.initModality(Modality.APPLICATION_MODAL);
         alerta.showAndWait();
     }
 
 
+    /**
+     * Inicializa los componentes visuales con los valores de la jornada actual.
+     * Actualiza la etiqueta de la jornada con la fecha formateada.
+     * Actualiza la etiqueta de la semana con el número de semana.
+     * Actualiza la etiqueta del día con el nombre del día de la semana.
+     */
     public void iniciar() {
-        lbJornada.setText(jornada.getFecha().format(formatter));
-        //lbDia.setText(jornada.obtenerDiaSemana());
-        lbSemana.setText(Integer.toString(jornada.getFecha().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR))); 
-        lbDia.setText(jornada.getFecha().getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES")));
+        lbJornada.setText(jornada.getFecha().format(formatter)); //Actualiza la etiqueta de la jornada con la fecha formateada.
+        lbSemana.setText(Integer.toString(jornada.getFecha().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR))); //Actualiza la etiqueta de la semana con el número de semana.
+        lbDia.setText(jornada.getFecha().getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES"))); //Actualiza la etiqueta del día con el nombre del día de la semana en español.
     }
 
 
@@ -372,16 +432,4 @@ public class JornadaCardDuplicarControlador implements Initializable {
 	public void setJornada(Jornada jornada) {
 		this.jornada = jornada;
 	}
-
-
-	/**
-     * Establece un Stage para este controlador.
-     * 
-     * @param s Stage que se establece.
-     */
-    public void setStage(Stage stage) {
-    	this.escenario = stage;
-    }
-
-    
 }

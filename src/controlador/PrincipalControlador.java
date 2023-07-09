@@ -5,7 +5,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import baseDatos.ConexionBD;
 import javafx.collections.FXCollections;
@@ -13,6 +18,10 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -21,11 +30,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import modelo.Alumno;
 import modelo.Jornada;
 import modelo.Mensualidad;
 import modelo.Toast;
 import modelo.Usuario;
+import utilidades.Constants;
 
 public class PrincipalControlador implements Initializable {
 	
@@ -36,7 +47,12 @@ public class PrincipalControlador implements Initializable {
 	private ObservableList<Mensualidad> listadoMensualidades;
 	private ConexionBD conexionBD;
 	private Toast toast = new Toast();
-	
+
+	Logger loggerRoot;
+	Logger loggerUser;
+	FileHandler fhRoot;
+	FileHandler fhUser;
+
 	private Usuario usuarioRoot; 
 	private Usuario usuarioActual;
 	
@@ -91,11 +107,8 @@ public class PrincipalControlador implements Initializable {
 		usuarioRoot = new Usuario(0, "root", "1234", new File("appdata"));
 		usuarioActual = null;
 		conexionBD = ConexionBD.getInstance();
-
-		//paso 1: llamar metodo comprobar ficheros app
-		if(!comprobarFicherosApp()) {
-			crearFicherosApp();
-		}
+	
+		crearFicherosApp(); //Comprueba si estan los ficheros de la aplicacion creados. Si no lo estan los crea.
 		
 		deshabilitarMenus();
 		
@@ -156,6 +169,7 @@ public class PrincipalControlador implements Initializable {
 				jornada = conexionBD.getJornadaCompleta(LocalDate.now().toString());
 			} catch (SQLException e) {
 				jornada = null;
+				loggerUser.log(Level.SEVERE, "Fallo al obtener la jornada de la BD. " + e.toString());
 				e.printStackTrace();
 			}
 			try {
@@ -168,11 +182,10 @@ public class PrincipalControlador implements Initializable {
 				JornadaControlador controller = loader.getController(); // cargo el controlador.
 				controller.setControladorPrincipal(this);
 				controller.setListaAlumnos(listadoAlumnos);
-				controller.setStage(escenario);
 				controller.inicializacion(jornada);
 				
 			} catch (IOException e) {
-				System.out.println("-ERROR- Fallo al cargar jornadaVista.fxml" + e.getMessage());
+				loggerUser.log(Level.SEVERE, "Excepción: " + e.toString());
 				e.printStackTrace();
 			}
 		}
@@ -206,7 +219,7 @@ public class PrincipalControlador implements Initializable {
 				controller.setStage(escenario);
 				
 			} catch (IOException e) {
-				System.out.println("-ERROR- Fallo al cargar mensualidadesVista.fxml" + e.getMessage());
+				loggerUser.log(Level.SEVERE, "Excepción: " + e.toString());
 				e.printStackTrace();
 			}
 		}
@@ -239,7 +252,7 @@ public class PrincipalControlador implements Initializable {
 				controller.setStage(escenario);
 				
 			} catch (IOException e) {
-				System.out.println("-ERROR- Fallo al cargar alumnosVista.fxml\n" + e.getMessage());
+				loggerUser.log(Level.SEVERE, "Excepción: " + e.toString());
 				e.printStackTrace();
 			}
 		}
@@ -289,7 +302,7 @@ public class PrincipalControlador implements Initializable {
 				controller.setControladorPrincipal(this);
 				
 			} catch (IOException e) {
-				//poner log.
+				loggerUser.log(Level.SEVERE, "Excepción: " + e.toString());
 				e.printStackTrace();
 			}
 		}
@@ -313,8 +326,31 @@ public class PrincipalControlador implements Initializable {
 
 
 	@FXML
-    void menuSalir(MouseEvent event) {
-		//Hacer que salte una ventana para preguntar si cerrar la app.
+	void menuSalir(MouseEvent event) {
+		Alert alerta = new Alert(AlertType.CONFIRMATION);
+		alerta.getDialogPane().getStylesheets()
+				.add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
+		alerta.setTitle("Lis_Gestión");
+		alerta.setHeaderText("Salir de Aplicación.");
+		alerta.setContentText("¿Estas seguro de que quieres salir de la aplicación?");
+		alerta.initStyle(StageStyle.DECORATED);
+		alerta.initOwner(escenario);
+
+		ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+		ButtonType buttonTypeConfirmar = new ButtonType("Salir", ButtonData.YES);
+		alerta.getButtonTypes().setAll(buttonTypeConfirmar, buttonTypeCancel);
+		Optional<ButtonType> result = alerta.showAndWait();
+
+		// Si pulsamos el boton confirmar:
+		if (result.get() == buttonTypeConfirmar) {
+			if (fhRoot != null) {
+				fhRoot.close();
+			}
+			if (fhUser != null) {
+				fhUser.close();
+			}
+			escenario.close();
+		}
 	}
 
 
@@ -325,9 +361,30 @@ public class PrincipalControlador implements Initializable {
 		try {
 			conexionBD.getDatosUsuario(usuarioActual);
 		} catch (SQLException e) {
-			System.out.println("No se ha podido recuperar los datos del usuario."); //Provisional
+			loggerRoot.severe("Excepción: " + e.toString());
 			e.printStackTrace();
 		}
+
+		loggerUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro "user".
+		
+		try {
+			fhUser = new FileHandler(usuarioActual.getDirectorio().getName() + "\\" + "log"  + "\\" + usuarioActual.getNombreUsuario() + "_log_" + LocalDate.now().getYear() + ".log", true);
+			
+            loggerUser.addHandler(fhUser); 							//Asociar el log a un fichero log. 
+            loggerUser.setUseParentHandlers(true);//Establecer si queremos visualizar los mensajes de log por pantalla.
+            SimpleFormatter formatoTxt = new SimpleFormatter();		//Establecer el formato del fichero. 
+            fhUser.setFormatter(formatoTxt);
+            loggerUser.setLevel(Level.ALL);						//Establezco el nivel de seguridad de las actividades que quiero registrar.
+
+		} catch (SecurityException e) {
+			loggerRoot.severe("Excepción: " + e.toString());
+			e.printStackTrace();
+		} catch (IOException e) {
+			loggerRoot.severe("Excepción: " + e.toString());
+			e.printStackTrace();
+		}
+
+		loggerUser.info("Inicio de sesión.");
 
 		habilitarMenus();
 		cargarVistaInicio();
@@ -341,6 +398,7 @@ public class PrincipalControlador implements Initializable {
 				}
 			}
 		} catch (Exception e) {
+			loggerUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
 		}
 	}
@@ -349,6 +407,7 @@ public class PrincipalControlador implements Initializable {
 		this.usuarioActual = null;
 		listadoAlumnos = null;
 		conexionBD.setUsuario(usuarioRoot);
+		fhUser.close();
 
 		deshabilitarMenus();
 
@@ -357,8 +416,7 @@ public class PrincipalControlador implements Initializable {
 		} else {
 			menuInicio(null);
 		}
-		
-
+	
 		toast.show(escenario, "Usuario Desconectado!!.");
 	}
 
@@ -428,22 +486,40 @@ public class PrincipalControlador implements Initializable {
     	bpPrincipal.setCenter(p);
     }
     
-    
-	
-	private boolean comprobarFicherosApp() {
-		return false;
-	}
 
 	private void crearFicherosApp() {
-		usuarioRoot.getDirectorio().mkdir();
+		usuarioRoot.getDirectorio().mkdir(); //Crea el directorio del usuarrioRoot si no esta creado.
+		
+		if(usuarioRoot.getDirectorio().exists()) {
+			File dirLog = new File(usuarioRoot.getDirectorio().getName() + "\\" + "log");
+			dirLog.mkdir(); //Crea el directorio donde se guardan los archivos log del usuario root.
+		}
+
+		loggerRoot = Logger.getLogger(Constants.USER_ROOT);
+		
+		try {
+			fhRoot = new FileHandler(usuarioRoot.getDirectorio().getName() + "\\" + "log"  + "\\" + "app_log_" + LocalDate.now().getYear() + ".log", true);
+			
+            loggerRoot.addHandler(fhRoot); 							//Asociar el log a un fichero log. 
+            loggerRoot.setUseParentHandlers(true);//Establecer si queremos visualizar los mensajes de log por pantalla.
+            SimpleFormatter formatoTxt = new SimpleFormatter();		//Establecer el formato del fichero. 
+            fhRoot.setFormatter(formatoTxt);
+            loggerRoot.setLevel(Level.FINE);						//Establezco el nivel de seguridad de las actividades que quiero registrar.
+
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		conexionBD.setUsuario(usuarioRoot);
 		File ficheroBD = new File(usuarioRoot.getDirectorio().getName() + "\\" + usuarioRoot.getNombreUsuario() + conexionBD.FINAL_NOMBRE_FICHERO_DB);
 		if(!ficheroBD.exists()) {
 			try {
 				conexionBD.crearTablasApp();
+				loggerRoot.log(Level.INFO, "Creadas tablas App");
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				loggerRoot.log(Level.SEVERE, "Fallo al crear las tablas de la app. " + e.toString());
 			}
 		}
 		
@@ -472,9 +548,6 @@ public class PrincipalControlador implements Initializable {
      */
     public void setStage(Stage stage) {
     	this.escenario = stage;
-		if(escenario == null) {
-			System.out.println("Escenario (Stage) Es nulo");
-		}
     }
 
 	public Stage getStage() {

@@ -2,6 +2,7 @@ package controlador;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import baseDatos.ConexionBD;
 import javafx.fxml.FXML;
@@ -12,12 +13,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import modelo.Usuario;
+import utilidades.Constants;
 import javafx.scene.control.Button;
 
 public class InicioControlador implements Initializable{
 
     private Usuario usuarioActual;
     private Usuario usuarioApp;
+    private Logger logUser;
     private ConexionBD conexionBD;
     private PrincipalControlador controladorPincipal;
 
@@ -55,6 +58,9 @@ public class InicioControlador implements Initializable{
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
+        logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
+    
     	//Cargar imagenes en ImageView.
         Image imagenCarpetaConfig;
         try {
@@ -116,7 +122,5 @@ public class InicioControlador implements Initializable{
     public void setUsuarioApp(Usuario usuarioApp) {
         this.usuarioApp = usuarioApp;
     }
-
-
     
 }

@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import baseDatos.ConexionBD;
 import javafx.beans.binding.Bindings;
@@ -44,6 +45,7 @@ import modelo.Alumno;
 import modelo.EstadoPago;
 import modelo.Mensualidad;
 import modelo.Toast;
+import utilidades.Constants;
 import utilidades.Fechas;
 
 public class MensualidadesControlador implements Initializable {
@@ -53,6 +55,7 @@ public class MensualidadesControlador implements Initializable {
     private ObservableList<Mensualidad> listadoMensualidadesGeneral;
     private DateTimeFormatter formatter;
     private ConexionBD conexionBD;
+    private Logger logUser;
     private PrincipalControlador controladorPincipal;
     private Toast toast;
     private Stage escenario;
@@ -200,6 +203,7 @@ public class MensualidadesControlador implements Initializable {
         ivGenerarMensualidades.setImage(GenerarMensualidades);
         ivNotificacion.setImage(Notificacion);
 
+        logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
         conexionBD = ConexionBD.getInstance();
         toast = new Toast();
 
@@ -266,9 +270,12 @@ public class MensualidadesControlador implements Initializable {
 
         //Valores iniciales de los ComboBox.
         try{
-            cbAnio.setValue(LocalDate.now().getYear());
+            cbAnio.setValue(LocalDate.now().getYear()); //Establece el año actual marcado por defecto.
         }catch (IllegalArgumentException e) {
-            cbAnio.setValue(2020);
+            cbAnio.setValue(2020); //Establece este año si el año actual no se encuentra entre los valores del ComboBox cbAnio.
+            logUser.severe("Excepción: " + e.toString());
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
         }
         
         cbMes.setValue(Fechas.obtenerNombreMes(LocalDate.now().getMonthValue()));
@@ -314,8 +321,6 @@ public class MensualidadesControlador implements Initializable {
                 URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
                 ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
     
-                controller.setStage(ventana);
-                controller.setStagePrincipal(escenario);
                 controller.setListaAlumnos(listadoAlumnosGeneral);
                 controller.setListaMensualidades(listadoMensualidadesGeneral);
     
@@ -326,8 +331,10 @@ public class MensualidadesControlador implements Initializable {
 
                 configurarFiltro(tfBusqueda.getText()); //Actualiza el filtro una vez que termina la ventana.
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                logUser.severe("Excepción: " + e.toString());
                 e.printStackTrace();
+            } catch (Exception e) {
+                logUser.severe("Excepción: " + e.toString());
             }
     }
 
@@ -367,10 +374,11 @@ public class MensualidadesControlador implements Initializable {
                         }
                         
                         listadoMensualidadesGeneral.remove(mensualidadSeleccionada);
+                        logUser.config("Borrada mensualidad: " + mensualidadSeleccionada.toString());
                         toast.show(escenario, "Mensualidad eliminada!!.");
                     }
                 } catch (SQLException e) {
-                    // meter en log.
+                    logUser.severe("Excepción: " + e.toString());
                     alerta = new Alert(Alert.AlertType.ERROR);
                     alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
                     alerta.setTitle("Borrar Mensualidad");
@@ -381,13 +389,14 @@ public class MensualidadesControlador implements Initializable {
                     alerta.showAndWait();
                     
                     e.printStackTrace();
+                } catch (Exception e) {
+                    logUser.severe("Excepción: " + e.toString());
                 }
     			
-    		} else {
-    			
-    		}
+    		} 
         }
     }
+
 
     @FXML
     void modificarMensualidad(MouseEvent event) {
@@ -415,7 +424,6 @@ public class MensualidadesControlador implements Initializable {
                 URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
                 ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
     
-                controller.setStage(ventana);
                 controller.modoFormulario(controller.MODO_EDITAR_MENSUALIDAD);
                 controller.setAlumno(alumnoMensualidad);
                 controller.setMensualidad(MensualidadSeleccionada);
@@ -428,8 +436,10 @@ public class MensualidadesControlador implements Initializable {
 
                 configurarFiltro(tfBusqueda.getText()); //Actualiza el filtro una vez que termina la ventana de modificar la mensualidad.
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                logUser.severe("Excepción: " + e.toString());
                 e.printStackTrace();
+            } catch (Exception e) {
+                logUser.severe("Excepción: " + e.toString());
             }
         }
     }
@@ -450,7 +460,6 @@ public class MensualidadesControlador implements Initializable {
             URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
             ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
 
-            controller.setStage(ventana);
             controller.modoFormulario(controller.MODO_NUEVA_MENSUALIDAD);
             controller.setListaAlumnos(listadoAlumnosGeneral);
             controller.setListaMensualidades(listadoMensualidadesGeneral);
@@ -463,8 +472,10 @@ public class MensualidadesControlador implements Initializable {
 
             configurarFiltro(tfBusqueda.getText());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            logUser.severe("Excepción: " + e.toString());
             e.printStackTrace();
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
         }
     }
 
@@ -499,7 +510,6 @@ public class MensualidadesControlador implements Initializable {
                 ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
                 ventana.initStyle(StageStyle.UNDECORATED);
     
-                controller.setStage(ventana);
                 controller.setModelos(alumnoMensualidad, MensualidadSeleccionada);
     
                 Scene scene = new Scene(cardMensualidad);
@@ -507,11 +517,12 @@ public class MensualidadesControlador implements Initializable {
                 ventana.setScene(scene);
                 ventana.showAndWait();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                logUser.severe("Excepción: " + e.toString());
                 e.printStackTrace();
+            } catch (Exception e) {
+                logUser.severe("Excepción: " + e.toString());
             }
         }
-
     }
 
 
