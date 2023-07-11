@@ -35,6 +35,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -53,11 +54,12 @@ public class AlumnosControlador implements Initializable {
     private DateTimeFormatter formatter;
     private ConexionBD conexionBD;
     private Logger logUser;
-    private PrincipalControlador controladorPincipal;
     private Toast toast;
-    private Stage escenario;
 
     
+    @FXML
+    private BorderPane bpAlumnos;
+
     @FXML
     private ImageView ivLupa;
 
@@ -130,19 +132,21 @@ public class AlumnosControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-    	btnBorrar.getStyleClass().add("boton_rojo");
+    	btnBorrar.getStyleClass().add("boton_rojo"); //Añadir clases de estilo CSS a elementos.
 
         //Cargar imagenes en ImageView.
         Image imagenLupa;
         try {
+            //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
             imagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png")); //Forma desde IDE y JAR.
         } catch (Exception e) {
+            //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
         	imagenLupa = new Image("/recursos/lupa_lila_2_128.png"); //Forma desde el JAR.
         }
-        ivLupa.setImage(imagenLupa);
+        ivLupa.setImage(imagenLupa); //Establecer la imagen cargada en el ImageView.
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
-        conexionBD = ConexionBD.getInstance();
+        conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
         toast = new Toast();
 
         //Asigno a cada columna de la tabla los campos del modelo.
@@ -162,8 +166,8 @@ public class AlumnosControlador implements Initializable {
             return localidad;
         });
         
-        //Mostamos los datos en la columna Fecha Compra Formateados.
-        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");//Formato dd/MM/yy
+        //Mostamos los datos en la columna Fecha Compra Formateados. Se muestra la edad, no la fecha de nacimiento.
+        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Crear un formateador de fecha con el patrón "dd/MM/yyyy".
         colFechaNacimiento.setCellValueFactory(cellData -> {
         	//LocalDate fechaText = cellData.getValue().getFechaNacimiento();
         	//return cellData.getValue().fechaNacimientoProperty().asString(fechaText.format(formatter).toString());
@@ -182,7 +186,14 @@ public class AlumnosControlador implements Initializable {
         });
     }
 
-
+    
+    /**
+     * Método para manejar el evento de borrado de un alumno.
+     * Se muestra un diálogo de confirmación antes de borrar el alumno seleccionado.
+     * Si el usuario confirma, se borra el alumno y se actualiza la lista de alumnos.
+     *
+     * @param event El evento del ratón que activó el método.
+     */
     @FXML
     void borrarAlumno(MouseEvent event) {
         int i = indiceSeleccionado();
@@ -197,38 +208,44 @@ public class AlumnosControlador implements Initializable {
                     + "\na este alumno y al alumno de todas las clases que este apuntado.\n" 
                     +"\nAlumno:  (" + alumnoSeleccionado.getId() + ")  " + alumnoSeleccionado.getNombreCompleto());
             alerta.initStyle(StageStyle.DECORATED);
-            alerta.initOwner(escenario);
+            alerta.initOwner((Stage) bpAlumnos.getScene().getWindow());
             alerta.initModality(Modality.APPLICATION_MODAL);
 
+            //Mostrar el diálogo de alerta y esperar la respuesta del usuario.
             Optional<ButtonType> result = alerta.showAndWait();
     		if (result.get() == ButtonType.OK) {
                 try {
                     if(conexionBD.borrarAlumno(alumnoSeleccionado)) {
                         listadoAlumnos.remove(alumnoSeleccionado);
                         logUser.config("Eliminado Alumno. " + alumnoSeleccionado.toString());
-                        toast.show(escenario, "Alumno eliminado!!.");
+                        toast.show((Stage) bpAlumnos.getScene().getWindow(), "Alumno eliminado!!.");
                     } else {
                         logUser.warning("Fallo al eliminar Alumno. " + alumnoSeleccionado.toString());
                     }
                 } catch (SQLException e) {
                     logUser.severe("Excepción: " + e.toString());
                     e.printStackTrace();
+                    mensajeAviso(
+                        AlertType.ERROR,
+                        "Borrar Alumno",
+                        "",
+                        "No se ha podido borrar el Alumno.");
 
-                    alerta = new Alert(Alert.AlertType.ERROR);
-                    alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
-                    alerta.setTitle("Borrar Alumno");
-                    alerta.setContentText("No se ha podido borrar el Alumno.");
-                    alerta.initStyle(StageStyle.DECORATED);
-                    alerta.initOwner(escenario);
-                    alerta.initModality(Modality.APPLICATION_MODAL);
-                    alerta.showAndWait();
                 } catch (Exception e) {
                     logUser.severe("Excepción: " + e.toString());
+                    e.printStackTrace();
                 }	
     		} 
         } 
     }
 
+
+    /**
+     * Método para manejar el evento de visualización de un alumno.
+     * Se muestra una ventana modal con la información del alumno seleccionado.
+     *
+     * @param event El evento del ratón que activó el método.
+     */
     @FXML
     void verAlumno(MouseEvent event) {
         int i = indiceSeleccionado();
@@ -242,7 +259,7 @@ public class AlumnosControlador implements Initializable {
                 CardAlumnoControlador controller = loader.getController(); // cargo el controlador.
                 
                 Stage ventana= new Stage();
-                ventana.initOwner(escenario);
+                ventana.initOwner((Stage) bpAlumnos.getScene().getWindow());
                 ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
                 ventana.initStyle(StageStyle.UNDECORATED);
     
@@ -257,9 +274,11 @@ public class AlumnosControlador implements Initializable {
                 e.printStackTrace();
             } catch (Exception e) {
                 logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
             }	
         }
     }
+
 
     @FXML
     void modificarAlumno(MouseEvent event) {
@@ -273,7 +292,7 @@ public class AlumnosControlador implements Initializable {
                 AlumnoFormControlador controller = loader.getController(); // cargo el controlador.
                 
                 Stage ventana= new Stage();
-                ventana.initOwner(escenario);
+                ventana.initOwner((Stage) bpAlumnos.getScene().getWindow());
                 ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
                 ventana.initStyle(StageStyle.DECORATED);
                  
@@ -294,12 +313,19 @@ public class AlumnosControlador implements Initializable {
                 e.printStackTrace();
             } catch (Exception e) {
                 logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
             }	
             setupDatosTalba(); //configuro los bindign para que se actualice los labels de informacion de la tableViev.
         }
     }
 
 
+    /**
+     * Método para manejar el evento de modificación de un alumno.
+     * Se muestra un formulario para editar la información del alumno seleccionado.
+     *
+     * @param event El evento del ratón que activó el método.
+     */
     @FXML
     void nuevoAlumno(MouseEvent event) {
         try {
@@ -309,14 +335,13 @@ public class AlumnosControlador implements Initializable {
             AlumnoFormControlador controller = loader.getController(); // cargo el controlador.
             
             Stage ventana= new Stage();
-            ventana.initOwner(escenario);
+            ventana.initOwner((Stage) bpAlumnos.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.DECORATED);
 
             URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
             ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
 
-            //controller.setStage(ventana);
             controller.modoFormulario(controller.MODO_NUEVO_ALUMNO);
             controller.setListaAlumnos(listadoAlumnos);
 
@@ -330,8 +355,10 @@ public class AlumnosControlador implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }	
     }    
+
 
     /**
      * Devuelve el indice seleccionado de la lista cargada en la tableView.
@@ -343,42 +370,10 @@ public class AlumnosControlador implements Initializable {
         if(i != -1) {
             return i; //número del indice seleccionado.
         }
-        toast.show(escenario, "No hay seleccionado ningun Alumno!!.");
+        toast.show((Stage) bpAlumnos.getScene().getWindow(), "No hay seleccionado ningun Alumno!!.");
         return i; //i = -1
     }
 
-    /**
-	 * Establece para este controlador, el controlador principal de la aplicacion.
-	 * 
-	 * @param principal Controlador principal.
-	 */
-	public void setControladorPrincipal(PrincipalControlador principal) {
-		controladorPincipal = principal;
-	}
-	
-	/**
-	 * Establece la lista de Alumnos.
-	 * 
-	 * @param lista La lista de donde se obtienen los Alumnos.
-	 */
-	public void setListaAlumnos(ObservableList<Alumno> lista) {
-        listadoAlumnos = lista; //Guado la lista pasada a la lista de Clasecontrolador.
-		//tvAlumnos.setItems(listadoAlumnos);
-		filtro = new FilteredList<Alumno>(listadoAlumnos); //Inicio el filtro pasandole el listado de alumnos.
-		tvAlumnos.setItems(filtro); //Añado la lista de alumnos TextView tvAlumnos.
-        
-        IntegerProperty tamLista = new SimpleIntegerProperty(filtro.size());
-        lbNumTotalAlumnos.textProperty().bind(tamLista.asString());
-
-        //Listener para obtener el tamaño de la lista
-        filtro.addListener((ListChangeListener<Alumno>) c -> {
-            while (c.next()) {
-                tamLista.set(filtro.size());
-            }
-        });
-
-        setupDatosTalba(); //configuro los bindign para que se actualice los labels de informacion de la tableViev.
-	}
 
     /**
      * Configura los bindign para que se actualice los labels de informacion de la tableViev.
@@ -413,12 +408,47 @@ public class AlumnosControlador implements Initializable {
 
 
     /**
-     * Establece un Stage para este controlador.
+     * Muestra una ventana de dialogo con la informacion pasada como parametros.
      * 
-     * @param s Stage que se establece.
+     * @param tipo Tipo de alerta.
+     * @param tiutlo Titulo de la ventana.
+     * @param cabecera Cabecera del mensaje.
+     * @param cuerpo Cuerpo del menesaje.
      */
-    public void setStage(Stage stage) {
-    	this.escenario = stage;
+    private void mensajeAviso(AlertType tipo, String tiutlo, String cabecera, String cuerpo) {
+        Alert alerta = new Alert(tipo);
+        alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
+        alerta.setTitle(tiutlo);
+        alerta.initOwner((Stage) bpAlumnos.getScene().getWindow());
+        alerta.setHeaderText(cabecera);
+        alerta.setContentText(cuerpo);
+        alerta.initStyle(StageStyle.DECORATED);
+        alerta.initModality(Modality.APPLICATION_MODAL);
+        alerta.showAndWait();
     }
-    
+
+
+    /**
+	 * Establece la lista de Alumnos.
+	 * 
+	 * @param lista La lista de donde se obtienen los Alumnos.
+	 */
+	public void setListaAlumnos(ObservableList<Alumno> lista) {
+        listadoAlumnos = lista; //Guado la lista pasada a la lista de Clasecontrolador.
+		//tvAlumnos.setItems(listadoAlumnos);
+		filtro = new FilteredList<Alumno>(listadoAlumnos); //Inicio el filtro pasandole el listado de alumnos.
+		tvAlumnos.setItems(filtro); //Añado la lista de alumnos TextView tvAlumnos.
+        
+        IntegerProperty tamLista = new SimpleIntegerProperty(filtro.size());
+        lbNumTotalAlumnos.textProperty().bind(tamLista.asString());
+
+        //Listener para obtener el tamaño de la lista
+        filtro.addListener((ListChangeListener<Alumno>) c -> {
+            while (c.next()) {
+                tamLista.set(filtro.size());
+            }
+        });
+
+        setupDatosTalba(); //configuro los bindign para que se actualice los labels de informacion de la tableViev.
+	}
 }

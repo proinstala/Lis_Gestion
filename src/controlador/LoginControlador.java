@@ -11,7 +11,6 @@ import baseDatos.ConexionBD;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -81,7 +80,7 @@ public class LoginControlador implements Initializable {
         ivImagenLogo.setImage(imagenLogo);
 
         loggerRoot = Logger.getLogger(Constants.USER_ROOT); //Crea una instancia de la clase Logger asociada al nombre de registro.
-        conexionBD = ConexionBD.getInstance();
+        conexionBD = ConexionBD.getInstance();              //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
         toast = new Toast();
 
         //olvidado password.
@@ -89,13 +88,27 @@ public class LoginControlador implements Initializable {
         lbPasswordLost.setVisible(false);//No visible.
     }
 
+
+    /**
+     * Método que se ejecuta cuando se hace clic en el boton acceder.
+     * LLama a los metodos que recuperan y comprueban los datos de Usuario del usuario que esta logueandose en la aplicación.
+     * Si el usuario existe y a introducido bien los datos en el formulario, llama al metodo que carga el usuario en la aplicación.
+     * 
+     * @param event El evento del mouse que desencadena el método.
+     */
     @FXML
     void acceder(MouseEvent event) {
+        // Recuperar los datos de los campos y comprobar si están completos.
         if(recuperarDatosCampos() && comprobarUsuario()) {
             boolean logueoOK = false;
             try {
+                //Obtener el usuario de la base de datos de Root a partir de los campos de login.
                 usuario = conexionBD.getUsuario(camposLogin);
+
+                //Establece en la ConexionBD la URL de acceso a la BD del usuario logueado.
                 conexionBD.setUsuario(usuario);
+
+                //Obtener los datos personales de usuario. si no hay, insertarlos.
                 if(!conexionBD.getDatosUsuario(usuario)) {
                     conexionBD.insertarDatosUsuario(usuario);
                 }
@@ -108,6 +121,7 @@ public class LoginControlador implements Initializable {
                 e.printStackTrace();
             } catch (Exception e) {
                 loggerRoot.severe("Excepción: " + e.toString());
+                e.printStackTrace();
             }
 
             if(logueoOK && usuario != null) {
@@ -124,25 +138,15 @@ public class LoginControlador implements Initializable {
 
     @FXML
     void recuperarPassword(MouseEvent event) {
-
         //El label para acceder a esta parte esta deshabilitado y no visible en el metodo initialize.
-        /* 
-        if(escenario == null) {
-            setStage(controladorPincipal.getStage());
-        }*/
-
-        Alert alerta = new Alert(Alert.AlertType.ERROR);
-        alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
-        alerta.setTitle("Recuperar password");
-        alerta.setContentText("En construcción.");
-        alerta.initStyle(StageStyle.DECORATED);
-        //alerta.initOwner(escenario);
-        alerta.initModality(Modality.APPLICATION_MODAL);
-        alerta.showAndWait();
-        
     }
 
 
+    /**
+     * Método que se ejecuta cuando se hace clic en el Label registrarse.
+     * 
+     * @param event El evento del mouse que desencadena el método.
+     */
     @FXML
     void registrarse(MouseEvent event) {
         try {
@@ -172,11 +176,19 @@ public class LoginControlador implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             loggerRoot.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
     }
     
+
+    /**
+     * Recupera los datos de los campos de entrada.
+     * @return true si los campos se han recuperado correctamente, false de lo contrario.
+     */
     private boolean recuperarDatosCampos() {
         boolean camposOK = false;
+
+        //Verificar si el campo de usuario está vacío.
         if (tfUsuario.getText().isBlank()) {
             toast.show((Stage) bdLogin.getScene().getWindow(), "El campo Nombre está vacío!!.");
         } else {
@@ -184,6 +196,7 @@ public class LoginControlador implements Initializable {
             camposOK = true;
         }
 
+        //Verificar si el campo de contraseña está vacío.
         if(camposOK && pfPassword.getText().isBlank()) {
             toast.show((Stage) bdLogin.getScene().getWindow(), "El campo password está vacío!!.");
             camposOK = false;
@@ -195,14 +208,21 @@ public class LoginControlador implements Initializable {
     }
 
 
+    /**
+     * Comprueba la validez del usuario comprobando si el nombre de usuario y contrasña coincienden con alguno registrado en la aplicación.
+     * 
+     * @return true si el usuario es válido, false de lo contrario.
+     */
     private boolean comprobarUsuario() {
         conexionBD.setUsuario(usuarioRoot);
         try {
+            //Comprobar si no hay ningún usuario registrado con ese nombre.
             if(!conexionBD.comprobarNombreUsuario(camposLogin[0])) {
                 toast.show((Stage) bdLogin.getScene().getWindow(), "No hay ningun usuario registrado\ncon ese nombre!!.");
                 return false;
             }
             
+            //Comprobar si el password es incorrecto.
             if(!conexionBD.comprobarUsuario(camposLogin)) {
                 toast.show((Stage) bdLogin.getScene().getWindow(), "El password es incorrecto!!.");
                 loggerRoot.info("Intento de acceso a usuario " + camposLogin[0] + " con password incorrecto.");
@@ -217,6 +237,7 @@ public class LoginControlador implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             loggerRoot.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
         return true;
     }
@@ -231,6 +252,7 @@ public class LoginControlador implements Initializable {
 		controladorPincipal = principal;
 	}
 
+    
     /**
      * Establece el usuarioRoot para este controlador.
      * 

@@ -15,6 +15,7 @@ import java.time.temporal.IsoFields;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import modelo.Alumno;
 import modelo.Clase;
@@ -29,12 +30,17 @@ import modelo.Mensualidad;
 import modelo.TipoClase;
 import modelo.Usuario;
 import utilidades.Cifrador;
+import utilidades.Constants;
 import utilidades.Fechas;
 
+
+/**
+ * Clase que representa una conexión a la base de datos.
+ * 
+ * @author David Jimenez Alonso.
+ */
 public class ConexionBD implements Cloneable{
 	private static final ConexionBD INSTANCE = new ConexionBD(); //Singleton
-	//private final String url = "jdbc:sqlite:src\\baseDatos\\Gestion_de_clientes";
-    //private final String url = "jdbc:sqlite:Gestion_de_clientes2.db?cipher=sqlcipher&legacy=4&key=12345";
     private Connection conn;
     private Statement st;
     private ResultSet res;
@@ -43,36 +49,86 @@ public class ConexionBD implements Cloneable{
     private final String cadenaConexionParte1 = "jdbc:sqlite:";
     private final String cadenaConexionParte2 = "datab.db?cipher=sqlcipher&legacy=4&key=";
     public final String FINAL_NOMBRE_FICHERO_DB = "datab.db"; 
+    private Logger logger;
 
     private ConexionBD() {}
 
+    /**
+     * Retorna la instancia única de la clase ConexionBD.
+     * 
+     * @return Instancia única de ConexionBD.
+     */
     public static ConexionBD getInstance() { //Singleton
         return INSTANCE;
     }
 
+    /**
+     * Establece el usuario para la conexión a la base de datos.
+     * 
+     * @param user El usuario para la conexión.
+     */
     public void setUsuario(Usuario user) {
         URLConexion = cadenaConexionParte1 + user.getDirectorio().getName() + "\\" + user.getNombreUsuario() + cadenaConexionParte2 + user.getPassword();
+        setLog(user);
     }
     
+    /**
+     * Retorna la URL de conexión actual.
+     * @return Un String con la URL de conexión.
+     */
     public String getURLConexion() {
         return URLConexion;
     }
 
+    /**
+     * Método clone para evitar la clonación del objeto.
+     * 
+     * @throws CloneNotSupportedException Si se intenta clonar el objeto.
+     */
     @Override
     public Object clone() throws CloneNotSupportedException { //Singleton - Para evitar la clonacion del objeto.
         throw new CloneNotSupportedException();
     }
     
+    /**
+     * Establece la conexión a la base de datos.
+     * 
+     * @return Objeto Connection que representa la conexión establecida.
+     * @throws SQLException Si ocurre un error al establecer la conexión.
+     */
     private Connection conectar() throws SQLException {
         conn = DriverManager.getConnection(URLConexion);
         return conn;
     }
 
+    /**
+     * Cierra la conexión a la base de datos.
+     * 
+     * @param con Objeto Connection que representa la conexión a cerrar.
+     * @throws SQLException Si ocurre un error al cerrar la conexión.
+     */
     private void desconectar(Connection con) throws SQLException {
         con.close();
     }
 
+    /**
+     * Establece el log para el usuario especificado.
+     * @param user El usuario para el cual se establecerá el log.
+     */
+    private void setLog(Usuario user) {
+        if (user.getNombreUsuario().equals("root")) {
+            logger = Logger.getLogger(Constants.USER_ROOT); //Crea una instancia de la clase Logger asociada al nombre de registro.
+        } else {
+            logger = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
+        }
+    }
+
     
+    /**
+     * Crea las tablas necesarias en la base de datos de la aplicación.
+     * 
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public void crearTablasApp() throws SQLException {
         ConexionBD cn = INSTANCE;
         conn = cn.conectar();
@@ -87,17 +143,25 @@ public class ConexionBD implements Cloneable{
                 "directorio TEXT NOT NULL); "; 
         st.execute(sql);
         
-        System.out.println("BD: Creada tabla usuario de APP."); //Esto es temporal para pruebas.
         st.close();
         cn.desconectar(conn);
+        logger.config("BD: Creada tabla usuario de APP.");
     }
 
+
+    /**
+     * Crea las tablas necesarias en la base de datos del usuario.
+     * 
+     * @return true si se crearon las tablas correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean crearTablasUsuario() throws SQLException {
         ConexionBD cn = INSTANCE;
         String sql;
         Boolean result = false;
+        conn = cn.conectar();
+
         try {
-            conn = cn.conectar();
             st = conn.createStatement();
             conn.setAutoCommit(false);
 
@@ -207,32 +271,30 @@ public class ConexionBD implements Cloneable{
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             result = true;
         } catch (SQLException e) {
-            // aqui poner la insercion en el .log
             conn.rollback(); // Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
             conn.setAutoCommit(true);
             if (st != null) st.close();
         }
 
-        System.out.println("BD: Creadas tablas."); //Esto es temporal para pruebas.
+        logger.config("BD: Creadas tablas.");
         cn.desconectar(conn);
         
-        if(insertProvincias()) {
-            System.out.println("insertado provincias y localidades.");
-        } else {
-            System.out.println("NO se han insertado las provincias y localidades.");
-        }
-
-        if(insertPreciosClase()) {
-            System.out.println("insertado precios de clases.");
-        } else {
-            System.out.println("NO se han insertado los precios de las clases.");
-        }
-
+        if(!insertProvincias()) {logger.warning("BD: NO se han insertado las provincias y localidades.");}
+        if(!insertPreciosClase()) {logger.warning("BD: NO se han insertado los precios de las clases.");}
+            
         return result;
     }
 
+
+    /**
+     * Inserta las provincias y localidades en la base de datos.
+     * 
+     * @return true si se insertaron las provincias y localidades correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     private boolean insertProvincias() throws SQLException{
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -259,12 +321,12 @@ public class ConexionBD implements Cloneable{
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            if(st != null) st.close();
+            if (st != null) {st.close();}
         }
 
         cn.desconectar(conn);
@@ -272,6 +334,12 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Inserta los precios de las clases en la base de datos.
+     * 
+     * @return true si se insertaron los precios de las clases correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     private boolean insertPreciosClase() throws SQLException{
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -286,25 +354,30 @@ public class ConexionBD implements Cloneable{
             st.execute("INSERT INTO PRECIO_CLASE (numero_clases, precio) VALUES (" + 3 + ", " + 40.00 + ");");
             st.execute("INSERT INTO PRECIO_CLASE (numero_clases, precio) VALUES (" + 4 + ", " + 50.00 + ");");
             
-
             conn.commit(); //Confirma la transacción de la inserción de los datos.
-           
-            System.out.println("Cambio de contraseña"); //Esto es temporal para pruebas.
-            
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            if(st != null) st.close();
+            if(st != null) {st.close();}
         }
 
         cn.desconectar(conn);
         return result;
     }
 
+
+    /**
+     * Cambia la contraseña de la base de datos.
+     * 
+     * @param newPass La nueva contraseña.
+     * @param usuarioActual El objeto Usuario actual.
+     * @return true si se cambió la contraseña de la base de datos correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean cambiarPasswordBD(String newPass, Usuario usuarioActual) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -320,17 +393,15 @@ public class ConexionBD implements Cloneable{
             st.execute(sqlReKey);
 
             conn.commit(); //Confirma la transacción de la inserción de los datos.
-           
-            System.out.println("Cambio de contraseña BD"); //Esto es temporal para pruebas.
-            
+            logger.config("BD: Cambio password de BD usuario."); 
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            if(st != null) st.close();
+            if(st != null) {st.close();}
         }
 
         cn.desconectar(conn);
@@ -338,6 +409,15 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Cambia la contraseña de un usuario en la base de datos.
+     * 
+     * @param newPass La nueva contraseña.
+     * @param oldPass La contraseña antigua.
+     * @param idUsuario El ID del usuario.
+     * @return true si se cambió la contraseña del usuario correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean cambiarPasswordUsuario(String newPass, String oldPass, int idUsuario) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -356,21 +436,20 @@ public class ConexionBD implements Cloneable{
            
             if(n > 0) {
                 result = true;
-                System.out.println("Cambio de contraseña de usuario"); //Esto es temporal para pruebas.
             } else {
-                result = false;
-                System.out.println("NO se ha Cambio la contraseña de usuario"); //Esto es temporal para pruebas.
+                logger.info("BD: Fallo cambio password de usuario."); 
             }
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
             conn.rollback();
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            if(ps != null) ps.close();
+            if(ps != null) {ps.close();}
         }
 
         cn.desconectar(conn);
@@ -378,6 +457,13 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Comprueba si existe un usuario con el nombre especificado en la base de datos.
+     * 
+     * @param nombre El nombre de usuario a comprobar.
+     * @return true si existe un usuario con el nombre especificado, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean comprobarNombreUsuario(String nombre) throws SQLException {
         ConexionBD cn = INSTANCE;
         conn = cn.conectar();
@@ -389,23 +475,28 @@ public class ConexionBD implements Cloneable{
 
             while (res.next()) {
                 result = true;
-                System.out.println("BD: Nombre usuario en base de datos."); //Esto es temporal para pruebas.
             }
-
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
-
         return result;
     }
 
 
+    /**
+     * Comprueba si un usuario existe en la base de datos y si las credenciales coinciden.
+     * 
+     * @param usuario Un arreglo de String que contiene el nombre de usuario en la posición 0 y la contraseña en la posición 1.
+     * @return true si el usuario existe y las credenciales coinciden, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     * @throws NoSuchAlgorithmException Si ocurre un error al cifrar la contraseña.
+     */
     public boolean comprobarUsuario(String[] usuario) throws SQLException, NoSuchAlgorithmException {
         ConexionBD cn = INSTANCE;
         conn = cn.conectar();
@@ -429,24 +520,28 @@ public class ConexionBD implements Cloneable{
                 //Comparo si el nombre y password pasados por parametro coinciden con los obtenidos en la consulta.
                 if(usuario[0].equals(usuarioBD[0]) && passwordCifrado.equals(usuarioBD[1])) {
                     result = true;
-                    System.out.println("BD: usuario macht en base de datos."); //Esto es temporal para pruebas.
                 }
-
             }
-
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) st.close();
-            if(res != null) res.close(); 
+            if(ps != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
-
         return result;
     }
 
+    /**
+     * Inserta un nuevo usuario en la base de datos.
+     * 
+     * @param user El objeto Usuario a insertar.
+     * @return true si se insertó el usuario correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     * @throws NoSuchAlgorithmException Si ocurre un error al cifrar la contraseña.
+     */
     public boolean insertarUsuario(Usuario user) throws SQLException, NoSuchAlgorithmException{
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -469,17 +564,26 @@ public class ConexionBD implements Cloneable{
             System.out.println("Insercion Usuario en base de datos"); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) ps.close();  
+            if(ps != null) {ps.close();}  
         }
         
         cn.desconectar(conn);
         return result;
     }
 
+
+    /**
+     * Recupera un objeto Usuario de la base de datos utilizando el nombre de usuario y la contraseña.
+     * 
+     * @param usuario Un arreglo de String que contiene el nombre de usuario en la posición 0 y la contraseña en la posición 1.
+     * @return El objeto Usuario recuperado de la base de datos, o null si no se encontró ningún usuario con las credenciales proporcionadas.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     * @throws NoSuchAlgorithmException Si ocurre un error al cifrar la contraseña.
+     */
     public Usuario getUsuario(String[] usuario) throws SQLException, NoSuchAlgorithmException {
         //[]usuario -> [0]nombre, [1]password
         ConexionBD cn = INSTANCE;
@@ -493,27 +597,32 @@ public class ConexionBD implements Cloneable{
             ps.setString(1, usuario[0]); 
             ps.setString(2, passwordCifrado);
            
-            //ps.executeUpdate();
             res = ps.executeQuery(); //consulta sql a tabla USUARIO.
 
             while (res.next()) {
                 //id-nombre-password-directorio
                 usuarioRecuperado = new Usuario(res.getInt(1), res.getString(2), usuario[1], new File(res.getString(4)));
             }
-
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) ps.close();
-            if(res != null) res.close(); 
+            if(ps != null) {ps.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
-
         return usuarioRecuperado;
     }
 
+
+    /**
+     * Borra un usuario de la base de datos utilizando su ID.
+     * 
+     * @param idUsuario El ID del usuario a borrar.
+     * @return true si se borró el usuario correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean borrarUsuario(int idUsuario) throws SQLException {
         ConexionBD cn = INSTANCE;
         conn = cn.conectar();
@@ -528,24 +637,29 @@ public class ConexionBD implements Cloneable{
                 result = true;
             } else if(eliminados > 1) {
                 conn.rollback(); //Si borra mas de un usuario, hacemos un rollback por seguridad.
+                logger.warning("BD: Fallo al borrar usuario. La SQL DELETE ha borrado mas de un usuario. Se ha hecho ROLLBACK.");
             }
-            
-            
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
+            if(st != null) {st.close();}
         }
 
         conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
         cn.desconectar(conn);
-
         return result;
     }
 
 
+    /**
+     * Obtiene los datos de un usuario desde la base de datos y los asigna al objeto Usuario proporcionado.
+     * 
+     * @param usuario El objeto Usuario al que se asignarán los datos obtenidos de la base de datos.
+     * @return true si se obtuvieron los datos del usuario correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean getDatosUsuario(Usuario usuario) throws SQLException{
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -568,19 +682,25 @@ public class ConexionBD implements Cloneable{
                     result = true;
                 }
             }
-
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) ps.close();
-            if(res != null) res.close(); 
+            if(ps != null) {ps.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
         return result;
     }
 
+    /**
+     * Inserta los datos de un usuario en la base de datos.
+     * 
+     * @param usuario El objeto Usuario que contiene los datos a insertar.
+     * @return true si se insertaron los datos correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean insertarDatosUsuario(Usuario usuario) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -602,20 +722,27 @@ public class ConexionBD implements Cloneable{
             
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            System.out.println("Insercion Datos Usuario en base de datos"); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) ps.close();  
+            if(ps != null) {ps.close();}  
         }
         
         cn.desconectar(conn);
         return result;
     }
 
+
+    /**
+     * Modifica los datos de un usuario en la base de datos.
+     * 
+     * @param usuario El objeto Usuario que contiene los nuevos datos a modificar.
+     * @return true si se modificaron los datos correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean modificarDatosUsuario(Usuario usuario) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -633,29 +760,34 @@ public class ConexionBD implements Cloneable{
             ps.setInt(6, usuario.getId());
             
             int n = ps.executeUpdate();
-
             conn.commit(); //Confirma la transacción de la inserción de los datos.
            
             if(n > 0) {
                 result = true;
-                System.out.println("Cambio de datos personales de usuario"); //Esto es temporal para pruebas.
             } else {
-                result = false;
-                System.out.println("NO se ha Cambio los datos personales de usuario"); //Esto es temporal para pruebas.
+                logger.warning("Fallo. BD: NO se ha Cambio los datos personales de usuario");
             }
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            if(ps != null) ps.close();
+            if(ps != null) {ps.close();}
         }
 
         cn.desconectar(conn);
         return result;
     }
 
+
+    /**
+     * Modifica el correo electrónico y la contraseña del correo electrónico de la aplicación de un usuario en la base de datos.
+     * 
+     * @param usuario El objeto Usuario que contiene los nuevos datos de correo electrónico y contraseña.
+     * @return true si se modificaron los datos correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean modificarEmailApp(Usuario usuario) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -670,23 +802,15 @@ public class ConexionBD implements Cloneable{
             ps.setInt(3, usuario.getId());
             
             int n = ps.executeUpdate();
-
             conn.commit(); //Confirma la transacción de la inserción de los datos.
-           
-            if(n > 0) {
-                result = true;
-                System.out.println("Cambio de datos personales de usuario"); //Esto es temporal para pruebas.
-            } else {
-                result = false;
-                System.out.println("NO se ha Cambio los datos personales de usuario"); //Esto es temporal para pruebas.
-            }
+            if(n > 0) {result = true;} 
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            if(ps != null) ps.close();
+            if(ps != null) {ps.close();}
         }
 
         cn.desconectar(conn);
@@ -694,10 +818,18 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Borra una jornada y todas las clases asociadas de la base de datos.
+     * 
+     * @param jornada La jornada a borrar.
+     * @return true si se borraron los datos correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean borrarJornada(Jornada jornada) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
         conn = cn.conectar();
+
         try {
             conn.setAutoCommit(false);
 
@@ -705,13 +837,10 @@ public class ConexionBD implements Cloneable{
             st = conn.createStatement();
             st.execute(sqlForeignKey);
 
-
             for (Clase c : jornada.getClases()) {
-                
                 ps = conn.prepareStatement("DELETE FROM CLASE_ALUMNO WHERE clase_id = ?;");
                 ps.setInt(1, c.getId());
                 ps.executeUpdate();
-                
 
                 ps = conn.prepareStatement("DELETE FROM CLASE WHERE id = ?;");
                 ps.setInt(1, c.getId());
@@ -723,17 +852,15 @@ public class ConexionBD implements Cloneable{
             ps.executeUpdate();
             
             conn.commit(); //Confirma la transacción de la inserción de los datos.
-            System.out.println("BD: Borrada Jornada " + jornada.getFecha().toString() + " en base de datos."); //Esto es temporal para pruebas.
             result = true;
-
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
-            if(ps != null) ps.close();
-            if(st != null) st.close(); 
-            if(res != null) res.close();
+            if(ps != null) {ps.close();}
+            if(st != null) {st.close();} 
+            if(res != null) {res.close();}
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
         }
         
@@ -742,6 +869,13 @@ public class ConexionBD implements Cloneable{
     }
 
     
+    /**
+     * Inserta una jornada y sus clases asociadas en la base de datos.
+     * 
+     * @param jornada La jornada a insertar.
+     * @return true si se insertaron los datos correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean insertarJornada(Jornada jornada) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -775,16 +909,15 @@ public class ConexionBD implements Cloneable{
             }
 
             conn.commit(); //Confirma la transacción de la inserción de los datos.
-            System.out.println("Insercion en base de datos"); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
-            if(ps != null) ps.close();
-            if(st != null) st.close(); 
-            if(res != null) res.close();
+            if(ps != null) {ps.close();}
+            if(st != null) {st.close();} 
+            if(res != null) {res.close();}
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
         }
         
@@ -793,6 +926,13 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Inserta una jornada completa, incluyendo las clases y la asociacion entre alumnos y clases, en la base de datos.
+     * 
+     * @param jornadaCopia La jornada a insertar.
+     * @return true si se insertaron los datos correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean insertarJornadaCompleta(Jornada jornadaCopia) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -842,13 +982,13 @@ public class ConexionBD implements Cloneable{
             System.out.println("BD: Insercion en base de datos"); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
-            if(ps != null) ps.close();
-            if(st != null) st.close(); 
-            if(res != null) res.close();
+            if(ps != null) {ps.close();}
+            if(st != null) {st.close();} 
+            if(res != null) {res.close();}
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
         }
         
@@ -857,6 +997,13 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Inserta una lista de jornadas completas, incluyendo las clases y la asociacion entre alumnos y clases, en la base de datos.
+     * 
+     * @param listaJornadas El array de jornadas a insertar.
+     * @return true si se insertaron los datos correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean insertarListaJornadas(Jornada[] listaJornadas) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -907,16 +1054,16 @@ public class ConexionBD implements Cloneable{
             }
 
             conn.commit(); //Confirma la transacción de la inserción de los datos.
-            System.out.println("BD: Inserción de Array de Jornadas en base de datos"); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
             //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
-            if(ps != null) ps.close();
-            if(st != null) st.close(); 
-            if(res != null) res.close();
+            if(ps != null) {ps.close();}
+            if(st != null) {st.close();} 
+            if(res != null) {res.close();}
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
         }
         
@@ -925,16 +1072,22 @@ public class ConexionBD implements Cloneable{
     }
 
     
-
+    /**
+     * Inserta un alumno en la base de datos, incluyendo su dirección.
+     * 
+     * @param alumno El alumno a insertar.
+     * @return true si se insertaron los datos correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean insertarAlumno(Alumno alumno) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
+        conn = cn.conectar();
+
         try {
-            conn = cn.conectar();
             conn.setAutoCommit(false);
 
             //Insertamos el Alumno en la base de datos.
-
             ps = conn.prepareStatement("INSERT INTO DIRECCION (calle, numero, localidad_id, codigo_postal) " + 
                 "VALUES (?,?,(SELECT id FROM LOCALIDAD WHERE nombre = ? AND provincia_id = (SELECT id FROM PROVINCIA WHERE nombre = ?)),?);");
 
@@ -976,16 +1129,15 @@ public class ConexionBD implements Cloneable{
             
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            System.out.println("Insercion en base de datos"); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) ps.close(); 
-            if(res != null) res.close();
-            if(st != null) st.close();
+            if(ps != null) {ps.close();} 
+            if(res != null) {res.close();}
+            if(st != null) {st.close();}
         }
         
         cn.desconectar(conn);
@@ -993,18 +1145,21 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Inserta un alumno en una clase específica en la base de datos.
+     * 
+     * @param alumno El alumno a insertar en la clase.
+     * @param clase La clase en la que se insertará el alumno.
+     * @return true si se insertaron los datos correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean insertarAlumnoEnClase(Alumno alumno, Clase clase) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
+        conn = cn.conectar();
+        
         try {
-            conn = cn.conectar();
             conn.setAutoCommit(false);
-            /* 
-            //Obtenemos el id que se le asignó a esa dirección.
-            st = conn.createStatement();
-            res = st.executeQuery("SELECT id FROM CLASE WHERE numero = " + clase.getNumero() + " and jornada = " + jornada.getFecha().toString() + ";");
-            int clase_id = res.getInt(1); //Guardo el valor de id obtenido en la consulta en la variable.
-            */
 
             //Insertamos el Alumno en la base de datos.
             ps = conn.prepareStatement("INSERT INTO CLASE_ALUMNO (clase_id, alumno_id) VALUES (?,?);");
@@ -1015,14 +1170,13 @@ public class ConexionBD implements Cloneable{
             
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            System.out.println("BD: Insercion alumno: " + alumno.getId() + " en clase id: " + clase.getId() + "."); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            ps.close(); 
+            if(ps != null) {ps.close();} 
         }
         
         cn.desconectar(conn);
@@ -1030,18 +1184,20 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Elimina un alumno de una clase específica en la base de datos.
+     * 
+     * @param alumno El alumno a eliminar de la clase.
+     * @param clase La clase de la cual se eliminará el alumno.
+     * @return true si se borraron los datos correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean borrarAlumnoEnClase(Alumno alumno, Clase clase) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
+        conn = cn.conectar();
         try {
-            conn = cn.conectar();
             conn.setAutoCommit(false);
-            /* 
-            //Obtenemos el id que se le asignó a esa dirección.
-            st = conn.createStatement();
-            res = st.executeQuery("SELECT id FROM CLASE WHERE numero = " + clase.getNumero() + " and jornada = " + jornada.getFecha().toString() + ";");
-            int clase_id = res.getInt(1); //Guardo el valor de id obtenido en la consulta en la variable.
-            */
 
             //Insertamos el Alumno en la base de datos.
             ps = conn.prepareStatement("DELETE FROM CLASE_ALUMNO WHERE clase_id = ? AND alumno_id = ?;");
@@ -1052,16 +1208,15 @@ public class ConexionBD implements Cloneable{
             
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            System.out.println("BD: borrado alumno en clase id: " + clase.getId() + "."); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) ps.close();
-            if(st != null) st.close();
-            if(res != null) res.close();
+            if(ps != null) {ps.close();}
+            if(st != null) {st.close();}
+            if(res != null) {res.close();}
         }
         
         cn.desconectar(conn);
@@ -1069,6 +1224,14 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Actualiza la lista de alumnos de una clase en la base de datos.
+     * 
+     * @param nuevaListaAlumnos La nueva lista de alumnos de la clase.
+     * @param idClase El identificador de la clase a actualizar.
+     * @return true si se actualizaron los datos correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean actualizarAlumnosEnClase(ArrayList<Alumno> nuevaListaAlumnos, int idClase) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -1125,16 +1288,15 @@ public class ConexionBD implements Cloneable{
             
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            System.out.println("BD: Actualizada la lista de alumnos de Clase " + idClase + "."); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) ps.close(); 
-            if(res != null) res.close();
-            if(st != null) st.close();
+            if(ps != null) {ps.close();} 
+            if(res != null) {res.close();}
+            if(st != null) {st.close();}
         }
         
         cn.desconectar(conn);
@@ -1142,11 +1304,19 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Actualiza los datos de una clase en la base de datos.
+     * 
+     * @param clase La clase con los datos actualizados.
+     * @return true si se actualizaron los datos correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean actualizarClase(Clase clase) throws SQLException{
         ConexionBD cn = INSTANCE;
         boolean result = false;
-        try {
-            conn = cn.conectar();
+        conn = cn.conectar();
+
+        try {    
             conn.setAutoCommit(false);
 
             ps = conn.prepareStatement("UPDATE CLASE SET tipo = ?, hora = ?, anotaciones = ? WHERE id = ?;");
@@ -1158,27 +1328,35 @@ public class ConexionBD implements Cloneable{
             
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            System.out.println("BD: Actualizada Clase " + clase.getId() + "."); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) ps.close(); 
-            if(res != null) res.close();
-            if(st != null) st.close();
+            if(ps != null) {ps.close();} 
+            if(res != null) {res.close();}
+            if(st != null) {st.close();}
         }
         
         cn.desconectar(conn);
         return result;
     }
 
+
+    /**
+     * Actualiza el comentario de una jornada en la base de datos.
+     * 
+     * @param jornada La jornada con el comentario actualizado.
+     * @return true si se actualizó el comentario correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public boolean actualizarComentarioJornada(Jornada jornada) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
+        conn = cn.conectar();
+
         try {
-            conn = cn.conectar();
             conn.setAutoCommit(false);
 
             ps = conn.prepareStatement("UPDATE JORNADA SET comentario = ? WHERE fecha = ?;");
@@ -1188,32 +1366,46 @@ public class ConexionBD implements Cloneable{
             
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            System.out.println("BD: Actualizado el comentario de Jornada " + jornada.getFecha().toString() + "."); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) ps.close(); 
-            if(res != null) res.close();
-            if(st != null) st.close();
+            if(ps != null) {ps.close();} 
+            if(res != null) {res.close();}
+            if(st != null) {st.close();}
         }
         
         cn.desconectar(conn);
         return result;
     }
 
+    /**
+     * Obtiene la lista de alumnos general desde la base de datos.
+     * 
+     * @return La lista de alumnos obtenida desde la base de datos.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public ArrayList<Alumno> getListadoAlumnos() throws SQLException {
         ConexionBD cn = INSTANCE;
         ArrayList<Alumno> listaAlumnos = null;
-        ArrayList<Direccion> listaDirecciones = getListadoDirecciones(); //Obtengo la lista de direcciones
+        ArrayList<Direccion> listaDirecciones = null;
         conn = cn.conectar();
-        try {
-            
-            st = conn.createStatement();
-            res = st.executeQuery("SELECT * FROM ALUMNO;"); //consulta sql a tabla ALUMNO.
 
+        try {
+            st = conn.createStatement();
+            res = st.executeQuery("SELECT D.id, D.calle, D.numero, L.nombre, P.nombre, D.codigo_postal " 
+                                + "FROM DIRECCION D JOIN LOCALIDAD L ON(D.localidad_id = L.id) "
+                                + "JOIN PROVINCIA P ON(L.provincia_id = P.id);"); //consulta sql a tablas DIRECCION, LOCALIDAD Y PROVINCIA.
+
+            listaDirecciones = new ArrayList<Direccion>();
+            while (res.next()) {
+                listaDirecciones.add(new Direccion(res.getInt(1), res.getString(2), res.getInt(3), 
+                    res.getString(4), res.getString(5), res.getInt(6)));
+            }
+            
+            res = st.executeQuery("SELECT * FROM ALUMNO;"); //consulta sql a tabla ALUMNO.
             listaAlumnos = new ArrayList<Alumno>();
             while (res.next()) {
                 Direccion direccion = null; //Por defecto la direccion es null;
@@ -1231,30 +1423,30 @@ public class ConexionBD implements Cloneable{
                     }
                 }
                 
-                //Genero un Enumerado de tipo Genero a partir del valor rescatado en el campo genero del registro que se esta recorriendo.
+                //Genera un Enumerado de tipo Genero a partir del valor rescatado en el campo genero del registro que se esta recorriendo.
                 Genero genero;
                 try {
                     genero = Genero.valueOf(res.getString(5));
                 } catch (IllegalArgumentException e) {
-                    //poner esto en el log.
+                    logger.severe("Excepción SQL: " + e.toString());
                     genero = null;
                 }
 
-                //Genero un Enumerado de tipo EstadoAlumno a partir del valor rescatado en el campo genero del registro que se esta recorriendo.
+                //Genera un Enumerado de tipo EstadoAlumno a partir del valor rescatado en el campo genero del registro que se esta recorriendo.
                 EstadoAlumno estado;
                 try {
                     estado = EstadoAlumno.valueOf(res.getString(10));
                 } catch (IllegalArgumentException e) {
-                    //poner esto en el log.
+                    logger.severe("Excepción SQL: " + e.toString());
                     estado = null;
                 }
 
-                //Genero un Enumerado de tipo FormaPago a partir del valor rescatado en el campo forma_pago del registro que se esta recorriendo.
+                //Genera un Enumerado de tipo FormaPago a partir del valor rescatado en el campo forma_pago del registro que se esta recorriendo.
                 FormaPago formaPago; //res.getString(6)
                 try {
                     formaPago = FormaPago.valueOf(res.getString(12));
                 } catch (IllegalArgumentException e) {
-                    //poner esto en el log.
+                    logger.severe("Excepción SQL: " + e.toString());
                     formaPago = null;
                 }
 
@@ -1264,20 +1456,26 @@ public class ConexionBD implements Cloneable{
                     res.getString(9), estado, res.getInt(11), formaPago));
             }
             
-            System.out.println("BD: Obtencion de listaAlumnos."); //Esto es temporal para pruebas.
+            logger.info("BD: Obtencion de lista Alumnos general. Total: " + listaAlumnos.size());
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(res != null) {res.close();}
+            if(st != null) {st.close();}
         }
         
         cn.desconectar(conn);
         return listaAlumnos;
     }
 
-    //original
+    /**
+     * Obtiene una lista de alumnos asociados a una clase específica desde la base de datos.
+     * 
+     * @param idClase El ID de la clase de la cual se obtendrá el listado de alumnos.
+     * @return La lista de alumnos asociados a la clase especificada.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public ArrayList<Alumno> getListadoAlumnos(int idClase) throws SQLException {
         ConexionBD cn = INSTANCE;
         ArrayList<Alumno> listaAlumnos = null;
@@ -1310,7 +1508,7 @@ public class ConexionBD implements Cloneable{
                 try {
                     genero = Genero.valueOf(res.getString(5));
                 } catch (IllegalArgumentException e) {
-                    //poner esto en el log.
+                    logger.severe("Excepción SQL: " + e.toString());
                     genero = null;
                 }
 
@@ -1319,7 +1517,7 @@ public class ConexionBD implements Cloneable{
                 try {
                     estado = EstadoAlumno.valueOf(res.getString(10));
                 } catch (IllegalArgumentException e) {
-                    //poner esto en el log.
+                    logger.severe("Excepción SQL: " + e.toString());
                     estado = null;
                 }
 
@@ -1328,7 +1526,7 @@ public class ConexionBD implements Cloneable{
                 try {
                     formaPago = FormaPago.valueOf(res.getString(12));
                 } catch (IllegalArgumentException e) {
-                    //poner esto en el log.
+                    logger.severe("Excepción SQL: " + e.toString());
                     formaPago = null;
                 }
 
@@ -1337,14 +1535,12 @@ public class ConexionBD implements Cloneable{
                     genero, direccion, LocalDate.parse(res.getString(7)), res.getInt(8),
                     res.getString(9), estado, res.getInt(11), formaPago));
             }
-            
-            System.out.println("BD: Obtencion de listaAlumnos de la Clase: " + idClase + "."); //Esto es temporal para pruebas.
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
@@ -1352,10 +1548,17 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Obtiene la lista de direcciones general desde la base de datos.
+     * 
+     * @return La lista de direcciones obtenidas.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public ArrayList<Direccion> getListadoDirecciones() throws SQLException {
         ConexionBD cn = INSTANCE;
         ArrayList<Direccion> listaDirecciones = null;
         conn = cn.conectar();
+
         try {
             st = conn.createStatement();
             res = st.executeQuery("SELECT D.id, D.calle, D.numero, L.nombre, P.nombre, D.codigo_postal " 
@@ -1367,14 +1570,12 @@ public class ConexionBD implements Cloneable{
                 listaDirecciones.add(new Direccion(res.getInt(1), res.getString(2), res.getInt(3), 
                     res.getString(4), res.getString(5), res.getInt(6)));
             }
-
-            System.out.println("BD: Obtencion de listaDirecciones de base de datos. Direcciones obtenidas: " + listaDirecciones.size()); //Esto es temporal para pruebas.
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
@@ -1382,10 +1583,16 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Obtiene la lista de mensualidades general desde la base de datos.
+     * @return La lista de mensualidades obtenidas.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public ArrayList<Mensualidad> getListadoMensualidades() throws SQLException {
         ConexionBD cn = INSTANCE;
         ArrayList<Mensualidad> listaMensualidades = null;
         conn = cn.conectar();
+        
         try {
 
             st = conn.createStatement();
@@ -1401,7 +1608,7 @@ public class ConexionBD implements Cloneable{
                 try {
                     formaPago = FormaPago.valueOf(res.getString(6));
                 } catch (IllegalArgumentException e) {
-                    //poner esto en el log.
+                    logger.severe("Excepción SQL: " + e.toString());
                     formaPago = null;
                 }
 
@@ -1410,7 +1617,7 @@ public class ConexionBD implements Cloneable{
                 try {
                     estadoPago = EstadoPago.valueOf(res.getString(7));
                 } catch (IllegalArgumentException e) {
-                    //poner esto en el log.
+                    logger.severe("Excepción SQL: " + e.toString());
                     estadoPago = null;
                 }
 
@@ -1418,26 +1625,20 @@ public class ConexionBD implements Cloneable{
                 if (res.getString(5) != null) {
                     fechaPago = LocalDate.parse(res.getString(5));
                 }
-                /* 
-                try {
-                    System.out.println("culum 5: " + (res.getString(5)));
-                    fechaPago = LocalDate.parse(res.getString(5));
-                } catch (NullPointerException e) {
-                    // TODO: handle exception
-                }*/
 
                 listaMensualidades.add(new Mensualidad(res.getInt(1), res.getInt(2), fecha, 
                     fechaPago , formaPago, estadoPago,
                     res.getInt(9), res.getDouble(8), res.getString(10)));
             }
 
-            System.out.println("BD: Obtencion de listaMensualidades de base de datos. Mensualidades obtenidas: " + listaMensualidades.size()); //Esto es temporal para pruebas.
+            System.out.println(); //Esto es temporal para pruebas.
+            logger.info("BD: Obtencion de lista Mensualidades general. Total: " + listaMensualidades.size());
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
@@ -1458,7 +1659,6 @@ public class ConexionBD implements Cloneable{
         conn = cn.conectar();
 
         try { 
-
             for (int i = 0; i < fechas.length; i++) {
                 Jornada jornada = null;
                 Clase[] listaClases = new Clase[8];
@@ -1551,7 +1751,7 @@ public class ConexionBD implements Cloneable{
                                 try {
                                     genero = Genero.valueOf(res.getString(5));
                                 } catch (IllegalArgumentException e) {
-                                    //poner esto en el log.
+                                    logger.severe("Excepción SQL: " + e.toString());
                                     genero = null;
                                 }
 
@@ -1560,7 +1760,7 @@ public class ConexionBD implements Cloneable{
                                 try {
                                     estado = EstadoAlumno.valueOf(res.getString(10));
                                 } catch (IllegalArgumentException e) {
-                                    //poner esto en el log.
+                                    logger.severe("Excepción SQL: " + e.toString());
                                     estado = null;
                                 }
 
@@ -1569,7 +1769,7 @@ public class ConexionBD implements Cloneable{
                                 try {
                                     formaPago = FormaPago.valueOf(res.getString(12));
                                 } catch (IllegalArgumentException e) {
-                                    //poner esto en el log.
+                                    logger.severe("Excepción SQL: " + e.toString());
                                     formaPago = null;
                                 }
 
@@ -1586,14 +1786,13 @@ public class ConexionBD implements Cloneable{
 
                 semana[i] = jornada; //añado la jornada a la semana.(Array de Jornada).
             } 
-            System.out.println("BD: Obtencion de Jornadas de semana " + fechas[0].get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) + " de base de datos."); //Esto es temporal para pruebas.
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
             semana = null;
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
         }
 
         cn.desconectar(conn);
@@ -1601,6 +1800,13 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Obtiene una jornada completa desde la base de datos con todas sus clases y alumnos.
+     * 
+     * @param fecha La fecha de la jornada en formato String.
+     * @return La jornada completa con todas sus clases y alumnos.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public Jornada getJornadaCompleta(String fecha) throws SQLException {
         ConexionBD cn = INSTANCE;
         Jornada jornada = null;
@@ -1634,7 +1840,7 @@ public class ConexionBD implements Cloneable{
                     try {
                         tipo = TipoClase.valueOf(res.getString(3));
                     } catch (IllegalArgumentException e) {
-                        //poner esto en el log.
+                        logger.severe("Excepción SQL: " + e.toString());
                         tipo = null;
                     }
 
@@ -1644,8 +1850,7 @@ public class ConexionBD implements Cloneable{
                         String[] partes = res.getString(4).split(":"); //Crea un Array con la hora y los minutos
                         hora = HoraClase.getHoraClase(Integer.parseInt(partes[0]), Integer.parseInt(partes[1]));
                     } catch (IllegalArgumentException e) {
-                        //poner esto en el log.
-                        System.out.println("BD: Fallo - No se asigna la hora de la clase.");
+                        logger.severe("Excepción SQL: " + e.toString());
                         hora = null;
                     }
 
@@ -1696,7 +1901,7 @@ public class ConexionBD implements Cloneable{
                             try {
                                 genero = Genero.valueOf(res.getString(5));
                             } catch (IllegalArgumentException e) {
-                                //poner esto en el log.
+                                logger.severe("Excepción SQL: " + e.toString());
                                 genero = null;
                             }
 
@@ -1705,7 +1910,7 @@ public class ConexionBD implements Cloneable{
                             try {
                                 estado = EstadoAlumno.valueOf(res.getString(10));
                             } catch (IllegalArgumentException e) {
-                                //poner esto en el log.
+                                logger.severe("Excepción SQL: " + e.toString());
                                 estado = null;
                             }
 
@@ -1714,7 +1919,7 @@ public class ConexionBD implements Cloneable{
                             try {
                                 formaPago = FormaPago.valueOf(res.getString(12));
                             } catch (IllegalArgumentException e) {
-                                //poner esto en el log.
+                                logger.severe("Excepción SQL: " + e.toString());
                                 formaPago = null;
                             }
 
@@ -1730,18 +1935,25 @@ public class ConexionBD implements Cloneable{
                 System.out.println("BD: Obtencion de Jornada " + jornada.getFecha().toString() + " de base de datos."); //Esto es temporal para pruebas.
             } 
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
         }
 
         cn.desconectar(conn);
         return jornada;
     }
 
-    //Original
+
+    /**
+     * Obtiene una jornada desde la base de datos con la fecha especificada.
+     * 
+     * @param fecha La fecha de la jornada en formato String.
+     * @return La jornada correspondiente a la fecha especificada.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public Jornada getJornada(String fecha) throws SQLException {
         ConexionBD cn = INSTANCE;
         Jornada jornada = null;
@@ -1753,15 +1965,13 @@ public class ConexionBD implements Cloneable{
 
             while (res.next()) {
                 jornada = new Jornada(LocalDate.parse(res.getString(1)), res.getString(2));
-                System.out.println("BD: Obtencion de Jornada " + jornada.getFecha().toString() + " de base de datos."); //Esto es temporal para pruebas.
             }
-
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
@@ -1775,6 +1985,13 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Obtiene un array de clases para una jornada especificada.
+     * 
+     * @param jornada La jornada para la cual se obtiene el array de clases.
+     * @return Un array de clases para la jornada especificada.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     public Clase[] getArrayClases(Jornada jornada) throws SQLException {
         ConexionBD cn = INSTANCE;
         Clase[] listaClases = new Clase[8];
@@ -1796,7 +2013,7 @@ public class ConexionBD implements Cloneable{
                 try {
                     tipo = TipoClase.valueOf(res.getString(3));
                 } catch (IllegalArgumentException e) {
-                    //poner esto en el log.
+                    logger.severe("Excepción SQL: " + e.toString());
                     tipo = null;
                 }
 
@@ -1806,8 +2023,7 @@ public class ConexionBD implements Cloneable{
                     String[] partes = res.getString(4).split(":"); //Crea un Array con la hora y los minutos
                     hora = HoraClase.getHoraClase(Integer.parseInt(partes[0]), Integer.parseInt(partes[1]));
                 } catch (IllegalArgumentException e) {
-                    //poner esto en el log.
-                    System.out.println("BD: Fallo - No se asigna la hora de la clase.");
+                    logger.severe("Excepción SQL: " + e.toString());
                     hora = null;
                 }
 
@@ -1817,19 +2033,16 @@ public class ConexionBD implements Cloneable{
             }
 
             //Si no hay registros, ponemos la listaClases a null.
-            if(!resultadoOk) listaClases = null;
-
-            System.out.println("BD: Obtencion de Array de Clases de la jornada " + jornada.getFecha().toString() + "."); //Esto es temporal para pruebas.
+            if(!resultadoOk) {listaClases = null;}
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
-
 
         if(listaClases != null) {
             setAlumnosClases(listaClases);
@@ -1838,14 +2051,19 @@ public class ConexionBD implements Cloneable{
         return listaClases;
     }
 
-    //Copia pruebas
+    
+    /**
+     * Establece la lista de alumnos para cada clase en el array de clases especificado.
+     * 
+     * @param listaClases El array de clases para el cual se establecerá la lista de alumnos.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     */
     private void setAlumnosClases(Clase[] listaClases) throws SQLException {
         ConexionBD cn = INSTANCE;
         ArrayList<Alumno> listaAlumnos = null;
-        //ArrayList<Direccion> listaDirecciones = getListadoDirecciones(); //Obtengo la lista de direcciones
         conn = cn.conectar();
+
         try {
-            
             st = conn.createStatement();
             for (int i = 0; i < listaClases.length; i++) {
                 res = st.executeQuery("SELECT * FROM ALUMNO A JOIN CLASE_ALUMNO C ON(A.id = C.alumno_id) WHERE C.clase_id = " + listaClases[i].getId() + " ;"); //consulta sql a tabla ALUMNO.
@@ -1857,7 +2075,7 @@ public class ConexionBD implements Cloneable{
                     try {
                         genero = Genero.valueOf(res.getString(5));
                     } catch (IllegalArgumentException e) {
-                        //poner esto en el log.
+                        logger.severe("Excepción SQL: " + e.toString());
                         genero = null;
                     }
 
@@ -1866,7 +2084,7 @@ public class ConexionBD implements Cloneable{
                     try {
                         estado = EstadoAlumno.valueOf(res.getString(10));
                     } catch (IllegalArgumentException e) {
-                        //poner esto en el log.
+                        logger.severe("Excepción SQL: " + e.toString());
                         estado = null;
                     }
 
@@ -1875,7 +2093,7 @@ public class ConexionBD implements Cloneable{
                     try {
                         formaPago = FormaPago.valueOf(res.getString(12));
                     } catch (IllegalArgumentException e) {
-                        //poner esto en el log.
+                        logger.severe("Excepción SQL: " + e.toString());
                         formaPago = null;
                     }
 
@@ -1885,28 +2103,33 @@ public class ConexionBD implements Cloneable{
                         res.getString(9), estado, res.getInt(11), formaPago));
                 }
 
-            listaClases[i].setListaAlumnos(listaAlumnos);
-            System.out.println("BD: Obtencion de listaAlumnos de la Clase: " + listaClases[i].getId() + "."); //Esto es temporal para pruebas.
-                
+                listaClases[i].setListaAlumnos(listaAlumnos);
             }
             
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
-        //return listaClases;
     }
 
 
+    /**
+     * Comprueba si existe una jornada en la base de datos para la fecha especificada.
+     * 
+     * @param fecha La fecha para la cual se verificará la existencia de la jornada.
+     * @return true si existe una jornada para la fecha especificada, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
+     */
     public boolean comprobarJornada(LocalDate fecha) throws SQLException{
         ConexionBD cn = INSTANCE;
         boolean result = false;
         conn = cn.conectar();
+        
         try {
             st = conn.createStatement();
             res = st.executeQuery("SELECT * FROM JORNADA WHERE fecha = '" + fecha.toString() + "';");
@@ -1916,11 +2139,11 @@ public class ConexionBD implements Cloneable{
             }
 
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
@@ -1928,6 +2151,13 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Comprueba si existen jornadas en la base de datos para las fechas especificadas.
+     * 
+     * @param fechas Un array de LocalDate que representa las fechas para las cuales se verificará la existencia de jornadas.
+     * @return true si existe al menos una jornada para alguna de las fechas especificadas, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
+     */
     public boolean comprobarJornadas(LocalDate[] fechas) throws SQLException{
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -1944,11 +2174,11 @@ public class ConexionBD implements Cloneable{
                 }
             }
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) ps.close();
-            if(res != null) res.close(); 
+            if(ps != null) {ps.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
@@ -1956,10 +2186,17 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Obtiene los precios de las clases desde la base de datos.
+     * 
+     * @return Un objeto Map<Integer, Double> que contiene los precios de las clases, donde la clave es el número de clases y el valor es el precio.
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
+     */
     public Map<Integer, Double> getPrecioClases() throws SQLException {
         ConexionBD cn = INSTANCE;
         Map<Integer, Double> precios_clases = null;
         conn = cn.conectar();
+
         try {
             st = conn.createStatement();
             res = st.executeQuery("SELECT numero_clases, precio FROM PRECIO_CLASE");
@@ -1968,14 +2205,12 @@ public class ConexionBD implements Cloneable{
             while (res.next()) {
                 precios_clases.put(res.getInt(1), res.getDouble(2));
             }
-
-            System.out.println("BD: Obtencion de precios de clases de base de datos. Precios obtenidos: " + precios_clases.size()); //Esto es temporal para pruebas.
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
@@ -1983,10 +2218,17 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Obtiene la lista de provincias desde la base de datos.
+     * 
+     * @return Un objeto ArrayList<String> que contiene los nombres de las provincias.
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
+     */
     public ArrayList<String> getProvincias() throws SQLException {
         ConexionBD cn = INSTANCE;
         ArrayList<String> listaProvincias = null;
         conn = cn.conectar();
+
         try {
             st = conn.createStatement();
             res = st.executeQuery("SELECT nombre FROM PROVINCIA");
@@ -1995,14 +2237,12 @@ public class ConexionBD implements Cloneable{
             while (res.next()) {
                 listaProvincias.add(res.getString(1));
             }
-
-            System.out.println("BD: Obtencion de listaProvincias de base de datos. Provincias obtenidas: " + listaProvincias.size()); //Esto es temporal para pruebas.
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
@@ -2010,10 +2250,17 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Obtiene la lista de provincias desde la base de datos.
+     * 
+     * @return Un objeto ArrayList<String> que contiene los nombres de las provincias.
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
+     */
     public ArrayList<String> getLocalidades(String provincia) throws SQLException {
         ConexionBD cn = INSTANCE;
         ArrayList<String> listaLocalidades = null;
         conn = cn.conectar();
+
         try {
             st = conn.createStatement();
             res = st.executeQuery("SELECT nombre FROM LOCALIDAD WHERE provincia_id = (SELECT id FROM PROVINCIA WHERE nombre = '" + provincia + "');");
@@ -2022,14 +2269,12 @@ public class ConexionBD implements Cloneable{
             while (res.next()) {
                 listaLocalidades.add(res.getString(1));
             }
-
-            System.out.println("BD: Obtencion de listaProvincias de base de datos. Provincias obtenidas: " + listaLocalidades.size()); //Esto es temporal para pruebas.
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(st != null) st.close();
-            if(res != null) res.close(); 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
@@ -2039,6 +2284,7 @@ public class ConexionBD implements Cloneable{
 
     /**
      * Actualiza los datos del alumno en la base de datos. 
+     * 
      * @param alumno Alumno de donde se obtine la informacion.
      * @return true si se modifica y no hay errores, false si no.
      * @throws SQLException
@@ -2076,12 +2322,12 @@ public class ConexionBD implements Cloneable{
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
             conn.setAutoCommit(true);
-            if(ps != null) ps.close();
+            if(ps != null) {ps.close();}
         }
 
         cn.desconectar(conn);
@@ -2091,6 +2337,7 @@ public class ConexionBD implements Cloneable{
 
     /**
      * Borra el alumno pasado como parametro, sus mensualidades asociadas y su direccion de la base de datos.
+     * 
      * @param alumno Alumno del que se va ha borrar sus datos de la base de datos.
      * @return true si borra el alumno y sus datos, false si no.
      * @throws SQLException
@@ -2120,17 +2367,14 @@ public class ConexionBD implements Cloneable{
             ps.executeUpdate();
 
             conn.commit(); //Confirma la transacción de la inserción de los datos.
-           
-            System.out.println("BD: Borrado Alumno de la base de datos"); //Esto es temporal para pruebas.
-            
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            if(ps != null) ps.close();
+            if(ps != null) {ps.close();}
         }
 
         cn.desconectar(conn);
@@ -2140,6 +2384,7 @@ public class ConexionBD implements Cloneable{
 
     /**
      * Devuelve el numero de clases en la que esta inscrito el alumna en la semana de la jornada pasada como parametro.
+     * 
      * @param idAlumno Identificador del alumno del que se va a obtener la información
      * @param jornada Jornada de la que se va a extraer la semana para la busqueda.
      * @return int con el numero de clases que esta incrito el alumno en la semana de la jornada pasada como parametro o -1 si hay algun problema.
@@ -2163,14 +2408,13 @@ public class ConexionBD implements Cloneable{
             ps.setString(3, Integer.toString(jornada.getFecha().getYear()));
            
             res = ps.executeQuery();
-
             result = res.getInt(1);
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) st.close();
-            if(res != null) res.close(); 
+            if(ps != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
@@ -2179,6 +2423,7 @@ public class ConexionBD implements Cloneable{
 
     /**
      * Crea una lista con los alumnos que superarían el número de sus asistencias semanales si se realiza la copia de la jornada.
+     * 
      * @param jornada jornada de donde se obtienen los alumnos a comprobar.
      * @return un ArrayList<Alumno> con los alumnos que superarían su número de asistencias semanales si se copia la jornada.
      * @throws SQLException
@@ -2211,16 +2456,13 @@ public class ConexionBD implements Cloneable{
                     }
                 }
             }
-            
-            System.out.println("BD: Control copia jornada. alumnos: " + alunosMacht.size());
-
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
             alunosMacht = null;
         } finally { 
-            if(ps != null) st.close();
-            if(res != null) res.close(); 
+            if(ps != null) {st.close();}
+            if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
@@ -2228,10 +2470,18 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Inserta una mensualidad en la base de datos.
+     * 
+     * @param mensualidad La mensualidad que se desea insertar.
+     * @return true si la inserción es exitosa, false de lo contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
+     */
     public boolean insertarMensualidad(Mensualidad mensualidad) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
         conn = cn.conectar();
+
         try {
             conn.setAutoCommit(false);
 
@@ -2259,21 +2509,19 @@ public class ConexionBD implements Cloneable{
             
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            System.out.println("BD: Insercion de Mensualidad con id: " + mensualidad.getId() + " en base de datos"); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } catch (Exception e) {
-            //aqui poner la insercion en el .log
-            System.out.println("-- ERROR -- " + e.toString());
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) ps.close(); 
-            if(res != null) res.close();
-            if(st != null) st.close();
+            if(ps != null) {ps.close();} 
+            if(res != null) {res.close();}
+            if(st != null) {st.close();}
         }
         
         cn.desconectar(conn);
@@ -2283,6 +2531,7 @@ public class ConexionBD implements Cloneable{
 
     /**
      * Actualiza los datos de la mensualidad en la base de datos. 
+     * 
      * @param mensualidad Mensualidad de donde se obtine la informacion.
      * @return true si se modifica y no hay errores, false si no.
      * @throws SQLException
@@ -2310,17 +2559,16 @@ public class ConexionBD implements Cloneable{
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } catch (Exception e) {
-            //aqui poner la insercion en el .log
-            System.out.println("-- ERROR -- " + e.toString());
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally {
             conn.setAutoCommit(true);
-            if(ps != null) ps.close();
+            if(ps != null) {ps.close();}
         }
 
         cn.desconectar(conn);
@@ -2329,6 +2577,7 @@ public class ConexionBD implements Cloneable{
 
     /**
      * Borra la Mensualidad pasado como parametro.
+     * 
      * @param alumno Mensualidad ha borrar de la base de datos.
      * @return true si borra la Menualidad, false si no.
      * @throws SQLException
@@ -2346,23 +2595,18 @@ public class ConexionBD implements Cloneable{
             ps.executeUpdate();
 
             conn.commit(); //Confirma la transacción de la inserción de los datos.
-           
-            System.out.println("BD: Borrado Mensualidad de la base de datos."); //Esto es temporal para pruebas.
-            
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
-            System.out.println("-- ERROR -- " + e.toString());
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } catch (Exception e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
-            System.out.println("-- ERROR -- " + e.toString());
         } finally {
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            if(ps != null) ps.close();
+            if(ps != null) {ps.close();}
         }
 
         cn.desconectar(conn);
@@ -2370,6 +2614,13 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    /**
+     * Inserta una lista de mensualidades en la base de datos.
+     * 
+     * @param listaMensualidades La lista de mensualidades que se desea insertar.
+     * @return true si la inserción es exitosa, false de lo contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
+     */
     public boolean insertarListaMensualidades(ArrayList<Mensualidad> listaMensualidades) throws SQLException {
         ConexionBD cn = INSTANCE;
         boolean result = false;
@@ -2403,25 +2654,22 @@ public class ConexionBD implements Cloneable{
 
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            System.out.println("BD: Insercion de " + listaMensualidades.size() + " Mensualidades en base de datos"); //Esto es temporal para pruebas.
             result = true;
         } catch (SQLException e) {
-            //aqui poner la insercion en el .log
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } catch (Exception e) {
-            //aqui poner la insercion en el .log
-            System.out.println("-- ERROR -- " + e.toString());
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) ps.close(); 
-            if(res != null) res.close();
-            if(st != null) st.close();
+            if(ps != null) {ps.close();} 
+            if(res != null) {res.close();}
+            if(st != null) {st.close();}
         }
         
         cn.desconectar(conn);
         return result;
     }
-
 }

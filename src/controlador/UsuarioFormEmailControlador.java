@@ -9,7 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import baseDatos.ConexionBD;
-import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -36,12 +35,6 @@ public class UsuarioFormEmailControlador implements Initializable {
     private ConexionBD conexionBD;
     private Logger logUser;
     private Toast toast;
-    private Alert alerta;
-    private Usuario usuario;
-    private Usuario usuarioRoot;
-    private StringProperty password;
-    private StringProperty nuevoPassword;
-    private StringProperty confimarPassword;
 
     private Usuario oldUsuario;
     private Usuario newUsuario;
@@ -119,7 +112,7 @@ public class UsuarioFormEmailControlador implements Initializable {
         });
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
-        conexionBD = ConexionBD.getInstance();
+        conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
         toast = new Toast();
 
         //Pone oculto los TextFiel que muestran los password.
@@ -132,6 +125,15 @@ public class UsuarioFormEmailControlador implements Initializable {
     }
 
 
+    /**
+     * Método de controlador de evento para guardar los cambios en el email del usuario.
+     * Verifica si los campos están completos y guarda los cambios realizados en el email del usuario.
+     * Si los campos están completos y los cambios se guardan correctamente,
+     * registra un mensaje de log y muestra un mensaje de notificación en un toast.
+     * Además, cierra la ventana actual.
+     *
+     * @param event El evento de ratón que activó el guardado de cambios.
+     */
     @FXML
     void guardarCambios(MouseEvent event) {
         if(comprobarCampos() && guardarCambios()) {
@@ -194,6 +196,7 @@ public class UsuarioFormEmailControlador implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
         return false;
     }

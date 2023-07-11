@@ -38,6 +38,7 @@ public class UsuarioFormControlador implements Initializable {
     private int telefono;
     private String email;
 
+
     @FXML
     private Button btnCancelar;
 
@@ -90,7 +91,7 @@ public class UsuarioFormControlador implements Initializable {
         ivImagenTipoFormulario.setImage(imagen); //Establecer la imagen cargada en el ImageView.
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
-        conexionBD = ConexionBD.getInstance();
+        conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
         toast = new Toast();
 
         tfIdUsuario.setDisable(true);
@@ -102,6 +103,15 @@ public class UsuarioFormControlador implements Initializable {
     }
 
 
+    /**
+    * Método de controlador de evento para la confirmación de cambios del usuario.
+    * Verifica si los campos están completos y guarda los cambios realizados.
+    * Si los campos están completos y los cambios se guardan correctamente,
+    * registra un mensaje de log y muestra un mensaje de notificación en un toast.
+    * Además, cierra la ventana actual.
+    *
+    * @param event El evento de ratón que activó la confirmación.
+    */
     @FXML
     void confirmacion(MouseEvent event) {
         if(comprobarCampos() && guardarCambios()) {
@@ -111,11 +121,18 @@ public class UsuarioFormControlador implements Initializable {
         }
     }
 
+    /**
+     * Establece el objeto Usuario y actualiza los componentes de la interfaz gráfica con sus valores.
+     *
+     * @param usuario El objeto Usuario a establecer.
+     */
     public void setUsuario(Usuario usuario) {
-        oldUsuario = usuario;
-        newUsuario = new Usuario(usuario);
+        oldUsuario = usuario;               //Guardar el usuario original en oldUsuario.
+        newUsuario = new Usuario(usuario);  //Crear una nueva instancia de Usuario basada en el objeto usuario pasado como parámetro.
 
-        tfIdUsuario.setText(Integer.toString(newUsuario.getId()));
+        tfIdUsuario.setText(Integer.toString(newUsuario.getId())); //Establecer el texto del componente tfIdUsuario con el ID del nuevo usuario.
+
+        //Vincular las propiedades de texto de los componentes de la interfaz gráfica con las propiedades correspondientes del nuevo usuario.
         tfNombre.textProperty().bindBidirectional(newUsuario.nombreProperty());
         tfApellido1.textProperty().bindBidirectional(newUsuario.apellido1Property());
         tfApellido2.textProperty().bindBidirectional(newUsuario.apellido2Property());
@@ -123,6 +140,15 @@ public class UsuarioFormControlador implements Initializable {
         tfEmail.textProperty().bindBidirectional(newUsuario.emailProperty());
     }
 
+
+    /**
+     * Comprueba la validez de los campos de entrada del formulario.
+     * Realiza validaciones utilizando expresiones regulares para cada campo.
+     * Muestra mensajes de advertencia si algún campo no es válido.
+     * Si todos los campos son válidos, guarda la información en variables y actualiza los componentes de la interfaz gráfica correspondientes.
+     *
+     * @return true si todos los campos son válidos, false en caso contrario.
+     */
     private Boolean comprobarCampos() {
         boolean camposCorrectos = false;
 
@@ -176,6 +202,13 @@ public class UsuarioFormControlador implements Initializable {
     }
 
     
+    /**
+     * Guarda los cambios realizados en el usuario en la base de datos.
+     * Intenta modificar los datos del usuario utilizando la conexión a la base de datos.
+     * Si la modificación es exitosa, actualiza los valores del usuario original con los nuevos valores.
+     *
+     * @return true si los cambios se guardaron correctamente en la base de datos, false en caso contrario.
+     */
     private boolean guardarCambios() {
         try {
             if(conexionBD.modificarDatosUsuario(newUsuario)) {
@@ -193,6 +226,7 @@ public class UsuarioFormControlador implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
         return false;
     }

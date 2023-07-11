@@ -37,6 +37,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -56,11 +57,10 @@ public class MensualidadesControlador implements Initializable {
     private DateTimeFormatter formatter;
     private ConexionBD conexionBD;
     private Logger logUser;
-    private PrincipalControlador controladorPincipal;
     private Toast toast;
-    private Stage escenario;
 
-    
+    @FXML
+    private BorderPane bpMensualidad;
 
     @FXML
     private AnchorPane apFiltro;
@@ -182,29 +182,30 @@ public class MensualidadesControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        btnBorrar.getStyleClass().add("boton_rojo");
+        btnBorrar.getStyleClass().add("boton_rojo"); //Añadir clases de estilo CSS a elementos.
 
         //Establecer imagen en ImageView.
         Image lupa;
         Image GenerarMensualidades;
         Image Notificacion;
         try {
-            //Forma desde IDE y JAR.
-            lupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png"));
+            //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
+            lupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png")); //Forma desde IDE y JAR.
             GenerarMensualidades = new Image(getClass().getResourceAsStream("/recursos/flceha_recarga_1.png"));
             Notificacion = new Image(getClass().getResourceAsStream("/recursos/circulo_flecha_1.png"));
         } catch (Exception e) {
-            //Forma desde el JAR.
-            lupa = new Image("/recursos/lupa_lila_2_128.png");
+            //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
+            lupa = new Image("/recursos/lupa_lila_2_128.png"); //Forma desde el JAR.
             GenerarMensualidades = new Image("/recursos/flceha_recarga_1.png");
             Notificacion = new Image("/recursos/circulo_flecha_1.png");
         }
+        //Establecer las imagenes cargadas en los ImageView.
         ivLupa.setImage(lupa);
         ivGenerarMensualidades.setImage(GenerarMensualidades);
         ivNotificacion.setImage(Notificacion);
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
-        conexionBD = ConexionBD.getInstance();
+        conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
         toast = new Toast();
 
         //Asigno a cada columna de la tabla los campos del modelo.
@@ -274,8 +275,10 @@ public class MensualidadesControlador implements Initializable {
         }catch (IllegalArgumentException e) {
             cbAnio.setValue(2020); //Establece este año si el año actual no se encuentra entre los valores del ComboBox cbAnio.
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
         
         cbMes.setValue(Fechas.obtenerNombreMes(LocalDate.now().getMonthValue()));
@@ -299,13 +302,19 @@ public class MensualidadesControlador implements Initializable {
         });
 
         ivNotificacion.setOnMouseClicked(e -> {
-            toast.show(escenario, "EN CONSTRUCCIÓN.\nEste boton es para enviar notificaciones.");
+            toast.show((Stage) bpMensualidad.getScene().getWindow(), "EN CONSTRUCCIÓN.\nEste boton es para enviar notificaciones.");
         });
 
     }
 
 
-     @FXML
+    /**
+     * Método para manejar el evento de lanzar una ventana para generar las mensualidades automaticamente.
+     * Se invoca al hacer clic en la imagen de boton "Generar mensualidades".
+     *
+     * @param event El evento del ratón que activó el método.
+     */
+    @FXML
     void abrirCardGenerarMensualidades(MouseEvent event) {
         try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/mensualidadCardGeneraMesVista.fxml"));
@@ -314,7 +323,7 @@ public class MensualidadesControlador implements Initializable {
                 MensualidadCardGeneraMesControlador controller = loader.getController(); // cargo el controlador.
                 
                 Stage ventana= new Stage();
-                ventana.initOwner(escenario);
+                ventana.initOwner((Stage) bpMensualidad.getScene().getWindow());
                 ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
                 ventana.initStyle(StageStyle.UNDECORATED);
 
@@ -335,6 +344,7 @@ public class MensualidadesControlador implements Initializable {
                 e.printStackTrace();
             } catch (Exception e) {
                 logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
             }
     }
 
@@ -345,6 +355,12 @@ public class MensualidadesControlador implements Initializable {
     }
 
 
+    /**
+     * Método para manejar el evento que borrar la mensualidad seleccionada.
+     * Se invoca al hacer clic en el botón "Borrar".
+     *
+     * @param event El evento de mouse que desencadena la acción.
+     */
     @FXML
     void borrarMensualidad(MouseEvent event) {
         int i = indiceSeleccionado();
@@ -359,12 +375,14 @@ public class MensualidadesControlador implements Initializable {
             alerta.setContentText("Id: " + mensualidadSeleccionada.getId() + "  Alumno id: " + mensualidadSeleccionada.getIdAlumno()  
                                 + "  Estado: " + mensualidadSeleccionada.getEstadoPago().toString());
             alerta.initStyle(StageStyle.DECORATED);
-            alerta.initOwner(escenario);
+            alerta.initOwner((Stage) bpMensualidad.getScene().getWindow());
             alerta.initModality(Modality.APPLICATION_MODAL);
 
+            //Mostrar el cuadro de diálogo y obtener la respuesta del usuario.
             Optional<ButtonType> result = alerta.showAndWait();
     		if (result.get() == ButtonType.OK) {
                 try {
+                    //Borrar la mensualidad de la base de datos y actualizar las estructuras de datos.
                     if(conexionBD.borrarMensualidad(mensualidadSeleccionada)) {
                         for (Alumno a : listadoAlumnosGeneral) {
                             if(a.getId() == mensualidadSeleccionada.getIdAlumno()) {
@@ -375,29 +393,32 @@ public class MensualidadesControlador implements Initializable {
                         
                         listadoMensualidadesGeneral.remove(mensualidadSeleccionada);
                         logUser.config("Borrada mensualidad: " + mensualidadSeleccionada.toString());
-                        toast.show(escenario, "Mensualidad eliminada!!.");
+                        toast.show((Stage) bpMensualidad.getScene().getWindow(), "Mensualidad eliminada!!.");
                     }
                 } catch (SQLException e) {
                     logUser.severe("Excepción: " + e.toString());
-                    alerta = new Alert(Alert.AlertType.ERROR);
-                    alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
-                    alerta.setTitle("Borrar Mensualidad");
-                    alerta.setContentText("No se ha podido borrar la Mensualidad.");
-                    alerta.initStyle(StageStyle.DECORATED);
-                    alerta.initOwner(escenario);
-                    alerta.initModality(Modality.APPLICATION_MODAL);
-                    alerta.showAndWait();
-                    
                     e.printStackTrace();
+                    mensajeAviso(
+                        AlertType.ERROR,
+                        "Borrar Mensualidad",
+                        "",
+                        "No se ha podido borrar la Mensualidad.");
+                    
                 } catch (Exception e) {
                     logUser.severe("Excepción: " + e.toString());
+                    e.printStackTrace();
                 }
-    			
     		} 
         }
     }
 
 
+    /**
+     * Método para manejar el evento que lanza una ventana para modificar la mensualidad seleccionada.
+     * Se invoca al hacer clic en el botón "Modificar".
+     *
+     * @param event El evento de mouse que desencadena la acción.
+     */
     @FXML
     void modificarMensualidad(MouseEvent event) {
         int i = indiceSeleccionado();
@@ -417,7 +438,7 @@ public class MensualidadesControlador implements Initializable {
                 MensualidadFormControlador controller = loader.getController(); // cargo el controlador.
                 
                 Stage ventana= new Stage();
-                ventana.initOwner(escenario);
+                ventana.initOwner((Stage) bpMensualidad.getScene().getWindow());
                 ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
                 ventana.initStyle(StageStyle.DECORATED);
 
@@ -440,10 +461,18 @@ public class MensualidadesControlador implements Initializable {
                 e.printStackTrace();
             } catch (Exception e) {
                 logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
             }
         }
     }
 
+
+    /**
+     * Método para manejar el evento que lanza una ventana para crear una nueva mensualidad.
+     * Se invoca al hacer clic en el botón "Nuevo".
+     *
+     * @param event El evento de mouse que desencadena la acción.
+     */
     @FXML
     void nuevaMensualidad(MouseEvent event) {
         try {
@@ -453,7 +482,7 @@ public class MensualidadesControlador implements Initializable {
             MensualidadFormControlador controller = loader.getController(); // cargo el controlador.
 
             Stage ventana = new Stage();
-            ventana.initOwner(escenario);
+            ventana.initOwner((Stage) bpMensualidad.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); // modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.DECORATED);
 
@@ -476,6 +505,7 @@ public class MensualidadesControlador implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
     }
 
@@ -506,7 +536,7 @@ public class MensualidadesControlador implements Initializable {
                 MensualidadCardControlador controller = loader.getController(); // cargo el controlador.
                 
                 Stage ventana= new Stage();
-                ventana.initOwner(escenario);
+                ventana.initOwner((Stage) bpMensualidad.getScene().getWindow());
                 ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
                 ventana.initStyle(StageStyle.UNDECORATED);
     
@@ -521,6 +551,7 @@ public class MensualidadesControlador implements Initializable {
                 e.printStackTrace();
             } catch (Exception e) {
                 logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
             }
         }
     }
@@ -705,8 +736,29 @@ public class MensualidadesControlador implements Initializable {
         if(i != -1) {
             return i; //número del indice seleccionado.
         }
-        toast.show(escenario, "No hay seleccionado ninguna Mensualidad!!.");
+        toast.show((Stage) bpMensualidad.getScene().getWindow(), "No hay seleccionado ninguna Mensualidad!!.");
         return i; //i = -1
+    }
+
+
+    /**
+     * Muestra una ventana de dialogo con la informacion pasada como parametros.
+     * 
+     * @param tipo Tipo de alerta.
+     * @param tiutlo Titulo de la ventana.
+     * @param cabecera Cabecera del mensaje.
+     * @param cuerpo Cuerpo del menesaje.
+     */
+    private void mensajeAviso(AlertType tipo, String tiutlo, String cabecera, String cuerpo) {
+        Alert alerta = new Alert(tipo);
+        alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
+        alerta.setTitle(tiutlo);
+        alerta.initOwner((Stage) bpMensualidad.getScene().getWindow());
+        alerta.setHeaderText(cabecera);
+        alerta.setContentText(cuerpo);
+        alerta.initStyle(StageStyle.DECORATED);
+        alerta.initModality(Modality.APPLICATION_MODAL);
+        alerta.showAndWait();
     }
 
 
@@ -735,16 +787,4 @@ public class MensualidadesControlador implements Initializable {
         setupMensualidadSeleccionada();         //Configura los eventos de selección de la tabla.
         setupDatosTabla(); // Configura los bindings para actualizar los labels de información en la TableView.
 	}
-
-
-
-    /**
-     * Establece un Stage para este controlador.
-     * 
-     * @param s Stage que se establece.
-     */
-    public void setStage(Stage stage) {
-    	this.escenario = stage;
-    }
-    
 }

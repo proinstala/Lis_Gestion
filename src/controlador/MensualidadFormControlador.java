@@ -106,6 +106,9 @@ public class MensualidadFormControlador implements Initializable {
     private ImageView ivImagenTipoFormulario;
 
     @FXML
+    private ImageView ivClearFechaPago;
+
+    @FXML
     private Label lbTitulo;
 
     @FXML
@@ -141,23 +144,28 @@ public class MensualidadFormControlador implements Initializable {
 
         //Establecer imagen formulario.
         Image imagenMensualidad;
+        Image clearFechaPago;
         try {
             //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
             imagenMensualidad = new Image(getClass().getResourceAsStream("/recursos/pago_1_128.png"));
+            clearFechaPago = new Image(getClass().getResourceAsStream("/recursos/clear_1_24.png"));
         } catch (Exception e) {
             //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR..
             imagenMensualidad = new Image("/recursos/pago_1_128.png");
+            clearFechaPago = new Image("/recursos/clear_1_24.png");
             
         }
-        ivImagenTipoFormulario.setImage(imagenMensualidad); //Establecer la imagen cargada en el ImageView.
+        //Establecer las imagenes cargadas en los ImageView.
+        ivImagenTipoFormulario.setImage(imagenMensualidad); 
+        ivClearFechaPago.setImage(clearFechaPago); 
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
-        conexionBD = ConexionBD.getInstance();
+        conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
         toast = new Toast();
 
         //Modifica el formato en el que se muestra la fecha en el DatePicker.
-        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");//Formato dd/MM/yy
-        dpFechaPago.setConverter(new LocalDateStringConverter(formatter, null));
+        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Crear un formateador de fecha con el patrón "dd/MM/yyyy".
+        dpFechaPago.setConverter(new LocalDateStringConverter(formatter, null)); //Establecer un convertidor de cadena de fecha para el control DatePicker dpFechaPago.
 
         decimalFormat = new DecimalFormat("#0.00");
         
@@ -199,6 +207,10 @@ public class MensualidadFormControlador implements Initializable {
         tfAlumnoFormaPago.setDisable(true);
 
         dpFechaPago.setEditable(false);
+
+        ivClearFechaPago.setOnMouseClicked(e -> {
+            dpFechaPago.setValue(null);
+        });
 
         //Configurar un evento de clic del ratón para el botón "Cerrar".
         btnCancelar.setOnMouseClicked(e -> {
@@ -332,6 +344,11 @@ public class MensualidadFormControlador implements Initializable {
             "Estado de Pago.", 
             "",
             "Selecciona un estado de pago para esta Mensualidad.");
+        } else if (cbEstadoPago.getValue() != EstadoPago.PAGADO && dpFechaPago.getValue() != null) {
+            mensajeAviso(AlertType.WARNING, 
+            "Estado de Pago.", 
+            "",
+            "No puede tener una fecha de pago\nsi la mensualida no tiene el estado 'PAGADO'.");
         } else if (cbEstadoPago.getValue() == EstadoPago.PAGADO && dpFechaPago.getValue() == null) {
             mensajeAviso(AlertType.WARNING, 
             "Fecha de pago.", 
@@ -391,6 +408,7 @@ public class MensualidadFormControlador implements Initializable {
                     "ERROR:\n" + e.toString());
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
         return false;
     }//FIN modificarMensualidad.
@@ -435,6 +453,7 @@ public class MensualidadFormControlador implements Initializable {
                     "ERROR:\n" + e.toString());
             } catch (Exception e) {
                 logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
             }
             
         } else {

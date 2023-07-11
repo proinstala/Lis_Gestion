@@ -1,19 +1,16 @@
 package controlador;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
-import baseDatos.ConexionBD;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -25,7 +22,6 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import modelo.Toast;
 import modelo.Usuario;
 import utilidades.Constants;
 import javafx.fxml.Initializable;
@@ -33,13 +29,13 @@ import javafx.fxml.Initializable;
 public class UsuarioControlador implements Initializable {
 
     private Logger logUser;
-    private ConexionBD conexionBD;
     private Usuario usuario;
     private Usuario usuarioRoot;
     private PrincipalControlador controladorPincipal;
-    private Toast toast;
-    private Alert alerta;
-    private Stage escenario;
+
+
+    @FXML
+    private GridPane gpUsuario;
 
     @FXML
     private AnchorPane apBotones;
@@ -112,19 +108,25 @@ public class UsuarioControlador implements Initializable {
         //Establecer imagen en ImageView.
         Image imagenBorrarUsuario;
         try {
-            //Forma desde IDE y JAR.
-        	imagenBorrarUsuario = new Image(getClass().getResourceAsStream("/recursos/boton_2_64.png"));
+            //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
+        	imagenBorrarUsuario = new Image(getClass().getResourceAsStream("/recursos/boton_2_64.png")); //Forma desde IDE y JAR.
         } catch (Exception e) {
-            //Forma desde el JAR.
-        	imagenBorrarUsuario = new Image("/recursos/circulo_flecha_1.png");
+            //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
+        	imagenBorrarUsuario = new Image("/recursos/circulo_flecha_1.png"); //Forma desde el JAR.
         	
         }
-        ivBorrarUsuario.setImage(imagenBorrarUsuario); 
+        ivBorrarUsuario.setImage(imagenBorrarUsuario); //Establecer la imagen cargada en el ImageView.
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
-        conexionBD = ConexionBD.getInstance();
     }
 
+    /**
+	 * Método que se ejecuta cuando se hace clic en la imagen "borrar usuario".
+	 * Crea y muestra una nueva ventana donde se puede borrar al usuario que este loguedao en la aplicacion
+	 * mediante la carga de una vista y su controlador desde un archivo FXML específico (usuarioCardBorrarVista.fxml).
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
     @FXML
     void borrarUsuario(MouseEvent event) {
         try {
@@ -134,7 +136,7 @@ public class UsuarioControlador implements Initializable {
             UsuarioCardBorrarControlador controller = loader.getController(); // cargo el controlador.
             
             Stage ventana= new Stage();
-            ventana.initOwner(escenario);
+            ventana.initOwner((Stage) gpUsuario.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.UNDECORATED);
 
@@ -154,29 +156,18 @@ public class UsuarioControlador implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
     }
 
-    private boolean borrarFicherosUsuario(File fichero) {
 
-        for(File f : fichero.listFiles()) {
-            System.out.println(f.getName());
-            if(f.isDirectory()) {
-                borrarFicherosUsuario(f);
-            } else {
-                f.delete();
-            }
-        }
-        
-        if(fichero.delete()) {
-            System.out.println("Borrado directorio");
-            return true;
-        } else {
-            System.out.println("No se ha borrado el directorio.");
-            return false;
-        }
-    }
-
+    /**
+	 * Método que se ejecuta cuando se hace clic en el boton "cambiar password".
+	 * Crea y muestra una nueva ventana donde se puede modificar el password de usuario que este loguedao en la aplicacion
+	 * mediante la carga de una vista y su controlador desde un archivo FXML específico (cambioPasswordVista.fxml).
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
     @FXML
     void cambiarPassword(MouseEvent event) {
         try {
@@ -186,11 +177,10 @@ public class UsuarioControlador implements Initializable {
             CambioPasswordControlador controller = loader.getController(); // cargo el controlador.
             
             Stage ventana= new Stage();
-            ventana.initOwner(escenario);
+            ventana.initOwner((Stage) gpUsuario.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.UNDECORATED);
             
-            controller.setStage(ventana);
             controller.setUsuarioActual(usuario);
             controller.setUsuarioRoot(usuarioRoot);
 
@@ -203,9 +193,18 @@ public class UsuarioControlador implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
     }
 
+
+    /**
+	 * Método que se ejecuta cuando se hace clic en el boton "editar" de email aplicacion.
+	 * Crea y muestra una nueva ventana donde se puede modificar el email y el password de usuario que este loguedao en la aplicacion
+	 * mediante la carga de una vista y su controlador desde un archivo FXML específico (usuarioFormEmailVista.fxml).
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
     @FXML
     void cambiarPasswordApp(MouseEvent event) {
         try {
@@ -215,7 +214,7 @@ public class UsuarioControlador implements Initializable {
             UsuarioFormEmailControlador controller = loader.getController(); // cargo el controlador.
             
             Stage ventana= new Stage();
-            ventana.initOwner(escenario);
+            ventana.initOwner((Stage) gpUsuario.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.UNDECORATED);
 
@@ -230,9 +229,18 @@ public class UsuarioControlador implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
     }
 
+
+    /**
+	 * Método que se ejecuta cuando se hace clic en el boton "editar" de datos personales.
+	 * Crea y muestra una nueva ventana donde se puede modificar los datos personales del usuario que este loguedao en la aplicacion
+	 * mediante la carga de una vista y su controlador desde un archivo FXML específico (usuarioFormVista.fxml).
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
     @FXML
     void editarDatosPersona(MouseEvent event) {
         try {
@@ -242,7 +250,7 @@ public class UsuarioControlador implements Initializable {
             UsuarioFormControlador controller = loader.getController(); // cargo el controlador.
             
             Stage ventana= new Stage();
-            ventana.initOwner(escenario);
+            ventana.initOwner((Stage) gpUsuario.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.DECORATED);
 
@@ -261,9 +269,16 @@ public class UsuarioControlador implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
     }
 
+
+    /**
+     * Inicia el proceso de inicialización de los componentes de la interfaz gráfica con los datos del usuario.
+     * Este método establece los valores de diferentes componentes de interfaz gráfica y vincula propiedades para mostrar información del usuario.
+     * 
+     */
     public void iniciar() {   
         //Binding Datos Usuario
         lbId.setText(Integer.toString(usuario.getId()));
@@ -291,7 +306,6 @@ public class UsuarioControlador implements Initializable {
         lbPasswordApp.textProperty().bind(Bindings.when(chbPasswordAppVisible.selectedProperty())
         .then(usuario.passwordEmailAppProperty())
         .otherwise(ocultarContraseña(usuario.passwordEmailAppProperty()))); 
-
     }
 
 
@@ -317,8 +331,10 @@ public class UsuarioControlador implements Initializable {
         return contraseñaOcultaProperty;
     }
 
+
     /**
 	 * Etablece el usuario que esta usando la aplicación.
+     * 
 	 * @param usuario
 	 */
 	public void setUsuarioActual(Usuario usuarioActual) {
@@ -326,23 +342,17 @@ public class UsuarioControlador implements Initializable {
         iniciar();
 	}
 
+
     /**
      * Establece el usuarioRoot para este controlador.
+     * 
      * @param usuarioRoot El usuarioRoot
      */
     public void setUsuarioRoot(Usuario usuarioRoot) {
         this.usuarioRoot = usuarioRoot;
     }
 
-    /**
-     * Establece un Stage para este controlador.
-     * 
-     * @param s Stage que se establece.
-     */
-    public void setStage(Stage stage) {
-    	this.escenario = stage;
-    }
-
+    
     /**
 	 * Establece para este controlador, el controlador principal de la aplicacion.
 	 * 

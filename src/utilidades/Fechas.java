@@ -1,8 +1,15 @@
 package utilidades;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Clase utilitaria para operaciones relacionadas con fechas.
+ * 
+ * @author David Jimenez Alonso.
+ */
 public class Fechas {
 
     /**
@@ -91,4 +98,28 @@ public class Fechas {
             return null; // No se encontró el mes correspondiente a la posición, devolver null.
         }
     }
+
+
+    /**
+     * Devuelve el nombre del día de la semana correspondiente a una fecha dada.
+     * 
+     * @param dia Objeto de tipo LocalDate de donde se obtiene la fecha.
+     * @return Un String con el dia de la semana. en español.
+     */
+	public static String obtenerDiaSemana(LocalDate dia) {
+		String nombreDia = "";
+		DayOfWeek diaDeLaSemana = dia.getDayOfWeek();
+        
+		switch (diaDeLaSemana.name()) {
+		case "MONDAY" -> nombreDia = "Lunes";
+		case "TUESDAY" -> nombreDia = "Martes";
+		case "WEDNESDAY" -> nombreDia = "Miércoles";
+		case "THURSDAY" -> nombreDia = "Jueves";
+		case "FRIDAY" -> nombreDia = "Viernes";
+		case "SATURDAY" -> nombreDia = "Sábado";
+		case "SUNDAY" -> nombreDia = "Domingo";
+		}
+		
+		return nombreDia; //devuelve el nombre del día de la semana es español.
+	}
 }

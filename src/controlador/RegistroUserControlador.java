@@ -112,7 +112,7 @@ public class RegistroUserControlador implements Initializable {
         });
 
         loggerRoot = Logger.getLogger(Constants.USER_ROOT); //Crea una instancia de la clase Logger asociada al nombre de registro.
-        conexionBD = ConexionBD.getInstance();
+        conexionBD = ConexionBD.getInstance();              //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
         toast = new Toast();
 
 
@@ -155,14 +155,22 @@ public class RegistroUserControlador implements Initializable {
     }
 
 
+    /**
+     * Método para manejar el evento que registra un nuevo usuario en la aplicación.
+     * Se invoca al hacer clic en el botón "Registrarse".
+     *
+     * @param event El evento de mouse que desencadena la acción.
+     */
     @FXML
     void registrarUsuario(MouseEvent event) {
+        // Verificar los campos de nombre y contraseña antes de proceder al registro.
         if(comprobarCampoNombre() && comprobarCamposPassword()) {
             usuario = new Usuario();
             usuario.setNombreUsuario(tfNombre.getText());
             usuario.setPassword(password.get());
             usuario.setDirectorio(new File(tfNombre.getText()));
             
+            //Crear los ficheros del usuario.
             if(crearFicherosUsuario(usuario)) {
                 boolean insertarUserOk = false;
                 try {
@@ -176,8 +184,10 @@ public class RegistroUserControlador implements Initializable {
                     e.printStackTrace();
                 } catch (Exception e) {
                     loggerRoot.severe("Excepción: " + e.toString());
+                    e.printStackTrace();
                 }
 
+                //Verificar si se ha insertado correctamente el usuario en la base de datos.
                 if(insertarUserOk) {
                     loggerRoot.config("Nuevo usuario registrado con exito. id: " + usuario.getId() + " || nombre: " + usuario.getNombreUsuario());
                     mensajeAviso(
@@ -204,11 +214,15 @@ public class RegistroUserControlador implements Initializable {
     }
     
 
+    /**
+     * Comprueba el campo de nombre de usuario.
+     *
+     * @return true si el campo de nombre de usuario es válido, false de lo contrario.
+     */
     private boolean comprobarCampoNombre() {
-        String nombre = tfNombre.getText(); //Obtengo el contenido del TextField
+        String nombre = tfNombre.getText(); //Obtener el contenido del TextField
         
-        // compilamos la expresion regular.(Una letra mañuscula o minuscula o un numero del 0 al 9 de uno a 40 caracteres).
-		//Pattern nombrePat = Pattern.compile("^[\\S]{1,40}$"); 
+        //Compila la expresión regular para validar el nombre del usuario.
         Pattern nombrePat = Pattern.compile("^[^\\\\/:*?<>|\\s]{2,30}$"); //Comprobacion: cadena sin espacios ni caracteres \/:*?<>
         Matcher nombreMatch = nombrePat.matcher(nombre);
 
@@ -238,14 +252,21 @@ public class RegistroUserControlador implements Initializable {
                 e.printStackTrace();
             } catch (Exception e) {
                 loggerRoot.severe("Excepción: " + e.toString());
+                e.printStackTrace();
             }
         }
         return true;
     }
 
+
+    /**
+     * Comprueba los campos de contraseña.
+     *
+     * @return true si los campos de contraseña son válidos, false de lo contrario.
+     */
     private boolean comprobarCamposPassword() {
-        // compilamos la expresion regular.(Una letra mañuscula o minuscula o un numero del 0 al 9 de 4 a 20 caracteres).
-		Pattern passPat = Pattern.compile("^[\\S]{4,20}$");
+        //compilamos la expresion regular.(Una letra mañuscula o minuscula o un numero del 0 al 9 de 4 a 20 caracteres).
+		Pattern passPat = Pattern.compile("^[\\S]{4,20}$"); //Comprobación: cadena sin espacios en blanco de 4 a 20 caracteres.
         Matcher passMatch = passPat.matcher(password.get());
 
         if(!passMatch.matches()) {
@@ -271,13 +292,28 @@ public class RegistroUserControlador implements Initializable {
     }
 
 
+    /**
+     * Crea los directorios y archivos necesarios para el nuevo usuario.
+     *
+     * @param user el usuario para el cual se crearán los directorios y archivos.
+     * @return true si se crearon los directorios y archivos correctamente, false en caso contrario.
+     */
     private boolean crearFicherosUsuario(Usuario user) {
+        //Crea el directorio principal del usuario.
 		if(user.getDirectorio().mkdir()) {
             File dirLog = new File(user.getDirectorio().getName() + "\\" + "log");
+            File dirReport = new File(user.getDirectorio().getName() + "\\" + "report");
             
-            //Crea el directorio donde se guardan los archivos log del usuario root.
+            // Crea el directorio donde se guardarán los archivos de registro (log) del nuevo usuario.
             if (!dirLog.mkdir()) {
-                loggerRoot.warning("No se ha creado el directirio de log del nuevo usuario.");
+                loggerRoot.warning("No se ha creado el directirio log del nuevo usuario.");
+                return false;
+            }
+
+            // Crea el directorio donde se guardarán los archivos de informes (report) del nuevo usuario.
+            if (!dirReport.mkdir()) {
+                loggerRoot.warning("No se ha creado el directirio report del nuevo usuario.");
+                return false;
             }
         } else {
             loggerRoot.warning("No se ha creado el directirio del nuevo usuario.");
@@ -296,6 +332,7 @@ public class RegistroUserControlador implements Initializable {
 				e.printStackTrace();
 			} catch (Exception e) {
                 loggerRoot.severe("Excepción: " + e.toString());
+                e.printStackTrace();
             }
 		}
 		return false;
@@ -347,6 +384,11 @@ public class RegistroUserControlador implements Initializable {
     }
 
 
+    /**
+     * Establece el usuario root para el controlador.
+     *
+     * @param usuarioRoot el usuario root a establecer.
+     */
     public void setUsuarioRoot(Usuario usuarioRoot) {
         this.usuarioRoot = usuarioRoot;
         conexionBD.setUsuario(usuarioRoot);

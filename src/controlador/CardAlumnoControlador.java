@@ -11,7 +11,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import modelo.Alumno;
@@ -99,6 +98,7 @@ public class CardAlumnoControlador implements Initializable {
         lbEstadoLabel.getStyleClass().add("color_texto_negro");
         lbAsistenciasLabel.getStyleClass().add("color_texto_negro");
         
+        //Establecer imagen en ImageView.
         Image imagenUser;
         try {
             //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
@@ -126,7 +126,7 @@ public class CardAlumnoControlador implements Initializable {
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
 
-        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");//Formato dd/MM/yy
+        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Crear un formateador de fecha con el patrón "dd/MM/yyyy".
 
         //Configurar un evento de clic del ratón para el botón "Cerrar".
         btnCerrar.setOnMouseClicked(e -> {

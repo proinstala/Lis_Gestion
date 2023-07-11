@@ -40,8 +40,6 @@ import javafx.fxml.Initializable;
 public class JornadaCardDuplicarControlador implements Initializable {
 
     private Double x, y;
-
-    private PrincipalControlador controladorPincipal;
 	private DateTimeFormatter formatter;
 	private ConexionBD conexionBD;
     private Logger logUser;
@@ -190,6 +188,7 @@ public class JornadaCardDuplicarControlador implements Initializable {
                     e.printStackTrace();
                 } catch (Exception e) {
                     logUser.severe("Excepción: " + e.toString());
+                    e.printStackTrace();
                 }
 
                 if(listaControlAlumnos != null && !listaControlAlumnos.isEmpty()) {
@@ -288,6 +287,7 @@ public class JornadaCardDuplicarControlador implements Initializable {
                     e.printStackTrace();
                 } catch (Exception e) {
                     logUser.severe("Excepción: " + e.toString());
+                    e.printStackTrace();
                 }
 
                 if(insetaOK) {
@@ -320,6 +320,7 @@ public class JornadaCardDuplicarControlador implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
         return false;
     }
@@ -384,6 +385,7 @@ public class JornadaCardDuplicarControlador implements Initializable {
                 e.printStackTrace();
             } catch (Exception e) {
                 logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
             }
         }
         return correcto;

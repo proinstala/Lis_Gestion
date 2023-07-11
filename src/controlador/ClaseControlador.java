@@ -202,7 +202,14 @@ public class ClaseControlador implements Initializable {
 
 	}
 
-	
+
+	/**
+	 * Maneja el evento de hacer clic en el botón "Anterior Clase".
+	 * Se encarga de cargar la clase anterior en la interfaz si hay una disponible.
+	 * Si no hay una clase anterior, muestra un mensaje de aviso.
+	 *
+	 * @param event El evento de clic del mouse.
+	 */
 	@FXML
 	void anteriorClase(MouseEvent event) {
 		if(numeroClase > 0) {
@@ -214,7 +221,14 @@ public class ClaseControlador implements Initializable {
 		}
 	}
 
-	
+
+	/**
+	 * Maneja el evento de hacer clic en el botón "Siguiente Clase".
+	 * Se encarga de cargar la clase Siguiente en la interfaz si hay una disponible.
+	 * Si no hay una clase siguiente, muestra un mensaje de aviso.
+	 *
+	 * @param event El evento de clic del mouse.
+	 */
 	@FXML
 	void siguienteClase(MouseEvent event) {
 		if(numeroClase < 7) {
@@ -227,6 +241,14 @@ public class ClaseControlador implements Initializable {
 	}
 	
 	
+	/**
+	 * Maneja el evento de hacer clic en el botón "Add Alumno".
+	 * Se encarga de agregar un alumno a la clase seleccionada si cumple ciertas condiciones.
+	 * Muestra mensajes de aviso en caso de que el alumno ya esté inscrito en la clase, en otra clase de la misma jornada
+	 * o haya alcanzado su máximo de clases semanales.
+	 *
+	 * @param event El evento de clic del mouse.
+	 */
 	@FXML
 	void addAlumno(MouseEvent event) {
 		int i = tvAlumnos.getSelectionModel().getSelectedIndex(); //Guardo el indice del elemento seleccionado en la lista.
@@ -242,6 +264,7 @@ public class ClaseControlador implements Initializable {
 				e.printStackTrace();
 			} catch (Exception e) {
 				logUser.severe("Excepción: " + e.toString());
+				e.printStackTrace();
 			}
 
 
@@ -278,7 +301,14 @@ public class ClaseControlador implements Initializable {
 		}
 	}
 
-	
+
+	/**
+	 * Maneja el evento de hacer clic en el botón "Quitar Alumno".
+	 * Se encarga de eliminar un alumno de la lista de Alumnos de la clase.
+	 * Muestra un mensaje de aviso cuando se elimina el Alumnos de la clase.
+	 *
+	 * @param event El evento de clic del mouse.
+	 */
 	@FXML
 	void quitarAlumno(MouseEvent event) {
 		int i = lvClase.getSelectionModel().getSelectedIndex();
@@ -291,6 +321,14 @@ public class ClaseControlador implements Initializable {
 	}
 
 
+	/**
+	 * Maneja el evento de hacer clic en el botón "Guardar".
+	 * Se encarga de guardar los cambios realizados en la clase y en la lista de alumnos de la clase.
+	 * Actualiza la base de datos con la información actualizada.
+	 * Muestra un mensaje de confirmación cuando se guardan los cambios.
+	 *
+	 * @param event El evento de clic del mouse.
+	 */
 	@FXML
 	void guardar(MouseEvent event) {
 		try {
@@ -315,9 +353,18 @@ public class ClaseControlador implements Initializable {
 			e.printStackTrace();
 		} catch (Exception e) {
 			logUser.severe("Excepción: " + e.toString());
+			e.printStackTrace();
 		}
 	}
 
+
+	/**
+	 * Maneja el evento de hacer clic en el botón "Volver".
+	 * Se encarga de cargar la vista de la jornada principal y establecerla como contenido principal.
+	 * Configura el controlador de la vista de la jornada principal y le pasa la lista de alumnos y la jornada actual.
+	 *
+	 * @param event El evento de clic del mouse.
+	 */
 	@FXML
 	void volver(MouseEvent event) {
 		try {
@@ -329,7 +376,6 @@ public class ClaseControlador implements Initializable {
 			JornadaControlador controller = loader.getController(); //cargo el controlador.
 			controller.setControladorPrincipal(controladorPincipal);
 			controller.setListaAlumnos(listadoAlumnos);
-			//controller.setStage((Stage) bpClase.getScene().getWindow());
 			controller.inicializacion(jornada);
 			
 		} catch (IOException e) {
@@ -337,6 +383,7 @@ public class ClaseControlador implements Initializable {
 			e.printStackTrace();
 		} catch (Exception e) {
 			logUser.severe("Excepción: " + e.toString());
+			e.printStackTrace();
 		}
 	}
 	
@@ -379,11 +426,18 @@ public class ClaseControlador implements Initializable {
 		cbTipo.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
 			this.clase.tipoProperty().set(ov);
 		});
-		
-		
 	}
 
 
+	/**
+	 * Comprueba la lista de alumnos en la clase y devuelve una nueva lista actualizada.
+	 * Recibe una lista de alumnos y verifica cada alumno en comparación con la lista general de alumnos.
+	 * Si encuentra una coincidencia de ID, agrega el alumno correspondiente de la lista general a la nueva lista.
+	 * Devuelve la nueva lista actualizada.
+	 *
+	 * @param listaAlumnos La lista de alumnos en la clase.
+	 * @return La nueva lista de alumnos actualizada.
+	 */
 	private ArrayList<Alumno> comprobarListaClase(ArrayList<Alumno> listaAlumnos) {
 		ArrayList<Alumno> nuevaListaAlumnos = new ArrayList<Alumno>();
 		//listadoAlumnos

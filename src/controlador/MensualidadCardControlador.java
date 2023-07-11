@@ -129,7 +129,7 @@ public class MensualidadCardControlador implements Initializable {
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
 
         //Formatos para mostrar la fecha y para el importe.
-        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");//Formato dd/MM/yy
+        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Crear un formateador de fecha con el patrón "dd/MM/yyyy".
         decimalFormat = new DecimalFormat("#0.00");
 
         //Configurar un evento de clic del ratón para el botón "Cerrar".
@@ -168,6 +168,7 @@ public class MensualidadCardControlador implements Initializable {
             
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
         
     }

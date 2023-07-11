@@ -3,7 +3,6 @@ package controlador;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -35,6 +34,7 @@ import modelo.Jornada;
 import modelo.TipoClase;
 import modelo.Toast;
 import utilidades.Constants;
+import utilidades.Fechas;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -204,7 +204,7 @@ public class JornadaControlador implements Initializable {
         ivBotonCrearJornada.setImage(imagenCrearJornada);
 		
 		logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
-		conexionBD = ConexionBD.getInstance(); //Obtenemos una istancia de la Conexion a BD.
+		conexionBD = ConexionBD.getInstance();		//Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
 		toast = new Toast();
 		
 		//deshabilita que se puedan seleccionar el contenido del los listView.
@@ -241,8 +241,8 @@ public class JornadaControlador implements Initializable {
 		lvClase8.setFocusTraversable(false);
 		
 		//Modifica el formato en el que se muestra la fecha en el dtFechaCompra
-        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");//Formato dd/MM/yy
-        dpFecha.setConverter(new LocalDateStringConverter(formatter, null));
+        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Crear un formateador de fecha con el patrón "dd/MM/yyyy".
+        dpFecha.setConverter(new LocalDateStringConverter(formatter, null)); //Establecer un convertidor de cadena de fecha para el control DatePicker dpFecha.
         
         //Para poder escribir directamente la fecha
         dpFecha.setEditable(false); //-> Poner a true para que sea editable.
@@ -251,7 +251,7 @@ public class JornadaControlador implements Initializable {
         
         dpFecha.setOnAction(event -> {
         	LocalDate fechaSeleccionada = dpFecha.getValue(); //Guardo la fecha seleccionada en fechaSeleccionada.
-            lbDiaSemana.setText(obtenerDiaSemana(fechaSeleccionada)); //Pongo el dia de la semana de la fecha seleecionada en el label lbDiaSemana.
+            lbDiaSemana.setText(Fechas.obtenerDiaSemana(fechaSeleccionada)); //Pongo el dia de la semana de la fecha seleecionada en el label lbDiaSemana.
             
             //LLamar a base de datos para rescatar la jornada
 			try {
@@ -262,39 +262,53 @@ public class JornadaControlador implements Initializable {
 				e.printStackTrace();
 			} catch (Exception e) {
 				logUser.severe("Excepción: " + e.toString());
+				e.printStackTrace();
 			}
         });
 	}
 
 
+	/**
+	 * Método que se ejecuta cuando se hace clic en el botón anteriorJornada (Image flecha Izquierda).
+	 * Actualiza la vista con la jornada anterior a la fecha seleccionada.
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
 	@FXML
     void anteriorJornada(MouseEvent event) {
-		LocalDate fechaAnterio = dpFecha.getValue().plusDays(-1);
-		Jornada j = null;
+		LocalDate fechaAnterio = dpFecha.getValue().plusDays(-1); //Obtiene la fecha anterior a la fecha seleccionada
+		Jornada j = null; //Variable para almacenar la jornada obtenida en la consulta a BD.
 		try {
-			j = conexionBD.getJornadaCompleta(fechaAnterio.toString());
-			inicializacion(j);
+			j = conexionBD.getJornadaCompleta(fechaAnterio.toString()); //Obtiene la jornada completa de la fecha anterior.
+			inicializacion(j); //Inicializa la vista con la jornada obtenida.
 		} catch (SQLException e) {
 			logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
 		} catch (Exception e) {
 			logUser.severe("Excepción: " + e.toString());
+			e.printStackTrace();
 		}
 
 		if(j == null) {
-			dpFecha.setValue(fechaAnterio);
-			lbDiaSemana.setText(obtenerDiaSemana(fechaAnterio));
+			dpFecha.setValue(fechaAnterio); //Establece la fecha seleccionada como la fecha anterior.
+			lbDiaSemana.setText(Fechas.obtenerDiaSemana(fechaAnterio)); //Actualiza el label de día de la semana en la vista.
 		}
     }
 
 
+	/**
+	 * Método que se ejecuta cuando se hace clic en el botón siguienteJornada (Imagen flecha derecha). 
+	 * Actualiza la vista con la jornada siguiente a la fecha seleccionada.
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
 	@FXML
     void siguienteJornada(MouseEvent event) {
-		LocalDate fechaSiguiente = dpFecha.getValue().plusDays(1);
-		Jornada j = null;
+		LocalDate fechaSiguiente = dpFecha.getValue().plusDays(1); //Obtiene la fecha siguiente a la fecha seleccionada.
+		Jornada j = null; //Variable para almacenar la jornada obtenida en la consulta a BD.
 		try {
-			j = conexionBD.getJornadaCompleta(fechaSiguiente.toString());
-			inicializacion(j);
+			j = conexionBD.getJornadaCompleta(fechaSiguiente.toString()); //Obtiene la jornada completa de la fecha siguiente.
+			inicializacion(j); //Inicializa la vista con la jornada obtenida.
 		} catch (SQLException e) {
 			logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
@@ -303,55 +317,110 @@ public class JornadaControlador implements Initializable {
 		}
 
 		if(j == null) {
-			dpFecha.setValue(fechaSiguiente);
-			lbDiaSemana.setText(obtenerDiaSemana(fechaSiguiente));
+			dpFecha.setValue(fechaSiguiente); //Establece la fecha seleccionada como la fecha siguiente.
+			lbDiaSemana.setText(Fechas.obtenerDiaSemana(fechaSiguiente)); //Actualiza el label de día de la semana en la vista.
 		}
     }
 	
+	/**
+	 * Método que se ejecuta cuando se hace clic en el ListView lvClase1.
+	 * Carga la clase correspondiente a la posición 0 en ClaseControlador.
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
 	@FXML
 	void clickClase1(MouseEvent event) {
 		cargaClase(0);
 	}
 	
+	/**
+	 * Método que se ejecuta cuando se hace clic en el ListView lvClase2.
+	 * Carga la clase correspondiente a la posición 1 en ClaseControlador.
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
 	@FXML
     void clickClase2(MouseEvent event) {
 		cargaClase(1);
     }
 
+	/**
+	 * Método que se ejecuta cuando se hace clic en el ListView lvClase3.
+	 * Carga la clase correspondiente a la posición 2 en ClaseControlador.
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
     @FXML
     void clickClase3(MouseEvent event) {
     	cargaClase(2);
     }
 
+	/**
+	 * Método que se ejecuta cuando se hace clic en el ListView lvClase4.
+	 * Carga la clase correspondiente a la posición 3 en ClaseControlador.
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
     @FXML
     void clickClase4(MouseEvent event) {
     	cargaClase(3);
     }
 
+	/**
+	 * Método que se ejecuta cuando se hace clic en el ListView lvClase5.
+	 * Carga la clase correspondiente a la posición 4 en ClaseControlador.
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
     @FXML
     void clickClase5(MouseEvent event) {
     	cargaClase(4);
     }
 
+	/**
+	 * Método que se ejecuta cuando se hace clic en el ListView lvClase6.
+	 * Carga la clase correspondiente a la posición 5 en ClaseControlador.
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
     @FXML
     void clickClase6(MouseEvent event) {
     	cargaClase(5);
     }
 
+	/**
+	 * Método que se ejecuta cuando se hace clic en el ListView lvClase7.
+	 * Carga la clase correspondiente a la posición 6 en ClaseControlador.
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
     @FXML
     void clickClase7(MouseEvent event) {
     	cargaClase(6);
     }
 
+	/**
+	 * Método que se ejecuta cuando se hace clic en el ListView lvClase8.
+	 * Carga la clase correspondiente a la posición 7 en ClaseControlador.
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
     @FXML
     void clickClase8(MouseEvent event) {
     	cargaClase(7);
     }
 
+
+	/**
+	 * Método que se ejecuta cuando se hace clic en el botón botonGuardarComentario.
+	 * Actualiza el comentario de la jornada en la base de datos y muestra un mensaje de confirmación.
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
 	@FXML
 	void botonGuardarComentario(MouseEvent event) {
 		try {
-			conexionBD.actualizarComentarioJornada(jornada);
+			conexionBD.actualizarComentarioJornada(jornada); //Actualiza el comentario de la jornada en la base de datos.
 			toast.show((Stage) bpJornada.getScene().getWindow(), "Comentario modificado!!.");
 			logUser.config("Actualizado comentario de jornada: " + jornada.getFecha().format(formatter));
 		} catch (SQLException e) {
@@ -361,14 +430,21 @@ public class JornadaControlador implements Initializable {
 		}
 	}
 
+
+	/**
+	 * Método que se ejecuta cuando se hace clic en el botón crearJornadaBD (ImageView boton crear jornada).
+	 * Crea una nueva jornada en la base de datos si no existe una jornada cargada previamente.
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
 	@FXML
     void crearJornadaBD(MouseEvent event) {
-		//Si la jornada que esta cargada es null(No esta creada)
+		//Verifica si la jornada cargada es null (no está creada).
 		if(jornada == null) {
-			Jornada j = crearJornada();
+			Jornada j = crearJornada(); //Crea una nueva jornada con datos genericos y la seleccionada en el DatePiker.
 			try {
-				conexionBD.insertarJornada(j);
-				inicializacion(j);
+				conexionBD.insertarJornada(j); //Inserta la jornada en la base de datos.
+				inicializacion(j); //Inicializa la vista con la nueva jornada
 				logUser.config("Creada Jornada: " + j.getFecha().format(formatter));
 				toast.show((Stage) bpJornada.getScene().getWindow(), "Jornada creada correctamente!!");
 			} catch (SQLException e) {
@@ -377,17 +453,26 @@ public class JornadaControlador implements Initializable {
 				toast.show((Stage) bpJornada.getScene().getWindow(), "ERROR al intentar crear la jornada!!");
 			} catch (Exception e) {
 				logUser.severe("Excepción: " + e.toString());
+				e.printStackTrace();
 			}
 		} else {
 			toast.show((Stage) bpJornada.getScene().getWindow(), "Esta Jornada ya esta creada!!");
 		}
     }
 
+
+	/**
+	 * Método que se ejecuta cuando se hace clic en el botón borrarJornadaBD.
+	 * Borra los datos de la jornada y sus clases asociadas en la base de datos, si existe una jornada cargada previamente.
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
 	@FXML
     void borrarJornadaBD(MouseEvent event) {
 		if(jornada != null) {
 			boolean borradoOK = false;
 			
+			//Configuración de la alerta de confirmación para el borrado de la jornada.
 			alerta = new Alert(AlertType.CONFIRMATION);
             alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
             alerta.setTitle("Borrar Jornada");
@@ -397,21 +482,23 @@ public class JornadaControlador implements Initializable {
             alerta.initOwner((Stage) bpJornada.getScene().getWindow());
             alerta.initModality(Modality.APPLICATION_MODAL);
 
+			//Muestra la alerta de confirmación y espera a que se seleccione una opción
             Optional<ButtonType> result = alerta.showAndWait();
-    		if (result.get() == ButtonType.OK) {
+    		if (result.get() == ButtonType.OK) { //Si se selecciona el botón OK.
                 try {
-                    borradoOK = conexionBD.borrarJornada(jornada);
+                    borradoOK = conexionBD.borrarJornada(jornada); //Borra la jornada y sus clases asociadas en la base de datos
                 } catch (SQLException e) {
                     logUser.severe("Excepción: " + e.toString());
                     e.printStackTrace();
                 } catch (Exception e) {
 					logUser.severe("Excepción: " + e.toString());
+					e.printStackTrace();
 				}
 
 				if (borradoOK) {
 					logUser.config("Borrada Jornada: " + jornada.getFecha().format(formatter));
 					Jornada j = null;
-					inicializacion(j);
+					inicializacion(j); //Reinicializa la vista sin una jornada cargada.
 					mensajeAviso(Alert.AlertType.INFORMATION,
 							"Borrar Jornada.",
 							"",
@@ -425,7 +512,7 @@ public class JornadaControlador implements Initializable {
 				}
     			
     		} else {
-    			//Si se pulsa el boton de cancelar.
+    			// Si se pulsa el botón de cancelar, no se realiza ninguna acción.
     		}
 
 		} else {
@@ -433,6 +520,14 @@ public class JornadaControlador implements Initializable {
 		}
     }
 
+
+	/**
+	 * Método que se ejecuta cuando se hace clic en el botón copiarJornada.
+	 * Crea y muestra una nueva ventana donde se puede configurar la copia de la jornada actual 
+	 * mediante la carga de una vista y su controlador desde un archivo FXML específico (jornadaCardDuplicarVista.fxml).
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
 	@FXML
     void copiarJornada(MouseEvent event) {
 		if(jornada == null) {
@@ -459,13 +554,24 @@ public class JornadaControlador implements Initializable {
             scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
             ventana.setScene(scene);
             ventana.showAndWait();
-        } catch (IOException e) {
-            logUser.severe("Excepción: " + e.toString());
-            e.printStackTrace();
-        }
+        	} catch (IOException e) {
+				logUser.severe("Excepción: " + e.toString());
+				e.printStackTrace();
+        	} catch (Exception e) {
+				logUser.severe("Excepción: " + e.toString());
+				e.printStackTrace();
+			}
 		}
     }
 
+
+	/**
+	 * Método que se ejecuta cuando se hace clic en el botón copiarSemana.
+	 * Crea y muestra una nueva ventana donde se puede configurar la copia de la semana de la jornada actual
+	 * mediante la carga de una vista y su controlador desde un archivo FXML específico (semanaCardDuplicarVista.fxml).
+	 *
+	 * @param event El evento del mouse que desencadena el método.
+	 */
     @FXML
     void copiarSemana(MouseEvent event) {
 		if(jornada == null) {
@@ -492,10 +598,13 @@ public class JornadaControlador implements Initializable {
             scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
             ventana.setScene(scene);
             ventana.showAndWait();
-        } catch (IOException e) {
-            logUser.severe("Excepción: " + e.toString());
-            e.printStackTrace();
-        }
+        	} catch (IOException e) {
+				logUser.severe("Excepción: " + e.toString());
+				e.printStackTrace();
+        	} catch (Exception e) {
+				logUser.severe("Excepción: " + e.toString());
+				e.printStackTrace();
+			}
 		}
     }
 	
@@ -523,11 +632,15 @@ public class JornadaControlador implements Initializable {
 	}
 	
 
+	/**
+	 * Cargar una clase específica en la vista.
+	 *
+	 * @param numeroClase El número de la clase que se desea cargar.
+	 */
 	private void cargaClase(int numeroClase) {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/ClaseVista.fxml"));
 			BorderPane ClasePilates;
-			//loader.setResources(recursos);
 			ClasePilates = (BorderPane) loader.load();
 			controladorPincipal.setPane(ClasePilates);
 			
@@ -540,16 +653,25 @@ public class JornadaControlador implements Initializable {
 		} catch (IOException e) {
 			logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
+		} catch (Exception e) {
+			logUser.severe("Excepción: " + e.toString());
+			e.printStackTrace();
 		}
 	}
 	
 	
+	/**
+	 * Método para inicializar la pantalla de una Jornada.
+	 * @param jorn La jornada a inicializar.
+	 */
 	public void inicializacion(Jornada jorn) {
 		if(jorn == null) {
-			btnGuardarComentario.setDisable(true);
+			btnGuardarComentario.setDisable(true); // Deshabilitar el botón de guardar comentario.
 			toast.show((Stage) bpJornada.getScene().getWindow(), "Esta jornada no esta creada");
+			
 			//Si ya hay cargado datos en pantalla, borra los datos.
 			if(jornada != null) {
+				//Limpiar las listas de alumnos de cada clase.
 				listaClase1.clear();
 				listaClase2.clear();
 				listaClase3.clear();
@@ -559,6 +681,7 @@ public class JornadaControlador implements Initializable {
 				listaClase7.clear();
 				listaClase8.clear();
 				
+				//Desvincular las propiedades de texto de las Labels.
 				lbHoraClase1.textProperty().unbind();
 				lbTipoClase1.textProperty().unbind();
 				
@@ -583,16 +706,17 @@ public class JornadaControlador implements Initializable {
 				lbHoraClase8.textProperty().unbind();
 				lbTipoClase8.textProperty().unbind();
 				
-				//unBinding a TextArea comentario.
+				//Desvincular el TextArea comentario.
 				taComentarios.textProperty().unbindBidirectional(jornada.comentarioProperty());
 				
 				taComentarios.clear();
 				
-				//Deshabilitar la edición y la selección del TextArea
+				//Deshabilitar la edición y la selección del TextArea.
 				taComentarios.setEditable(false);
 				taComentarios.setFocusTraversable(false);
 				taComentarios.setMouseTransparent(true);
 				
+				//Limpiar el contenido de las Labels de hora de clase.
 				lbHoraClase1.setText("");
 				lbHoraClase2.setText("");
 				lbHoraClase3.setText("");
@@ -602,6 +726,7 @@ public class JornadaControlador implements Initializable {
 				lbHoraClase7.setText("");
 				lbHoraClase8.setText("");
 				
+				//Limpiar el contenido de las Labels de tipo de clase.
 				lbTipoClase1.setText("");
 				lbTipoClase2.setText("");
 				lbTipoClase3.setText("");
@@ -631,30 +756,27 @@ public class JornadaControlador implements Initializable {
 				lvClase7.setFocusTraversable(false);
 				lvClase8.setFocusTraversable(false);
 				
-				//La jornada que esta cargada la ponemos a null
+				//Establecer la jornada cargada a null.
 				jornada = null;
 			}
 		} 
 		
-		//Si la jornada pasada como parametro no es null, hacemos el proceso de binding
+		//Si la jornada pasada como parametro no es null, realizar el proceso de binding
 		if(jorn != null) {
-			btnGuardarComentario.setDisable(false);
-			this.jornadaOriginal = jorn; //Asignamos la jornada pasada como parametro a jornadaOriginal.
-			jornada = new Jornada(jornadaOriginal); //pasamos los datos de jornadaOriginal a jornada para que los cambios no afecten directamente a jornadaOriginal
-			dpFecha.setValue(jornada.getFecha());	//Asignamos la fecha de la jornada al datePiker.
-			lbDiaSemana.setText(jornada.obtenerDiaSemana()); //Ponemos el dia de la semana de la jornada en el Label lbDiaSemana.
+			btnGuardarComentario.setDisable(false); //Habilitar el botón de guardar comentario.
+			this.jornadaOriginal = jorn; //Asigna la jornada pasada como parametro a jornadaOriginal.
+			jornada = new Jornada(jornadaOriginal); //pasar los datos de jornadaOriginal a jornada para que los cambios no afecten directamente a jornadaOriginal
+			dpFecha.setValue(jornada.getFecha());	//Asigna la fecha de la jornada al datePiker.
+			lbDiaSemana.setText(jornada.obtenerDiaSemana()); //Asigna el dia de la semana de la jornada en el Label lbDiaSemana.
 			
-			//Cambio los alumnos que tiene cada clase por los alumnos de la aplicacion
+			//Cambio los alumnos que tiene cada clase por los alumnos de la aplicacion.
 			for(Clase clase : jorn.getClases()) {
 				if(!clase.getListaAlumnos().isEmpty()) {
 					clase.setListaAlumnos(comprobarListaClase(clase.getListaAlumnos()));
 				}
 			}
 
-			
-
 			//Inicializacion del listView. 
-			//listaClase1 = FXCollections.observableArrayList(jornada.getListaClases().get(0).getListaAlumnos());
 			listaClase1 = FXCollections.observableArrayList(jornada.getClase(0).getListaAlumnos());
 			lvClase1.setItems(listaClase1);
 			
@@ -707,7 +829,7 @@ public class JornadaControlador implements Initializable {
 			//Binding a TextArea comentario.
 			taComentarios.textProperty().bindBidirectional(jornada.comentarioProperty());
 			
-			//habilitar la edición y la selección del TextArea
+			//habilitar la edición y la selección del TextArea.
 			taComentarios.setEditable(true);
 			taComentarios.setFocusTraversable(true);
 			taComentarios.setMouseTransparent(false);
@@ -733,19 +855,30 @@ public class JornadaControlador implements Initializable {
 		} 
 	}
 	
+
+	/**
+	 * Comprueba la lista de alumnos de una clase y reemplaza los alumnos por los alumnos de la aplicación.
+	 * 
+	 * @param listaAlumnos La lista de alumnos de la clase.
+	 * @return La nueva lista de alumnos con los alumnos de la aplicación.
+	 */
 	private ArrayList<Alumno> comprobarListaClase(ArrayList<Alumno> listaAlumnos) {
 		ArrayList<Alumno> nuevaListaAlumnos = new ArrayList<Alumno>();
-		//listadoAlumnos
+		
+		//Itera sobre la lista de alumnos proporcionada.
 		for(Alumno alumno : listaAlumnos) {
+			//Compara cada alumno con los alumnos de la aplicación.
 			for(Alumno alumnoApp : listadoAlumnosGeneral) {
+				//Si encuentra una coincidencia por ID, agrega el alumno de la aplicación a la nueva lista.
 				if(alumno.getId() == alumnoApp.getId()) {
 					nuevaListaAlumnos.add(alumnoApp);
 					break;
 				}
 			}
 		}
-		return nuevaListaAlumnos;
+		return nuevaListaAlumnos; //Devuelve la nueva lista de alumnos.
 	}
+
 
 	/**
      * Muestra una ventana de dialogo con la informacion pasada como parametros.
@@ -767,6 +900,7 @@ public class JornadaControlador implements Initializable {
         alerta.showAndWait();
     }
 
+
 	/**
 	 * Establece para este controlador, el controlador principal de la aplicacion.
 	 * 
@@ -775,6 +909,7 @@ public class JornadaControlador implements Initializable {
 	public void setControladorPrincipal(PrincipalControlador principal) {
 		controladorPincipal = principal;
 	}
+
 
 	/**
 	 * Establece la lista de alumnos.
@@ -785,6 +920,7 @@ public class JornadaControlador implements Initializable {
 		listadoAlumnosGeneral = lista;
 	}
 	
+
 	/**
 	 * Establece una jornada para este controlador.
 	 * 
@@ -792,31 +928,5 @@ public class JornadaControlador implements Initializable {
 	 */
 	public void setJornada(Jornada jornada) {
 		this.jornada = jornada;
-	}
-
-	
-	/**
-	 * Obtiene un String con el dia de la semana a partir de la fecha pasada como parametro.
-	 * 
-	 * @param dia Objeto de tipo LocalDate de donde se obtiene la fecha.
-	 * @return Un String con el dia de la semana.
-	 */
-	public String obtenerDiaSemana(LocalDate dia) {
-		String nombreDia = "";
-		DayOfWeek diaDeLaSemana = dia.getDayOfWeek();
-		switch (diaDeLaSemana.name()) {
-		case "MONDAY" -> nombreDia = "Lunes";
-		case "TUESDAY" -> nombreDia = "Martes";
-		case "WEDNESDAY" -> nombreDia = "Miércoles";
-		case "THURSDAY" -> nombreDia = "Jueves";
-		case "FRIDAY" -> nombreDia = "Viernes";
-		case "SATURDAY" -> nombreDia = "Sábado";
-		case "SUNDAY" -> nombreDia = "Domingo";
-		}
-		
-		return nombreDia;
-	}
-	
-	
-	
+	}	
 }

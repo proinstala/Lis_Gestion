@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
@@ -181,5 +182,16 @@
          </GridPane.margin>
       </TextArea>
       <ComboBox fx:id="cbAlumnos" prefWidth="200.0" promptText="Selecciona un Alumno" GridPane.columnIndex="1" GridPane.rowIndex="16" />
+      <ImageView fx:id="ivClearFechaPago" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="10" GridPane.valignment="CENTER">
+         <image>
+            <Image url="@../recursos/clear_1_24.png" />
+         </image>
+         <GridPane.margin>
+            <Insets left="210.0" top="3.0" />
+         </GridPane.margin>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </ImageView>
    </children>
 </GridPane>

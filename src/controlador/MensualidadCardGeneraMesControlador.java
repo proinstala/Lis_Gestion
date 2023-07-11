@@ -129,7 +129,7 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
         });
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
-        conexionBD = ConexionBD.getInstance();
+        conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
         toast = new Toast();
 
         formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");//Formato dd/MM/yy
@@ -155,7 +155,13 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
     }//FIN initialize.
 
 
+    /**
+     * Genera las mensualidades de la fecha seleccionada para los alumnos que no tienen mesualidad en esa fecha y su estado es 'ACTIVO'.
+     * 
+     * @return true si se generaron las mensualidades correctamente, false de lo contrario.
+     */
     private boolean generarMensualidades() {
+        //Verificar si el número de mensualidades a generar es 0.
         if (numeroMensualidades.get() == 0) {
             mensajeAviso(Alert.AlertType.INFORMATION,
             "Generar Mensualidades",
@@ -165,6 +171,7 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
             return false;
         }
         
+        // Obtener los precios de las clases semanales.
         if (!obtenerPreciosClase()) {
             mensajeAviso(Alert.AlertType.ERROR,
             "Generar Mensualidades",
@@ -175,24 +182,30 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
         }
 
         String anotacionGenerica = "";
+
+        //Generar anotación genérica si está seleccionada la opción.
         if (chbAddAnotacion.isSelected()) {
             anotacionGenerica = "Mensualidad generada automaticamente. ";
         }
 
+        //Agregar fecha de creación a la anotación si está seleccionada la opción.
         if (chbAddFecha.isSelected()) {
             anotacionGenerica = anotacionGenerica.concat("Fecha de creación: " + fechaActual.format(formatter).toString());
         }
 
         ArrayList<Mensualidad> nuevaListaMensualidades = new ArrayList<>();
         for (Alumno a : listadoAlumnosGeneral) {
+            //Verificar si el alumno está activo y tiene disponible la mensualidad en la fecha seleccionada.
             if(a.getEstado().equals(EstadoAlumno.ACTIVO) && a.fechaMensualidadDisponible(fechaSeleccionada)) {
-                Mensualidad mens = new Mensualidad(-1, a.getId(), fechaSeleccionada, fechaActual, a.getFormaPago(), EstadoPago.PENDIENTE, a.getAsistenciaSemanal(), precios_clases.get(a.getAsistenciaSemanal()), anotacionGenerica);
+                Mensualidad mens = new Mensualidad(-1, a.getId(), fechaSeleccionada, null, a.getFormaPago(), EstadoPago.PENDIENTE, a.getAsistenciaSemanal(), precios_clases.get(a.getAsistenciaSemanal()), anotacionGenerica);
                 nuevaListaMensualidades.add(mens);
             }
         }
 
         try {
+            // Insertar la lista de mensualidades en la base de datos.
             if (conexionBD.insertarListaMensualidades(nuevaListaMensualidades)) {
+                //Agregar las mensualidades a la lista general y asociarlas a los alumnos correspondientes.
                 listadoMensualidadesGeneral.addAll(nuevaListaMensualidades);
                 for (Mensualidad m : nuevaListaMensualidades) {
                     for (Alumno a : listadoAlumnosGeneral) {
@@ -220,6 +233,7 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
             return false;
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
             return false;
         }
         return true;
@@ -247,6 +261,10 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
     }//FIN obtenerPreciosClase.
 
 
+    /**
+     * Configura el ComboBox de selección de mes y año.
+     * 
+     */
     private void configurarComboBox() {
         //Creo un ArrayList de Integer con valores de 2020 hasta 2050 y cargo el ArrayList en el ComboBox cbAnio.
         int yearInicial = 2020;
@@ -254,27 +272,26 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
         for (int i = 0; i <= 30; i++) {
             listaYears.add(yearInicial + i);
         }
-        //Si el año actual no esta en la lista, lo agrega.
+        //Si el año actual no esta en la lista, agregarlo.
         if(!listaYears.contains(LocalDate.now().getYear())) {
             listaYears.add(LocalDate.now().getYear());
         }
         cbYear.setItems(FXCollections.observableArrayList(listaYears));
 
-        //Creo un ObservableList<String> con el nombre de los meses del año. Cargo la lista en el ComboBox cbMes.
+        //Crea un ObservableList<String> con el nombre de los meses del año. Carga la lista en el ComboBox cbMes.
         ObservableList<String> listMeses = FXCollections.observableArrayList(Fechas.obtenerMesesDelAnio().values());
         cbMes.setItems(listMeses);
 
+        //Establecer el mes y año actual en el ComboBox cbMes y cbYear.
         cbMes.setValue(Fechas.obtenerNombreMes(fechaActual.getMonthValue()));
         cbYear.setValue(fechaActual.getYear());
 
-        
         //Establecer listeners para los cambios en los campos seleccionados de la interfaz de usuario.
         cbMes.getSelectionModel().selectedItemProperty().addListener((o, nv, ov) -> {
             fechaSeleccionada = YearMonth.of(fechaSeleccionada.getYear(), Month.valueOf(Fechas.traducirMesAIngles(ov)));
             configurarLabels();
         });
-
-        
+ 
         cbYear.getSelectionModel().selectedItemProperty().addListener((o, nv, ov) -> {
             fechaSeleccionada = YearMonth.of(ov, fechaSeleccionada.getMonth());
             configurarLabels();
@@ -282,16 +299,24 @@ public class MensualidadCardGeneraMesControlador implements Initializable {
     }//FIN configurarComboBox.
 
 
+    /**
+     * Configura las etiquetas (Labels) en la interfaz de usuario.
+     * 
+     */
     private void configurarLabels() {
+        //Crear un Binding para contar el número de alumnos activos.
         alumnoActivos = Bindings.createIntegerBinding(
                 () -> (int) listadoAlumnosGeneral.stream().filter(alumno -> alumno.getEstado() == EstadoAlumno.ACTIVO).count(), listadoAlumnosGeneral);
 
+        //Crear un Binding para contar el número de mensualidades disponibles para la fecha seleccionada.
         numeroMensualidades = Bindings.createIntegerBinding(
                 () -> (int) listadoAlumnosGeneral.stream().filter(alumno -> alumno.getEstado() == EstadoAlumno.ACTIVO && alumno.fechaMensualidadDisponible(fechaSeleccionada)).count(), listadoAlumnosGeneral);
         
+        //Vincular el texto de la etiqueta lbAlumnosVista al número de alumnos activos.
         lbAlumnosVista.textProperty()
                 .bind(Bindings.createStringBinding(() -> String.format("%d", alumnoActivos.get()), alumnoActivos));
 
+        //Vincular el texto de la etiqueta lbGenerarVista al número de mensualidades disponibles.
         lbGenerarVista.textProperty()
                 .bind(Bindings.createStringBinding(() -> String.format("%d", numeroMensualidades.get()), numeroMensualidades));
     }//FIN configurarLabels.

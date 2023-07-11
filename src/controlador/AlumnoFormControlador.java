@@ -152,12 +152,12 @@ public class AlumnoFormControlador implements Initializable {
         pSeparador.getStyleClass().add("panelSeparador"); //Panel separador de barra superior.
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
-        conexionBD = ConexionBD.getInstance();
+        conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
         toast = new Toast();
 
         //Modifica el formato en el que se muestra la fecha en el DatePicker.
-        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");//Formato dd/MM/yy
-        dpFechaNacimiento.setConverter(new LocalDateStringConverter(formatter, null));
+        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Crear un formateador de fecha con el patrón "dd/MM/yyyy".
+        dpFechaNacimiento.setConverter(new LocalDateStringConverter(formatter, null)); //Establecer un convertidor de cadena de fecha para el control DatePicker dpFechaNacimiento.
 
         cbGenero.setItems(FXCollections.observableArrayList(Genero.values()));
         cbEstado.setItems(FXCollections.observableArrayList(EstadoAlumno.values()));
@@ -200,7 +200,7 @@ public class AlumnoFormControlador implements Initializable {
                     logUser.config("Nuevo Alumno. (id: " + newAlumno.getId() + " nombre: " + newAlumno.getNombre() + ")");
                     ((Stage) gpFormAlumno.getScene().getWindow()).close();
                 }
-            } else {
+            } else if (modoControlador == MODO_EDITAR_ALUMNO) {
                 if(modificarAlumno()) {
                     logUser.config("Modificado Alumno. (id: " + oldAlumno.getId() + " nombre: " + oldAlumno.getNombre() + ")");
                     toast.show((Stage) ((Stage) gpFormAlumno.getScene().getWindow()).getOwner(), "Alumno modificado!!.");
@@ -514,6 +514,7 @@ public class AlumnoFormControlador implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
         logUser.warning("Fallo al crar Alumno.");
         return false;
@@ -549,6 +550,7 @@ public class AlumnoFormControlador implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
         }
         return false;
     }

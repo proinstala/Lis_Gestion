@@ -3,6 +3,7 @@ package controlador;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +13,7 @@ import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -21,20 +23,21 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import modelo.Toast;
 import modelo.Usuario;
+import utilidades.Constants;
 
 public class CambioPasswordControlador implements Initializable {
 
     private double x, y;
     private ConexionBD conexionBD;
+    private Logger logUser;
     private Toast toast;
-    private Alert alerta;
     private Usuario usuario;
     private Usuario usuarioRoot;
-    private Stage escenario;
     private StringProperty password;
     private StringProperty nuevoPassword;
     private StringProperty confimarPassword;
@@ -86,32 +89,43 @@ public class CambioPasswordControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        btnCancelar.getStyleClass().add("boton_rojo");
-        conexionBD = ConexionBD.getInstance();
-        toast = new Toast();
+        btnCancelar.getStyleClass().add("boton_rojo"); //Añadir clases de estilo CSS a elementos.
         
+        //Establecer imagen en ImageView.
         Image imagenEdit;
         Image padlock;
         try {
+            //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
             imagenEdit = new Image(getClass().getResourceAsStream("/recursos/usuario_edit_1_128.png")); //Forma desde IDE y JAR.
             padlock = new Image(getClass().getResourceAsStream("/recursos/candado_1_64.png"));
         } catch (Exception e) {
+            //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
             imagenEdit = new Image("/recursos/usuario_edit_1_128.png"); //Forma desde el JAR.
             padlock = new Image("/recursos/candado_1_64.png");
         }
+        //Establecer las imagenes cargadas en los ImageView.
         ivImagenUser.setImage(imagenEdit);
         ivPadloock.setImage(padlock);
 
+        //Configurar el evento cuando se presiona el ratón en el panel apCambioPassword.
         apCambioPassword.setOnMousePressed(mouseEvent -> {
+            //Obtener las coordenadas X e Y del ratón en relación con la escena.
             x = mouseEvent.getSceneX();
             y = mouseEvent.getSceneY();
         });
 
+        //Configurar el evento cuando se arrastra el ratón en el panel apCambioPassword.
         apCambioPassword.setOnMouseDragged(mouseEvent -> {
-            escenario.setX(mouseEvent.getScreenX() - x);
-            escenario.setY(mouseEvent.getScreenY() - y);
+            //Obtener la referencia al Stage actual y establecer las nuevas coordenadas X e Y.
+            ((Stage) apCambioPassword.getScene().getWindow()).setX(mouseEvent.getScreenX() - x);
+            ((Stage) apCambioPassword.getScene().getWindow()).setY(mouseEvent.getScreenY() - y);
         });
         
+
+        logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
+        conexionBD = ConexionBD.getInstance(); //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
+        toast = new Toast();
+
         //Inicializa los StringProperty
         password = new SimpleStringProperty("");
         nuevoPassword = new SimpleStringProperty("");
@@ -155,13 +169,21 @@ public class CambioPasswordControlador implements Initializable {
                 tfConfirmarPasswordVisible.setVisible(false);
             }
         });
+
+        //Configurar un evento de clic del ratón para el botón "Cancelar".
+        btnCancelar.setOnMouseClicked(e -> {
+            ((Stage) apCambioPassword.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
+        });
     }
 
-    @FXML
-    void cerrarVentana(MouseEvent event) {
-        escenario.close();
-    }
 
+    /**
+     * Método para manejar el evento de guardar cambios en la contraseña de Usuario.
+     * Comprueba las contraseñas, realiza los cambios en la base de datos
+     * y muestra mensajes de confirmación o error.
+     *
+     * @param event El evento del ratón que activó el método.
+     */
     @FXML
     void guardarCambios(MouseEvent event) {
         if(comprobarPassword() && comprobarNuevoPassword()) {
@@ -170,15 +192,16 @@ public class CambioPasswordControlador implements Initializable {
                 conexionBD.setUsuario(usuarioRoot);
                 cambioPassUsuario = conexionBD.cambiarPasswordUsuario(nuevoPassword.get(), password.get(), usuario.getId());
             } catch (SQLException e) {
-                alerta = new Alert(Alert.AlertType.ERROR);
-                alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
-                alerta.setTitle("Error cambio password");
-                alerta.setHeaderText("");
-                alerta.setContentText("No se ha podido cambiar el password.\n"
+                logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
+                mensajeAviso(
+                    AlertType.INFORMATION,
+                    "Error cambio password",
+                    "",
+                    "No se ha podido cambiar el password.\n"
                         + "Ha ocurrido un error durante la actualizacion en la base de datos.");
-                alerta.initStyle(StageStyle.DECORATED);
-                alerta.initOwner(escenario);
-                alerta.showAndWait();
+            } catch (Exception e) {
+                logUser.severe("Excepción: " + e.toString());
                 e.printStackTrace();
             } finally {
                 conexionBD.setUsuario(usuario);
@@ -190,7 +213,10 @@ public class CambioPasswordControlador implements Initializable {
                 try {
                     cambioPassBD = conexionBD.cambiarPasswordBD(nuevoPassword.get(), usuario);
                 } catch (SQLException e) {
-                    // TODO Auto-generated catch block
+                    logUser.severe("Excepción: " + e.toString());
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    logUser.severe("Excepción: " + e.toString());
                     e.printStackTrace();
                 } 
 
@@ -198,80 +224,81 @@ public class CambioPasswordControlador implements Initializable {
                 if (cambioPassBD) {
                     usuario.setPassword(nuevoPassword.get());
                     conexionBD.setUsuario(usuario);
-
-                    alerta = new Alert(Alert.AlertType.INFORMATION);
-                    alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
-                    alerta.setTitle("Cambio password");
-                    alerta.setHeaderText("");
-                    alerta.setContentText("El password se ha actualizado.");
-                    alerta.initStyle(StageStyle.DECORATED);
-                    alerta.initOwner(escenario);
-                    alerta.showAndWait();
+                    logUser.config("Cambiado password Usuario.");
+                    mensajeAviso(
+                        AlertType.INFORMATION,
+                        "Cambio password",
+                        "",
+                        "El password se ha actualizado.");
                     
-                    cerrarVentana(null);
+                    ((Stage) apCambioPassword.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
 
                 } else { //Si no ha cambiado la contraseña en la BD de usuario, restablece la contraseña de usuario en la BD de usuarioRoot.
                     try {
                         conexionBD.setUsuario(usuarioRoot);
                         if(conexionBD.cambiarPasswordUsuario(password.get(), nuevoPassword.get(), usuario.getId())) {
-                            alerta = new Alert(Alert.AlertType.ERROR);
-                            alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
-                            alerta.setTitle("Error cambio password");
-                            alerta.setHeaderText("");
-                            alerta.setContentText("No se ha podido cambiar el password.\n"
-                                + "Ha ocurrido un error durante la actualizacion en la base de datos.");
-                            alerta.initStyle(StageStyle.DECORATED);
-                            alerta.initOwner(escenario);
-                            alerta.showAndWait();
+                            logUser.warning("Fallo durante el cambio de password de Usuario.");
+                            mensajeAviso(
+                                AlertType.ERROR,
+                                "Error cambio password",
+                                "",
+                                "No se ha podido cambiar el password.\n"
+                                    + "Ha ocurrido un error durante la actualizacion en la base de datos.");
 
-                            
                         } else {
-                            alerta = new Alert(Alert.AlertType.ERROR);
-                            alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
-                            alerta.setTitle("Error cambio password");
-                            alerta.setHeaderText("");
-                            alerta.setContentText("No se ha podido cambiar el password.\n"
+                            logUser.warning("Fallo durante el cambio de password de Usuario. Fallo al restablecer el password en BD Root.");
+                            mensajeAviso(
+                                AlertType.ERROR,
+                                "Error cambio password",
+                                "",
+                                "No se ha podido cambiar el password.\n"
+                                    + "Ha ocurrido un error durante la actualizacion en la base de datos.\n"
+                                    + "Es posible que el password de usuario haya quedado inutilizado.\n"
+                                    + "Pongase en contacto con el técnico de mantenimiento.");
+
+                        }
+                    } catch (SQLException e) {
+                        logUser.severe("Excepción: " + e.toString());
+                        e.printStackTrace();
+                        mensajeAviso(
+                            AlertType.ERROR,
+                            "Error cambio password",
+                            "",
+                            "No se ha podido cambiar el password.\n"
                                 + "Ha ocurrido un error durante la actualizacion en la base de datos.\n"
                                 + "Es posible que el password de usuario haya quedado inutilizado.\n"
                                 + "Pongase en contacto con el técnico de mantenimiento.");
-                            alerta.initStyle(StageStyle.DECORATED);
-                            alerta.initOwner(escenario);
-                            alerta.showAndWait();
-                        }
-                    } catch (SQLException e) {
-                        alerta = new Alert(Alert.AlertType.ERROR);
-                        alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
-                        alerta.setTitle("Error cambio password");
-                        alerta.setHeaderText("");
-                        alerta.setContentText("No se ha podido cambiar el password.\n"
-                            + "Ha ocurrido un error durante la actualizacion en la base de datos.\n"
-                            + "Es posible que el password de usuario haya quedado inutilizado.\n"
-                            + "Pongase en contacto con el técnico de mantenimiento.");
-                        alerta.initStyle(StageStyle.DECORATED);
-                        alerta.initOwner(escenario);
-                        alerta.showAndWait();
+
+                    } catch (Exception e) {
+                        logUser.severe("Excepción: " + e.toString());
                         e.printStackTrace();
                     } finally {
                         conexionBD.setUsuario(usuario);
                     }
                 }
             } else {
-                alerta = new Alert(Alert.AlertType.ERROR);
-                alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
-                alerta.setTitle("Error cambio password");
-                alerta.setHeaderText("");
-                alerta.setContentText("No se ha podido cambiar el password.\n"
+                logUser.warning("Fallo durante el cambio de password de Usuario.");
+                mensajeAviso(
+                    AlertType.ERROR,
+                    "Error cambio password",
+                    "",
+                    "No se ha podido cambiar el password.\n"
                         + "Ha ocurrido un error durante la actualizacion en la base de datos.");
-                alerta.initStyle(StageStyle.DECORATED);
-                alerta.initOwner(escenario);
-                alerta.showAndWait();
             }
         }
     }
 
+
+    /**
+     * Comprueba si el password introducido coincide con el password del usuario actual.
+     * Si el password coincide o está en blanco, devuelve true.
+     * Si el password está en blanco, muestra un mensaje de error.
+     * Si el password no coincide, muestra un mensaje de error.
+     *
+     * @return true si el password coincide o está en blanco, false en caso contrario.
+     */
     private boolean comprobarPassword() {
         if(usuario.getPassword().equals(password.get())) {
-            //toast.show(escenario, "El password de Usuario correcto!!.");
             return true;
         } else if(password.get().isBlank()) {
             toast.show((Stage) apCambioPassword.getScene().getWindow(), "El campo Password esta vacío.!!.");
@@ -282,52 +309,82 @@ public class CambioPasswordControlador implements Initializable {
         }
     }
 
+
+    /**
+     * Comprueba si el nuevo password cumple con los requisitos y si coincide con la confirmación de password.
+     * Si el nuevo password cumple con los requisitos y coincide con la confirmación, devuelve true, 
+     * en caso contrario muestra un mensaje de error y devuelve false.
+     *
+     * @return true si el nuevo password cumple con los requisitos y coincide con la confirmación, false en caso contrario.
+     */
     private boolean comprobarNuevoPassword() {
         // compilamos la expresion regular.(Una letra mañuscula o minuscula o un numero del 0 al 9 de 4 a 20 caracteres).
 		Pattern passPat = Pattern.compile("^[\\S]{4,20}$");
         Matcher passMatch = passPat.matcher(nuevoPassword.get());
 
         if(!passMatch.matches()) {
-            alerta = new Alert(Alert.AlertType.ERROR);
-            alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); //Añade hoja de estilos.
-			alerta.setTitle("Error nuevo password");
-			alerta.setHeaderText("");
-			alerta.setContentText("El password de usuario tiene que contener de 4 a 20 caracteres.\n"
+            mensajeAviso(
+                AlertType.ERROR,
+                "Error nuevo password",
+                "",
+                "El password de usuario tiene que contener de 4 a 20 caracteres.\n"
                     + "No puede contener espacios en blanco.");
-            alerta.initStyle(StageStyle.DECORATED);
-            alerta.initOwner(escenario);
-			alerta.showAndWait();
+
             return false;
         } else if(!nuevoPassword.get().equals(confimarPassword.get())) {
-            alerta = new Alert(Alert.AlertType.ERROR);
-            alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); //Añade hoja de estilos.
-			alerta.setTitle("Error confirmación password");
-			alerta.setHeaderText("");
-			alerta.setContentText("El password de confirmación no conincide con el nuevo password.");
-			alerta.initStyle(StageStyle.DECORATED);
-            alerta.initOwner(escenario);
-			alerta.showAndWait();
+            mensajeAviso(
+                AlertType.ERROR,
+                "Error confirmaci\u00F3n password",
+                "",
+                "El password de confirmación no conincide con el nuevo password.");
+
             return false;
         } else if(usuario.getPassword().equals(nuevoPassword.get())) {
-            alerta = new Alert(Alert.AlertType.ERROR);
-            alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); //Añade hoja de estilos.
-			alerta.setTitle("Error password");
-			alerta.setHeaderText("");
-			alerta.setContentText("El nuevo password de usuario es igual\nque el password actual de usuario."
+            mensajeAviso(
+                AlertType.ERROR,
+                "Error password",
+                "",
+                "El nuevo password de usuario es igual\nque el password actual de usuario."
                     + "\nEl nuevo password tiene que ser difente al password actual.");
-            alerta.initStyle(StageStyle.DECORATED);
-            alerta.initOwner(escenario);
-			alerta.showAndWait();
+
             return false;
         } else {
             return true;
         }
     }
 
+
+    /**
+     * Muestra una ventana de dialogo con la informacion pasada como parametros.
+     * 
+     * @param tipo Tipo de alerta.
+     * @param tiutlo Titulo de la ventana.
+     * @param cabecera Cabecera del mensaje.
+     * @param cuerpo Cuerpo del menesaje.
+     */
+    private void mensajeAviso(AlertType tipo, String tiutlo, String cabecera, String cuerpo) {
+        Alert alerta = new Alert(tipo);
+        alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
+        alerta.setTitle(tiutlo);
+        alerta.initOwner((Stage) apCambioPassword.getScene().getWindow());
+        alerta.setHeaderText(cabecera);
+        alerta.setContentText(cuerpo);
+        alerta.initStyle(StageStyle.DECORATED);
+        alerta.initModality(Modality.APPLICATION_MODAL);
+        alerta.showAndWait();
+    }
+    
+
+    /**
+     * Inicializa los componentes de la interfaz de usuario con los datos del usuario actual.
+     * Establece el valor del Label lbIdUsuario con el ID del usuario.
+     * Establece el valor del Label lbNombreUsuario con el nombre de usuario.
+     */
     private void iniciar() {
         lbIdUsuario.setText(Integer.toString(usuario.getId()));
         lbNombreUsuario.setText(usuario.getNombreUsuario());
     }
+
 
     /**
 	 * Etablece el usuario que esta usando la aplicación.
@@ -338,6 +395,7 @@ public class CambioPasswordControlador implements Initializable {
         iniciar();
 	}
 
+    
     /**
      * Establece el usuarioRoot para este controlador.
      * @param usuarioRoot El usuarioRoot
@@ -345,15 +403,4 @@ public class CambioPasswordControlador implements Initializable {
     public void setUsuarioRoot(Usuario usuarioRoot) {
         this.usuarioRoot = usuarioRoot;
     }
-
-    /**
-     * Establece un Stage para este controlador.
-     * 
-     * @param stage Stage que se establece.
-     */
-    public void setStage(Stage stage) {
-    	this.escenario = stage;
-    }
-    
-    
 }

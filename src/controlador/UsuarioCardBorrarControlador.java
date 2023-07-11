@@ -113,8 +113,8 @@ public class UsuarioCardBorrarControlador implements Initializable {
             ((Stage) apBorrarUsuario.getScene().getWindow()).setY(mouseEvent.getScreenY() - y);
         });
 
-        logRoot = Logger.getLogger(Constants.USER_ROOT); //Crea una instancia de la clase Logger asociada al nombre de registro.
-        conexionBD = ConexionBD.getInstance();
+        logRoot = Logger.getLogger(Constants.USER_ROOT);    //Crea una instancia de la clase Logger asociada al nombre de registro.
+        conexionBD = ConexionBD.getInstance();              //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
         toast = new Toast();
 
         //Inicializa los StringProperty
@@ -191,6 +191,7 @@ public class UsuarioCardBorrarControlador implements Initializable {
                         e.printStackTrace();
                     } catch (Exception e) {
                         logRoot.severe("Excepción: " + e.toString());
+                        e.printStackTrace();
                     }
                     controladorPincipal.cerrarSesion();
                     ((Stage) apBorrarUsuario.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.

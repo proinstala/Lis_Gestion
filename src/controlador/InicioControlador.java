@@ -2,26 +2,18 @@ package controlador;
 
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.logging.Logger;
-
-import baseDatos.ConexionBD;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.fxml.Initializable;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import modelo.Usuario;
-import utilidades.Constants;
 import javafx.scene.control.Button;
 
-public class InicioControlador implements Initializable{
+public class InicioControlador implements Initializable {
 
     private Usuario usuarioActual;
-    private Usuario usuarioApp;
-    private Logger logUser;
-    private ConexionBD conexionBD;
     private PrincipalControlador controladorPincipal;
 
     
@@ -58,33 +50,28 @@ public class InicioControlador implements Initializable{
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        bpInicio.getStyleClass().add("fondo_border_pane"); //Añadir clases de estilo CSS a elementos.
 
-        logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
-    
     	//Cargar imagenes en ImageView.
         Image imagenCarpetaConfig;
         try {
-            //Forma desde IDE y JAR.
-            imagenCarpetaConfig = new Image(getClass().getResourceAsStream("/recursos/carpeta_lila_2_128.png"));
+            //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
+            imagenCarpetaConfig = new Image(getClass().getResourceAsStream("/recursos/carpeta_lila_2_128.png")); //Forma desde IDE y JAR.
         } catch (Exception e) {
-            //Forma desde el JAR.
-        	imagenCarpetaConfig = new Image("/recursos/carpeta_lila_2_128.png");
+            //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
+        	imagenCarpetaConfig = new Image("/recursos/carpeta_lila_2_128.png"); //Forma desde el JAR.
         }
-        ivCarpetaConfig.setImage(imagenCarpetaConfig);
-    	
-    	bpInicio.getStyleClass().add("fondo_border_pane");
-    	
-    }
+        ivCarpetaConfig.setImage(imagenCarpetaConfig); //Establecer las imagenes cargadas en los ImageView.
 
+        //Configurar un evento de clic del ratón para la imagen "Configurarcion".
+        ivCarpetaConfig.setOnMouseClicked(e -> {
+            controladorPincipal.menuUsuario(null); //llama al método 'menuUsuario' del controlador principal.
+        });
 
-    @FXML
-    void cerrarSesion(MouseEvent event) {
-        controladorPincipal.cerrarSesion();
-    }
-
-     @FXML
-    void cargarVistaUsuario(MouseEvent event) {
-        controladorPincipal.menuUsuario(null);
+        //Configurar un evento de clic del ratón para el botón "Cerrar Sesion".
+        btnCerrarSesion.setOnMouseClicked(e -> {
+            controladorPincipal.cerrarSesion(); //llama al método 'cerrarSesion' del controlador principal.
+        });
     }
 
 
@@ -113,14 +100,4 @@ public class InicioControlador implements Initializable{
         lbEmail.textProperty().bind(usuarioActual.emailProperty());
         lbEmailApp.textProperty().bind(usuarioActual.emailAppProperty());
 	}
-
-
-    /**
-     * Establece el usuarioApp para este controlador.
-     * @param usuarioApp El usuarioApp
-     */
-    public void setUsuarioApp(Usuario usuarioApp) {
-        this.usuarioApp = usuarioApp;
-    }
-    
 }

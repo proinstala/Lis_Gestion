@@ -172,6 +172,7 @@ public class SemanaCardDuplicarControlador implements Initializable {
                 e.printStackTrace();
             } catch (Exception e) {
                 logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
             }
 
             boolean copiaOK = false;
@@ -191,6 +192,7 @@ public class SemanaCardDuplicarControlador implements Initializable {
                     e.printStackTrace();
                 } catch (Exception e) {
                     logUser.severe("Excepción: " + e.toString());
+                    e.printStackTrace();
                 }
             }
 
@@ -306,6 +308,7 @@ public class SemanaCardDuplicarControlador implements Initializable {
                 e.printStackTrace();
             } catch (Exception e) {
                 logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
             }
         }
         return correcto;
@@ -333,9 +336,14 @@ public class SemanaCardDuplicarControlador implements Initializable {
     }
 
 
+    /**
+     * Método que obtiene la semana y el año de origen desde un objeto Jornada y
+     * actualiza dos componentes de interfaz gráfica con esos valores.
+     * 
+     */
     public void iniciar() {
-        semanaOrigen = jornada.getFecha().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
-        anioOrigen = jornada.getFecha().getYear();
+        semanaOrigen = jornada.getFecha().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR); //Obtener el número de semana de origen.
+        anioOrigen = jornada.getFecha().getYear(); //Obtener el año de origen
         lbSemana.setText(Integer.toString(semanaOrigen));
         lbAnioOrigen.setText(Integer.toString(anioOrigen));
     }
