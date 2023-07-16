@@ -395,6 +395,15 @@ public class Usuario {
           this.passwordEmailApp.set(passwordEmailApp);
      }
 
+     /**
+	 * Obtine un String con el nombre y apellidos del Usuario.
+	 * 
+	 * @return String con el nombre y apellidos del Usuario.
+	 */
+	public String getNombreCompleto() {
+		return getNombre() + " " + getApellido1() + " " + getApellido2();
+	}
+
      @Override
      public String toString() {
           return "Usuario [id=" + id + ", nombre=" + nombre + ", apellido1=" + apellido1 + ", apellido2=" + apellido2

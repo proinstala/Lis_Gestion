@@ -40,6 +40,7 @@ import utilidades.Constants;
 
 public class PrincipalControlador implements Initializable {
 	
+	private ResourceBundle recursos;
 	private String menuSeleccionado = "ninguno";
 	private ObservableList<Alumno> listadoAlumnos;
 	private ObservableList<Mensualidad> listadoMensualidades;
@@ -237,6 +238,7 @@ public class PrincipalControlador implements Initializable {
 				//controller.setControladorPrincipal(this);
 				controller.setListaAlumnos(listadoAlumnos);
 				controller.setListaMensualidades(listadoMensualidades);
+				controller.setUsuarioActual(usuarioActual);
 				
 			} catch (IOException e) {
 				logUser.log(Level.SEVERE, "Excepción: " + e.toString());

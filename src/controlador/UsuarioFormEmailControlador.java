@@ -3,6 +3,7 @@ package controlador;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -12,7 +13,10 @@ import baseDatos.ConexionBD;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -35,6 +39,7 @@ public class UsuarioFormEmailControlador implements Initializable {
     private ConexionBD conexionBD;
     private Logger logUser;
     private Toast toast;
+    private Alert alerta;
 
     private Usuario oldUsuario;
     private Usuario newUsuario;
@@ -50,6 +55,9 @@ public class UsuarioFormEmailControlador implements Initializable {
 
     @FXML
     private Button btnGuardar;
+
+    @FXML
+    private Button btnQuitar;
 
     @FXML
     private CheckBox chbVisible;
@@ -126,10 +134,10 @@ public class UsuarioFormEmailControlador implements Initializable {
 
 
     /**
-     * Método de controlador de evento para guardar los cambios en el email del usuario.
-     * Verifica si los campos están completos y guarda los cambios realizados en el email del usuario.
+     * Método de controlador de evento para guardar los cambios en el email de aplicación del usuario.
+     * Verifica si los campos están completos y guarda los cambios realizados en el email de aplicación del usuario.
      * Si los campos están completos y los cambios se guardan correctamente,
-     * registra un mensaje de log y muestra un mensaje de notificación en un toast.
+     * Muestra un mensaje de notificación en un toast.
      * Además, cierra la ventana actual.
      *
      * @param event El evento de ratón que activó el guardado de cambios.
@@ -137,9 +145,52 @@ public class UsuarioFormEmailControlador implements Initializable {
     @FXML
     void guardarCambios(MouseEvent event) {
         if(comprobarCampos() && guardarCambios()) {
-            logUser.config("Datos de email de usuario modificados.");
-            toast.show((Stage) ((Stage) apEmailApp.getScene().getWindow()).getOwner(), "Email de usuario modificado.");
+            toast.show((Stage) ((Stage) apEmailApp.getScene().getWindow()).getOwner(), "Email aplicación usuario modificado.");
             ((Stage) apEmailApp.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
+        }
+    }
+
+
+    /**
+     * Método de controlador de evento para borrar datos de email de aplicación de usuario.
+     * Muestra una ventana de dialogo para confirmar la acción o cancelar.
+     * Si se confirma, muestra un mesanje indicando si se ha podido llevar acabo la acción o no.
+     * 
+     * @param event El evento de ratón que activó el quitarEamil.
+     */
+    @FXML
+    void quitarEamil(MouseEvent event) {
+        if (oldUsuario.getEmailApp() != null || !oldUsuario.getEmailApp().isBlank()) {
+            alerta = new Alert(AlertType.CONFIRMATION);
+            alerta.getDialogPane().getStylesheets()
+                    .add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
+            alerta.setTitle("Borrar Email Aplicación");
+            alerta.setHeaderText("Esta acción elimana los datos (email y password) que estan\n" + "guardados de email Aplicación.");
+            alerta.setContentText("¿Estas seguro de que quieres borrar estos datos?");
+            alerta.initStyle(StageStyle.DECORATED);
+            alerta.initOwner((Stage) apEmailApp.getScene().getWindow());
+
+            ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+            ButtonType buttonTypeConfirmar = new ButtonType("Confirmar", ButtonData.YES);
+            alerta.getButtonTypes().setAll(buttonTypeConfirmar, buttonTypeCancel);
+            Optional<ButtonType> result = alerta.showAndWait();
+
+            // Si pulsamos el boton confirmar:
+            if (result.get() == buttonTypeConfirmar) {
+                newUsuario.setEmailApp("");
+                newUsuario.setPasswordEmailApp("");
+
+                if (guardarCambios()) {
+                    toast.show((Stage) apEmailApp.getScene().getWindow(),
+                            "Email aplicación usuario modificado.");
+                } else {
+                    toast.show((Stage) apEmailApp.getScene().getWindow(),
+                            "Fallo al intentar modificadar\nel email aplicación usuario.");
+                }
+            }
+        } else {
+            toast.show((Stage) apEmailApp.getScene().getWindow(),
+                    "El Usuario no tiene configurado el Email Aplicación.");
         }
     }
 
@@ -154,13 +205,14 @@ public class UsuarioFormEmailControlador implements Initializable {
 
         //Patrón para validar el formato del email.
         Pattern emailPattern = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-        Matcher emaiMatcher = emailPattern.matcher((tfEmail.getText() == null) ? "" : tfEmail.getText());
+        Matcher emailMatcher = emailPattern.matcher((tfEmail.getText() == null) ? "" : tfEmail.getText());
 
         //Patrón para validar el formato de la contraseña.
         Pattern passPat = Pattern.compile("^[\\S]{4,20}$");
         Matcher passMatch = passPat.matcher((tfPassword.getText() == null) ? "" : tfPassword.getText());
 
-        if(!emaiMatcher.matches()) {
+
+        if(!emailMatcher.matches()) {
             mensajeAviso("Email no valido.",
             "",
             "El Email introducido no es valido.");
@@ -178,6 +230,7 @@ public class UsuarioFormEmailControlador implements Initializable {
 
     /**
      * Guarda los cambios realizados en el email y la contraseña de la aplicación para el usuario actual.
+     * Registra un mensaje en el log si ha modificado el email o si no se ha podido modificar.
      *
      * @return true si los cambios se guardaron correctamente, false en caso contrario.
      */
@@ -187,9 +240,10 @@ public class UsuarioFormEmailControlador implements Initializable {
                 //Actualizar los valores del email y contraseña de la aplicación en el objeto oldUsuario.
                 oldUsuario.setEmailApp(newUsuario.getEmailApp());
                 oldUsuario.setPasswordEmailApp(newUsuario.getPasswordEmailApp());
+                logUser.config("Datos de email aplicación usuario modificados.");
                 return true;
             } else {
-                logUser.warning("Fallo al intentar modificar el email de usuario en BD.");
+                logUser.warning("Fallo al intentar modificar el email aplicación usuario en BD.");
             }
         } catch (SQLException e) {
             logUser.severe("Excepción: " + e.toString());

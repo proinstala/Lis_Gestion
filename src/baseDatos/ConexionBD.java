@@ -1631,7 +1631,6 @@ public class ConexionBD implements Cloneable{
                     res.getInt(9), res.getDouble(8), res.getString(10)));
             }
 
-            System.out.println(); //Esto es temporal para pruebas.
             logger.info("BD: Obtencion de lista Mensualidades general. Total: " + listaMensualidades.size());
         } catch (SQLException e) {
             logger.severe("Excepción SQL: " + e.toString());

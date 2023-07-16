@@ -180,6 +180,9 @@ public class UsuarioControlador implements Initializable {
             ventana.initOwner((Stage) gpUsuario.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.UNDECORATED);
+
+            URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
+            ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
             
             controller.setUsuarioActual(usuario);
             controller.setUsuarioRoot(usuarioRoot);
@@ -217,6 +220,9 @@ public class UsuarioControlador implements Initializable {
             ventana.initOwner((Stage) gpUsuario.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.UNDECORATED);
+
+            URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
+            ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
 
             controller.setUsuario(usuario);
 

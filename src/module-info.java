@@ -19,4 +19,6 @@ module Lis_Gestion {
 	requires javafx.base;
 	requires java.desktop;
 	requires java.sql;
+	requires java.mail;
+	requires activation;
 }

@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import javax.mail.MessagingException;
+
 import baseDatos.ConexionBD;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
@@ -46,7 +48,9 @@ import modelo.Alumno;
 import modelo.EstadoPago;
 import modelo.Mensualidad;
 import modelo.Toast;
+import modelo.Usuario;
 import utilidades.Constants;
+import utilidades.Correo;
 import utilidades.Fechas;
 
 public class MensualidadesControlador implements Initializable {
@@ -55,6 +59,7 @@ public class MensualidadesControlador implements Initializable {
     private ObservableList<Alumno> listadoAlumnosGeneral;
     private ObservableList<Mensualidad> listadoMensualidadesGeneral;
     private DateTimeFormatter formatter;
+    private Usuario usuario;
     private ConexionBD conexionBD;
     private Logger logUser;
     private Toast toast;
@@ -301,9 +306,19 @@ public class MensualidadesControlador implements Initializable {
             configurarFiltro(tfBusqueda.getText());
         });
 
+        /* 
         ivNotificacion.setOnMouseClicked(e -> {
-            toast.show((Stage) bpMensualidad.getScene().getWindow(), "EN CONSTRUCCIÓN.\nEste boton es para enviar notificaciones.");
-        });
+            //toast.show((Stage) bpMensualidad.getScene().getWindow(), "EN CONSTRUCCIÓN.\nEste boton es para enviar notificaciones.");
+
+            try {
+            Correo.enviarCorreoSimple(usuario.getEmail(), "Prueba email lis_pilates", "Mensaje de prueba", usuario.getEmailApp(), usuario.getPasswordEmailApp());
+            System.out.println("PRUEBAS: correo enviado.");
+            } catch (MessagingException ex) {
+                System.out.println("ERROR ---- " + e.toString() + "\n");
+                ex.printStackTrace();
+            }
+            
+        });*/
 
     }
 
@@ -351,7 +366,68 @@ public class MensualidadesControlador implements Initializable {
 
     @FXML
     void abrirNotificaciones(MouseEvent event) {
+        int i = indiceSeleccionado();
+        if(i != -1) {
+            Mensualidad MensualidadSeleccionada = tvMensualidades.getSelectionModel().getSelectedItem();
+            Alumno alumnoMensualidad = null; 
+            for (Alumno a : listadoAlumnosGeneral) {
+                if(a.getId() == MensualidadSeleccionada.getIdAlumno()) {
+                    alumnoMensualidad = new Alumno(a);
+                }
+            }
 
+            if(comprobarRequisitosNotificacion(alumnoMensualidad)) {
+                try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/mensualidadFormNotificacionVista.fxml"));
+                GridPane formNotificacion;
+                formNotificacion = (GridPane) loader.load();
+                MensualidadFormNotificacionControlador controller = loader.getController(); // cargo el controlador.
+                
+                Stage ventana= new Stage();
+                ventana.initOwner((Stage) bpMensualidad.getScene().getWindow());
+                ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
+                ventana.initStyle(StageStyle.DECORATED);
+
+                URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
+                ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
+    
+                controller.setModelos(MensualidadSeleccionada, alumnoMensualidad, usuario);
+    
+                Scene scene = new Scene(formNotificacion);
+                scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
+                ventana.setScene(scene);
+                ventana.setTitle("Notificación Mensualidad");
+                ventana.showAndWait();
+
+                } catch (IOException e) {
+                    logUser.severe("Excepción: " + e.toString());
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    logUser.severe("Excepción: " + e.toString());
+                    e.printStackTrace();
+                }
+            }
+
+            
+        }
+        
+    }
+
+    private boolean comprobarRequisitosNotificacion(Alumno alumnoNotificacion) {
+        if (usuario.getEmailApp() == null || usuario.getEmailApp().isBlank()) {
+            mensajeAviso(AlertType.INFORMATION, 
+                "Fallo Notificación", 
+                "Email Aplicación NO configurado.", 
+                "El usuario no tiene configurado el Email Aplicación.");
+            return false;
+        } else if (alumnoNotificacion.getEmail() == null || alumnoNotificacion.getEmail().isBlank()) {
+            mensajeAviso(AlertType.INFORMATION, 
+                "Fallo Notificación", 
+                "Email de Alumno NO registrado.", 
+                "El Alumno no tiene email registrado en aplicación.");
+            return false;
+        }
+        return true;
     }
 
 
@@ -760,6 +836,16 @@ public class MensualidadesControlador implements Initializable {
         alerta.initModality(Modality.APPLICATION_MODAL);
         alerta.showAndWait();
     }
+
+
+    /**
+	 * Etablece el usuario que esta usando la aplicación.
+     * 
+	 * @param usuario
+	 */
+	public void setUsuarioActual(Usuario usuarioActual) {
+		this.usuario = usuarioActual;
+	}
 
 
     /**
