@@ -1,5 +1,8 @@
 package utilidades;
 
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -7,6 +10,7 @@ import java.util.Properties;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
+import javax.activation.URLDataSource;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -18,6 +22,9 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
+
+import principal.Main;
 
 
 /**
@@ -322,7 +329,7 @@ public class Correo {
      * @param password Password de la cuenta de Gmail del emisor.
      * @param correoCallback Objeto que implementa la interfaz CorreoCallback para recibir notificaciones del resultado del envío del correo (opcional, puede ser null).
      */
-    public static void enviarCorreoMultiparte(String destinatario, String asunto, String texto, String codigoHtml, String rutaImagen, String emitente, String password, CorreoCallback correoCallback) {
+    public static void enviarCorreoMultiparte(String destinatario, String asunto, String texto, String codigoHtml, String emitente, String password, CorreoCallback correoCallback) {
         callback = correoCallback;
         
         //Crear y ejecutar el hilo secundario para enviar el correo.
@@ -361,15 +368,44 @@ public class Correo {
                 BodyPart messageBodyPart = new MimeBodyPart();
                 messageBodyPart.setContent(cadenaHtml, "text/html");
 
-                //Creación de la parte del pie de página con la imagen adjunta.
+                //------------------------------------------------------------------------------------------
+                /*Codigo para carga la imagen desde fuera del jar.*/ 
+                /* 
+                //Creación de la parte del pie de página con la imagen adjunta
                 MimeBodyPart footerPart = new MimeBodyPart();
-                DataSource fds = new FileDataSource(rutaImagen);
+                DataSource fds = new FileDataSource("src/recursos/logo_nuevo_original_fondo.png");
                 footerPart.setDataHandler(new DataHandler(fds));
                 footerPart.setHeader("Content-ID", "<imagen_footer>");
 
                 //Agregar partes al multipart.
                 multipart.addBodyPart(messageBodyPart);
                 multipart.addBodyPart(footerPart);
+                */
+                //-------------------------------------------------------------------------------------------
+
+
+                //-------------------------------------------------------------------------------------------
+                /*Codigo para carga la imagen desde el del jar exportado.*/
+
+                //Creación de la parte del pie de página con la imagen adjunta desde el JAR.
+                MimeBodyPart footerPart = new MimeBodyPart();
+                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                InputStream inputStream = classLoader.getResourceAsStream(Constants.URL_IMAGEN_FOOTER);
+                
+                if (inputStream != null) {
+                    DataSource fds = new ByteArrayDataSource(inputStream, "image/png");
+                    footerPart.setDataHandler(new DataHandler(fds));
+                    footerPart.setHeader("Content-ID", "<imagen_footer>");
+                } else {
+                    System.out.println("No se pudo encontrar la imagen en el JAR.");
+                }
+                
+                //Agregar partes al multipart.
+                multipart.addBodyPart(messageBodyPart);
+                if (inputStream != null) {
+                    multipart.addBodyPart(footerPart);
+                }
+                //-------------------------------------------------------------------------------------------
 
                 message.setContent(multipart); //Establecer el contenido multipart en el mensaje.
 
@@ -377,21 +413,21 @@ public class Correo {
 
                 //Notificar que el correo se envió correctamente.
                 if (callback != null) {
-                    callback.onCorreoEnviado(true);
+                    callback.onCorreoEnviado(true, "El mensaje se ha enviado correctamente.");
                 }
             } catch (MessagingException e) {
                 e.printStackTrace();
 
                 //Notificar que el envío del correo falló.
                 if (callback != null) {
-                    callback.onCorreoEnviado(false);
+                    callback.onCorreoEnviado(false, e.toString());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
 
                 //Notificar que el envío del correo falló.
                 if (callback != null) {
-                    callback.onCorreoEnviado(false);
+                    callback.onCorreoEnviado(false, e.toString());
                 }
             }
         });
@@ -415,7 +451,7 @@ public class Correo {
      * @param password          Password de la cuenta de Gmail del emisor.
      * @param correoCallback    Objeto que implementa la interfaz CorreoCallback para recibir notificaciones del resultado del envío del correo (opcional, puede ser null).
      */
-    public static void enviarCorreoMultiparte(String destinatario, String detinatarioCopia,String asunto, String texto, String codigoHtml, String rutaImagen, String emitente, String password, CorreoCallback correoCallback) {
+    public static void enviarCorreoMultiparte(String destinatario, String detinatarioCopia,String asunto, String texto, String codigoHtml, String emitente, String password, CorreoCallback correoCallback) {
         callback = correoCallback;
         
         //Crear y ejecutar el hilo secundario para enviar el correo.
@@ -455,15 +491,44 @@ public class Correo {
                 BodyPart messageBodyPart = new MimeBodyPart();
                 messageBodyPart.setContent(cadenaHtml, "text/html");
 
-                //Creación de la parte del pie de página con la imagen adjunta.
+                //------------------------------------------------------------------------------------------
+                /*Codigo para carga la imagen desde fuera del jar.*/ 
+                /* 
+                //Creación de la parte del pie de página con la imagen adjunta
                 MimeBodyPart footerPart = new MimeBodyPart();
-                DataSource fds = new FileDataSource(rutaImagen);
+                DataSource fds = new FileDataSource("src/recursos/logo_nuevo_original_fondo.png");
                 footerPart.setDataHandler(new DataHandler(fds));
                 footerPart.setHeader("Content-ID", "<imagen_footer>");
 
                 //Agregar partes al multipart.
                 multipart.addBodyPart(messageBodyPart);
                 multipart.addBodyPart(footerPart);
+                */
+                //-------------------------------------------------------------------------------------------
+
+
+                //-------------------------------------------------------------------------------------------
+                /*Codigo para carga la imagen desde el del jar exportado.*/
+                
+                //Creación de la parte del pie de página con la imagen adjunta desde el JAR.
+                MimeBodyPart footerPart = new MimeBodyPart();
+                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                InputStream inputStream = classLoader.getResourceAsStream(Constants.URL_IMAGEN_FOOTER);
+                
+                if (inputStream != null) {
+                    DataSource fds = new ByteArrayDataSource(inputStream, "image/png");
+                    footerPart.setDataHandler(new DataHandler(fds));
+                    footerPart.setHeader("Content-ID", "<imagen_footer>");
+                } else {
+                    System.out.println("No se pudo encontrar la imagen en el JAR.");
+                }
+                
+                //Agregar partes al multipart.
+                multipart.addBodyPart(messageBodyPart);
+                if (inputStream != null) {
+                    multipart.addBodyPart(footerPart);
+                }
+                //-------------------------------------------------------------------------------------------
 
                 message.setContent(multipart); //Establecer el contenido multipart en el mensaje.
 
@@ -471,21 +536,291 @@ public class Correo {
 
                 //Notificar que el correo se envió correctamente.
                 if (callback != null) {
-                    callback.onCorreoEnviado(true);
+                    callback.onCorreoEnviado(true, "El mensaje se ha enviado correctamente.");
                 }
             } catch (MessagingException e) {
                 e.printStackTrace();
 
                 //Notificar que el envío del correo falló.
                 if (callback != null) {
-                    callback.onCorreoEnviado(false);
+                    callback.onCorreoEnviado(false, e.toString());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
 
                 //Notificar que el envío del correo falló.
                 if (callback != null) {
-                    callback.onCorreoEnviado(false);
+                    callback.onCorreoEnviado(false, e.toString());
+                }
+            }
+        });
+
+        enviarCorreoThread.start();
+    }//Fin enviarCorreoMultiparte.
+
+
+    /**
+     * Envía un correo electrónico a través del protocolo SMTP utilizando la cuenta de Gmail del emisor.
+     * El envío del correo se realiza en un hilo secundario para evitar bloquear la interfaz de usuario.
+     * Tambien envia con el mensaje un archivo adjunto.
+     *
+     * @param destinatario Dirección de correo del destinatario del email.
+     * @param asunto Asunto del email.
+     * @param texto Texto del email que se incluirá en el cuerpo del mensaje (opcional, puede ser null).
+     * @param codigoHtml Código HTML que se utilizará como plantilla del cuerpo del mensaje.
+     * @param archivo Archvio adjunto que se incluirá en el mensaje.
+     * @param emitente Dirección de correo electrónico del emisor (cuenta de Gmail).
+     * @param password Password de la cuenta de Gmail del emisor.
+     * @param correoCallback Objeto que implementa la interfaz CorreoCallback para recibir notificaciones del resultado del envío del correo (opcional, puede ser null).
+     */
+    public static void enviarCorreoMultiparte(String destinatario, String asunto, String texto, String codigoHtml, File archivo, String emitente, String password, CorreoCallback correoCallback) {
+        callback = correoCallback;
+        
+        //Crear y ejecutar el hilo secundario para enviar el correo.
+        Thread enviarCorreoThread = new Thread(() -> {
+            try {
+                //Configurar propiedades del servidor de correo electronico.
+                Properties props = new Properties();            //Propiedades para construir la sesión con el servidor.
+                props.put("mail.smtp.host", "smtp.gmail.com");  //Servidor SMTP.
+                props.put("mail.smtp.auth", "true");            //Identificación requerida.
+
+                //Para transmisión segura a través de TLS
+                props.put("mail.smtp.starttls.enable", "true"); //Para conectar de manera segura al servidor SMTP.
+                props.put("mail.smtp.port", "587");             //El puerto SMTP seguro de Google.
+
+                //Crea una sesión con autenticación con el usuario, la contraseña y las propiedades especificadas.
+                Session session = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(emitente, password);
+                    }
+                });
+
+                //Adaptar el texto y inserta el texto en el código HTML.
+                String mensajeAdaptadoHtml = adaptarTexto(texto);
+                String cadenaHtml = codigoHtml.replace("{?TEXTO}", mensajeAdaptadoHtml);
+
+                //Crear el mensaje
+                Message message = new MimeMessage(session);
+                message.setFrom(new InternetAddress(emitente));
+                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario)); //Destinatario de correo.
+                message.setSubject(asunto);   //Asunto del mensaje.
+
+                Multipart multipart = new MimeMultipart();
+
+                //Crea la parte de texto del mensaje.
+                BodyPart messageBodyPart = new MimeBodyPart();
+                messageBodyPart.setContent(cadenaHtml, "text/html");
+
+                //------------------------------------------------------------------------------------------
+                /*Codigo para carga la imagen desde fuera del jar.*/ 
+                /* 
+                //Creación de la parte del pie de página con la imagen adjunta
+                MimeBodyPart footerPart = new MimeBodyPart();
+                DataSource fds = new FileDataSource("src/recursos/logo_nuevo_original_fondo.png");
+                footerPart.setDataHandler(new DataHandler(fds));
+                footerPart.setHeader("Content-ID", "<imagen_footer>");
+
+                //Agregar partes al multipart.
+                multipart.addBodyPart(messageBodyPart);
+                multipart.addBodyPart(footerPart);
+                */
+                //-------------------------------------------------------------------------------------------
+
+
+                //-------------------------------------------------------------------------------------------
+                /*Codigo para carga la imagen desde el del jar exportado.*/
+                
+                //Creación de la parte del pie de página con la imagen adjunta desde el JAR.
+                MimeBodyPart footerPart = new MimeBodyPart();
+                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                InputStream inputStream = classLoader.getResourceAsStream(Constants.URL_IMAGEN_FOOTER);
+                
+                if (inputStream != null) {
+                    DataSource fds = new ByteArrayDataSource(inputStream, "image/png");
+                    footerPart.setDataHandler(new DataHandler(fds));
+                    footerPart.setHeader("Content-ID", "<imagen_footer>");
+                } else {
+                    System.out.println("No se pudo encontrar la imagen en el JAR.");
+                }
+                
+                //Agregar partes al multipart.
+                multipart.addBodyPart(messageBodyPart);
+                if (inputStream != null) {
+                    multipart.addBodyPart(footerPart);
+                }
+                //-------------------------------------------------------------------------------------------
+
+                
+                //-------------------------------------------------------------------------------------------
+                /*Carga la imagen adjunta desde fuera del jar. */
+                
+                //Multipart adjunto = new MimeMultipart();
+                MimeBodyPart adjunto = new MimeBodyPart();
+                DataSource source = new FileDataSource(archivo.getPath());
+                adjunto.setDataHandler(new DataHandler(source));
+                adjunto.setFileName(archivo.getName());
+                multipart.addBodyPart(adjunto);
+                //-------------------------------------------------------------------------------------------
+
+                message.setContent(multipart); //Establecer el contenido multipart en el mensaje.
+
+                Transport.send(message); //Envía el mensaje, realizando conexión, transmisión y desconexión.
+
+                //Notificar que el correo se envió correctamente.
+                if (callback != null) {
+                    callback.onCorreoEnviado(true, "El mensaje se ha enviado correctamente.");
+                }
+            } catch (MessagingException e) {
+                e.printStackTrace();
+
+                //Notificar que el envío del correo falló.
+                if (callback != null) {
+                    callback.onCorreoEnviado(false, e.toString());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
+                //Notificar que el envío del correo falló.
+                if (callback != null) {
+                    callback.onCorreoEnviado(false, e.toString());
+                }
+            }
+        });
+
+        enviarCorreoThread.start();
+    }//Fin enviarCorreoMultiparte.
+
+
+    /**
+     * Envía un correo electrónico a través del protocolo SMTP utilizando la cuenta de Gmail del emisor.
+     * El envío del correo se realiza en un hilo secundario para evitar bloquear la interfaz de usuario.
+     * Tambien envia con el mensaje un archivo adjunto.
+     * Envia una copia oculta a la direccion de correo destinaratioCopia.
+     * 
+     *
+     * @param destinatario      Dirección de correo del destinatario del email.
+     * @param detinatarioCopia  Dirección de correo electrónico del destinatario con copia oculta (BCC).
+     * @param asunto            Asunto del email.
+     * @param texto             Texto del email que se incluirá en el cuerpo del mensaje (opcional, puede ser null).
+     * @param codigoHtml        Código HTML que se utilizará como plantilla del cuerpo del mensaje.
+     * @param archivo           Archvio adjunto que se incluirá en el mensaje.
+     * @param emitente          Dirección de correo electrónico del emisor (cuenta de Gmail).
+     * @param password          Password de la cuenta de Gmail del emisor.
+     * @param correoCallback    Objeto que implementa la interfaz CorreoCallback para recibir notificaciones del resultado del envío del correo (opcional, puede ser null).
+     */
+    public static void enviarCorreoMultiparte(String destinatario, String detinatarioCopia,String asunto, String texto, String codigoHtml, File archivo, String emitente, String password, CorreoCallback correoCallback) {
+        callback = correoCallback;
+        
+        //Crear y ejecutar el hilo secundario para enviar el correo.
+        Thread enviarCorreoThread = new Thread(() -> {
+            try {
+                //Configurar propiedades del servidor de correo electronico.
+                Properties props = new Properties();            //Propiedades para construir la sesión con el servidor.
+                props.put("mail.smtp.host", "smtp.gmail.com");  //Servidor SMTP.
+                props.put("mail.smtp.auth", "true");            //Identificación requerida.
+
+                //Para transmisión segura a través de TLS
+                props.put("mail.smtp.starttls.enable", "true"); //Para conectar de manera segura al servidor SMTP.
+                props.put("mail.smtp.port", "587");             //El puerto SMTP seguro de Google.
+
+                //Crea una sesión con autenticación con el usuario, la contraseña y las propiedades especificadas.
+                Session session = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(emitente, password);
+                    }
+                });
+
+                //Adaptar el texto y inserta el texto en el código HTML.
+                String mensajeAdaptadoHtml = adaptarTexto(texto);
+                String cadenaHtml = codigoHtml.replace("{?TEXTO}", mensajeAdaptadoHtml);
+
+                //Crear el mensaje
+                Message message = new MimeMessage(session);
+                message.setFrom(new InternetAddress(emitente));
+                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario)); //Destinatario de correo.
+                message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(detinatarioCopia)); //Destinatario con copia oculta.
+                message.setSubject(asunto);   //Asunto del mensaje.
+
+                Multipart multipart = new MimeMultipart();
+
+                //Crea la parte de texto del mensaje.
+                BodyPart messageBodyPart = new MimeBodyPart();
+                messageBodyPart.setContent(cadenaHtml, "text/html");
+
+                //------------------------------------------------------------------------------------------
+                /*Codigo para carga la imagen desde fuera del jar.*/ 
+                /* 
+                //Creación de la parte del pie de página con la imagen adjunta
+                MimeBodyPart footerPart = new MimeBodyPart();
+                DataSource fds = new FileDataSource("src/recursos/logo_nuevo_original_fondo.png");
+                footerPart.setDataHandler(new DataHandler(fds));
+                footerPart.setHeader("Content-ID", "<imagen_footer>");
+
+                //Agregar partes al multipart.
+                multipart.addBodyPart(messageBodyPart);
+                multipart.addBodyPart(footerPart);
+                */
+                //-------------------------------------------------------------------------------------------
+
+
+                //-------------------------------------------------------------------------------------------
+                /*Codigo para carga la imagen desde el del jar exportado.*/
+                
+                //Creación de la parte del pie de página con la imagen adjunta desde el JAR.
+                MimeBodyPart footerPart = new MimeBodyPart();
+                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                InputStream inputStream = classLoader.getResourceAsStream(Constants.URL_IMAGEN_FOOTER); 
+
+                if (inputStream != null) {
+                    DataSource fds = new ByteArrayDataSource(inputStream, "image/png");
+                    footerPart.setDataHandler(new DataHandler(fds));
+                    footerPart.setHeader("Content-ID", "<imagen_footer>");
+                } else {
+                    System.out.println("No se pudo encontrar la imagen en el JAR.");
+                }
+                
+                //Agregar partes al multipart.
+                multipart.addBodyPart(messageBodyPart);
+                if (inputStream != null) {
+                    multipart.addBodyPart(footerPart);
+                }
+                //-------------------------------------------------------------------------------------------
+
+
+                //-------------------------------------------------------------------------------------------
+                /*Carga la imagen adjunta desde fuera del jar. */
+
+                //Multipart adjunto = new MimeMultipart();
+                MimeBodyPart adjunto = new MimeBodyPart();
+                DataSource source = new FileDataSource(archivo.getPath());
+                adjunto.setDataHandler(new DataHandler(source));
+                adjunto.setFileName(archivo.getName());
+                multipart.addBodyPart(adjunto);
+                //-------------------------------------------------------------------------------------------
+
+                message.setContent(multipart); //Establecer el contenido multipart en el mensaje.
+
+                Transport.send(message); //Envía el mensaje, realizando conexión, transmisión y desconexión.
+
+                //Notificar que el correo se envió correctamente.
+                if (callback != null) {
+                    callback.onCorreoEnviado(true, "El mensaje se ha enviado correctamente.");
+                }
+            } catch (MessagingException e) {
+                e.printStackTrace();
+
+                //Notificar que el envío del correo falló.
+                if (callback != null) {
+                    callback.onCorreoEnviado(false, e.toString());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
+                //Notificar que el envío del correo falló.
+                if (callback != null) {
+                    callback.onCorreoEnviado(false, e.toString());
                 }
             }
         });

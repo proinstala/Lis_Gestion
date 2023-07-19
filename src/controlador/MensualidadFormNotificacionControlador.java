@@ -45,9 +45,6 @@ import utilidades.Correo;
  */
 public class MensualidadFormNotificacionControlador implements Initializable {
 
-    private final String EMAIL_APP = "Aplicación";
-    private final String EMAIL_USER = "Personal";
-    private final String EMAIL_OTHER = "Otro";
     private final String ASUNTO_PAGADA = "Notificación pago mensualidad. ";
     private final String ASUNTO_PENDIENTE = "Notificación mensualidad pendiente. ";
     
@@ -167,15 +164,15 @@ public class MensualidadFormNotificacionControlador implements Initializable {
      */
     private void configurarComboBox() {
         tipoEmailCopia = FXCollections.observableArrayList();
-        tipoEmailCopia.addAll(EMAIL_APP, EMAIL_OTHER);
+        tipoEmailCopia.addAll(Constants.EMAIL_APP, Constants.EMAIL_OTHER);
         cbEmailCopia.setItems(tipoEmailCopia);
         cbEmailCopia.setDisable(true);
         
         cbEmailCopia.getSelectionModel().selectedItemProperty().addListener((o, nv, ov) -> {
-            if (ov.equals(EMAIL_APP)) {
+            if (ov.equals(Constants.EMAIL_APP)) {
                 tfEmailCopia.setDisable(true);
                 tfEmailCopia.setText(newUsuario.getEmailApp());
-            } else if(ov.equals(EMAIL_OTHER)) {
+            } else if(ov.equals(Constants.EMAIL_OTHER)) {
                 tfEmailCopia.setDisable(false);
                 tfEmailCopia.clear();
             } else {
@@ -218,7 +215,7 @@ public class MensualidadFormNotificacionControlador implements Initializable {
         chekbCopiaOculta.selectedProperty().addListener(e -> {
             if (chekbCopiaOculta.isSelected()) {
                 cbEmailCopia.setDisable(false);
-                if(cbEmailCopia.getValue().equals(EMAIL_OTHER)) {
+                if(cbEmailCopia.getValue().equals(Constants.EMAIL_OTHER)) {
                     tfEmailCopia.setDisable(false);
                 } else {
                     tfEmailCopia.setDisable(true);
@@ -410,19 +407,16 @@ public class MensualidadFormNotificacionControlador implements Initializable {
                 //Enviar correo con copia oculta.
                 Correo.enviarCorreoMultiparte(newAlumno.getEmail(), tfEmailCopia.getText(), tfAsunto.getText(),
                         taMensaje.getText(),
-                        Constants.EMAIL_HTML, Constants.URL_IMAGEN_FOOTER, newUsuario.getEmailApp(),
-                        
-                        newUsuario.getPasswordEmailApp(), exito -> {
+                        Constants.EMAIL_HTML, newUsuario.getEmailApp(), newUsuario.getPasswordEmailApp(), (exito, mensaje) -> {
                             //Si el correo se envió correctamente.
                             if (exito) {
                                 Platform.runLater(() -> {
                                     //Registrar el envío exitoso en el log de información.
                                     logUser.info("Notificación enviada. (Id_Alumno: " + newAlumno.getId() + ", Nombre: " + newAlumno.getNombre()
-                                            + ")--(Id_Mensualidad: " + newMensualidad.getId() + ")--(Correo destino: " + newAlumno.getEmail()
-                                            + ")");
+                                            + ")--(Id_Mensualidad: " + newMensualidad.getId() + ")");
                                     
                                     //Mostrar una notificación de éxito en la interfaz gráfica.
-                                    toast.show((Stage) ((Stage) gpFormNotificacion.getScene().getWindow()).getOwner(),"Enviando notificación!.");
+                                    toast.show((Stage) ((Stage) gpFormNotificacion.getScene().getWindow()).getOwner(),"Notificación Enviada!.");
                                     
                                     // Cerrar la ventana actual después de enviar el correo.
                                     ((Stage) gpFormNotificacion.getScene().getWindow()).close(); // Obtener la referencia al Stage actual y cerrarlo.
@@ -439,27 +433,23 @@ public class MensualidadFormNotificacionControlador implements Initializable {
                                     //Registrar el fallo en el log de advertencias.
                                     logUser.warning("Fallo al enviar notificación: (Id_Alumno: " + newAlumno.getId()
                                             + ", Nombre: " + newAlumno.getNombre()
-                                            + ")--(Id_Mensualidad: " + newMensualidad.getId() + ")--(Correo destino: "
-                                            + newAlumno.getEmail() + ")");
+                                            + ")--(Id_Mensualidad: " + newMensualidad.getId() + ")\n ERROR: " + mensaje);
                                 });
                             }
                         });
             } else {
                 //Enviar correo sin copia oculta.
                 Correo.enviarCorreoMultiparte(newAlumno.getEmail(), tfAsunto.getText(), taMensaje.getText(),
-                        Constants.EMAIL_HTML, Constants.URL_IMAGEN_FOOTER, newUsuario.getEmailApp(),
-                        
-                        newUsuario.getPasswordEmailApp(), exito -> {
+                        Constants.EMAIL_HTML, newUsuario.getEmailApp(), newUsuario.getPasswordEmailApp(), (exito, mensaje) -> {
                             //Si el correo se envió correctamente.
                             if (exito) {
                                 Platform.runLater(() -> {
                                     //Registrar el envío exitoso en el log de información.
                                     logUser.info("Notificación enviada. (Id_Alumno: " + newAlumno.getId() + ", Nombre: " + newAlumno.getNombre()
-                                            + ")--(Id_Mensualidad: " + newMensualidad.getId() + ")--(Correo destino: " + newAlumno.getEmail()
-                                            + ")");
+                                            + ")--(Id_Mensualidad: " + newMensualidad.getId() + ")");
                                     
                                     //Mostrar una notificación de éxito en la interfaz gráfica.
-                                    toast.show((Stage) ((Stage) gpFormNotificacion.getScene().getWindow()).getOwner(),"Enviando notificación!.");
+                                    toast.show((Stage) ((Stage) gpFormNotificacion.getScene().getWindow()).getOwner(),"Notificación Enviada!.");
                                     
                                     //Cerrar la ventana actual después de enviar el correo.
                                     ((Stage) gpFormNotificacion.getScene().getWindow()).close(); // Obtener la referencia al Stage actual y cerrarlo.
@@ -476,8 +466,7 @@ public class MensualidadFormNotificacionControlador implements Initializable {
                                     //Registrar el fallo en el log de advertencias.
                                     logUser.warning("Fallo al enviar notificación: (Id_Alumno: " + newAlumno.getId()
                                             + ", Nombre: " + newAlumno.getNombre()
-                                            + ")--(Id_Mensualidad: " + newMensualidad.getId() + ")--(Correo destino: "
-                                            + newAlumno.getEmail() + ")");
+                                            + ")--(Id_Mensualidad: " + newMensualidad.getId() + ")\n ERROR: " + mensaje);
                                 });
                             }
                         });
@@ -558,17 +547,17 @@ public class MensualidadFormNotificacionControlador implements Initializable {
         newUsuario = new Usuario(usuario);  //Crear una nueva instancia de Usuario basada en el objeto usuario pasado como parámetro.
 
         ///Configura los enlaces de datos entre los campos de texto y las propiedades de newUsuario.
-        tfNombreUsuario.textProperty().bind(Bindings.concat(usuario.nombreProperty(), " ", usuario.apellido1Property(), " ", usuario.apellido2Property()));
+        tfNombreUsuario.textProperty().bind(Bindings.concat(newUsuario.nombreProperty(), " ", newUsuario.apellido1Property(), " ", newUsuario.apellido2Property()));
         tfEmailUsuario.textProperty().bindBidirectional(usuario.emailAppProperty());
         
-        tfNombreAlumno.textProperty().bind(Bindings.concat(alumno.nombreProperty(), " ", alumno.apellido1Property(), " ", alumno.apellido2Property()));
+        tfNombreAlumno.textProperty().bind(Bindings.concat(newAlumno.nombreProperty(), " ", newAlumno.apellido1Property(), " ", newAlumno.apellido2Property()));
         tfEmailAlumno.textProperty().bindBidirectional(newAlumno.emailProperty());
 
         if(usuario.getEmail() == null || usuario.getEmail().isBlank()) {
-            cbEmailCopia.setValue(EMAIL_APP); //Establece valor por defecto.
+            cbEmailCopia.setValue(Constants.EMAIL_APP); //Establece valor por defecto.
         } else {
-            tipoEmailCopia.add(EMAIL_USER);     //Añadir elemento a ObservableList de cbEmailCopia
-            cbEmailCopia.setValue(EMAIL_USER); //Establece valor por defecto.
+            tipoEmailCopia.add(Constants.EMAIL_USER);     //Añadir elemento a ObservableList de cbEmailCopia
+            cbEmailCopia.setValue(Constants.EMAIL_USER); //Establece valor por defecto.
         }
         
         cbTipoNotificacion.setValue(newMensualidad.getEstadoPago());

@@ -10,7 +10,11 @@ public class Constants {
     public static final String USER = "usuario";
     public static final String USER_ROOT = "usuarioRoot";
 
-    public static final String URL_IMAGEN_FOOTER = "src/recursos/logo_nuevo_original_fondo.png";
+    public static final String EMAIL_APP = "Aplicación";
+    public static final String EMAIL_USER = "Personal";
+    public static final String EMAIL_OTHER = "Otro";
+
+    public static final String URL_IMAGEN_FOOTER = "recursos/logo_nuevo_original_fondo.png"; //ruta desde fuera del jar.
     public static final String EMAIL_HTML =  
         "<html>" +
             "<body>" +

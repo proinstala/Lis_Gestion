@@ -2250,9 +2250,10 @@ public class ConexionBD implements Cloneable{
 
 
     /**
-     * Obtiene la lista de provincias desde la base de datos.
+     * Obtiene la lista de localidades de una provincia desde la base de datos.
      * 
-     * @return Un objeto ArrayList<String> que contiene los nombres de las provincias.
+     * @param provincia Provincia de donde se obtine las localidades.
+     * @return Un objeto ArrayList<String> que contiene los nombres de las localidades.
      * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
      */
     public ArrayList<String> getLocalidades(String provincia) throws SQLException {
@@ -2263,6 +2264,38 @@ public class ConexionBD implements Cloneable{
         try {
             st = conn.createStatement();
             res = st.executeQuery("SELECT nombre FROM LOCALIDAD WHERE provincia_id = (SELECT id FROM PROVINCIA WHERE nombre = '" + provincia + "');");
+
+            listaLocalidades = new ArrayList<String>();
+            while (res.next()) {
+                listaLocalidades.add(res.getString(1));
+            }
+        } catch (SQLException e) {
+            logger.severe("Excepción SQL: " + e.toString());
+            e.printStackTrace();
+        } finally { 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
+        }
+        
+        cn.desconectar(conn);
+        return listaLocalidades;
+    }
+
+
+    /**
+     * Obtiene la lista de localidades desde la base de datos.
+     * 
+     * @return Un objeto ArrayList<String> que contiene los nombres de las localidades.
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
+     */
+    public ArrayList<String> getLocalidades() throws SQLException {
+        ConexionBD cn = INSTANCE;
+        ArrayList<String> listaLocalidades = null;
+        conn = cn.conectar();
+
+        try {
+            st = conn.createStatement();
+            res = st.executeQuery("SELECT nombre FROM LOCALIDAD;");
 
             listaLocalidades = new ArrayList<String>();
             while (res.next()) {

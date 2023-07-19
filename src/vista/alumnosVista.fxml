@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TableColumn?>
@@ -9,6 +11,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -16,7 +19,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="bpAlumnos" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" styleClass="fondo_ventana_degradaddo" stylesheets="@../hojasEstilos/Styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.AlumnosControlador">
+<BorderPane fx:id="bpAlumnos" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" styleClass="fondo_ventana_degradaddo" stylesheets="@../hojasEstilos/Styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.AlumnosControlador">
    <center>
       <TableView fx:id="tvAlumnos" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         <columns>
@@ -43,28 +46,27 @@
    <top>
       <GridPane BorderPane.alignment="CENTER">
         <columnConstraints>
-          <ColumnConstraints hgrow="NEVER" maxWidth="140.0" minWidth="40.0" prefWidth="140.0" />
-            <ColumnConstraints hgrow="NEVER" maxWidth="40.0" minWidth="10.0" prefWidth="40.0" />
-            <ColumnConstraints hgrow="NEVER" maxWidth="100.0" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="NEVER" maxWidth="40.0" minWidth="10.0" prefWidth="40.0" />
-            <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="300.0" />
+          <ColumnConstraints hgrow="NEVER" maxWidth="140.0" minWidth="400.0" prefWidth="400.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="50.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="500.0" minWidth="10.0" prefWidth="400.0" />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
         </columnConstraints>
         <rowConstraints>
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="20.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="200.0" vgrow="NEVER" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <TextField fx:id="tfBusqueda" maxWidth="150.0" prefWidth="150.0" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.hgrow="NEVER" GridPane.rowIndex="5">
+            <TextField fx:id="tfBusqueda" maxWidth="150.0" prefWidth="150.0" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.hgrow="NEVER" GridPane.rowIndex="4">
                <GridPane.margin>
                   <Insets />
                </GridPane.margin>
             </TextField>
-            <ImageView fx:id="ivLupa" fitHeight="24.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.hgrow="NEVER" GridPane.rowIndex="5" GridPane.vgrow="NEVER">
+            <ImageView fx:id="ivLupa" fitHeight="24.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.hgrow="NEVER" GridPane.rowIndex="4" GridPane.vgrow="NEVER">
                <image>
                   <Image url="@../recursos/lupa_lila_2_128.png" />
                </image>
@@ -72,30 +74,126 @@
                   <Insets right="160.0" />
                </GridPane.margin>
             </ImageView>
-            <Separator prefWidth="200.0" GridPane.columnSpan="6" GridPane.rowIndex="4" />
-            <Label text="Listado Alumnos" GridPane.rowIndex="5">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Label>
-            <Label text="Total Alumnos:" GridPane.rowIndex="1" />
-            <Label fx:id="lbNumTotalAlumnos" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label text="Alumnos Activos:" GridPane.rowIndex="2" />
-            <Label fx:id="lbNumAlumnosActivos" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Label text="Hombres:" GridPane.columnIndex="2" GridPane.rowIndex="1">
+            <Separator prefWidth="200.0" GridPane.columnSpan="6" GridPane.rowIndex="2" />
+            <AnchorPane fx:id="apFiltro" prefHeight="200.0" prefWidth="200.0" styleClass="panel_border" GridPane.rowIndex="1">
+               <children>
+                  <GridPane layoutX="75.0" layoutY="44.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="40.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="40.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="DATOS TABLA" underline="true" GridPane.columnSpan="4" GridPane.halignment="CENTER">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <Label text="Alumnos Baja:" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                           <GridPane.margin>
+                              <Insets right="10.0" />
+                           </GridPane.margin>
+                        </Label>
+                        <Label text="Mujeres:" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+                           <GridPane.margin>
+                              <Insets right="10.0" />
+                           </GridPane.margin>
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <Label text="Hombres:" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+                           <GridPane.margin>
+                              <Insets right="10.0" />
+                           </GridPane.margin>
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <Label text="Alumnos Activos:" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                           <GridPane.margin>
+                              <Insets right="10.0" />
+                           </GridPane.margin>
+                        </Label>
+                        <Label text="Total Alumnos:" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                           <GridPane.margin>
+                              <Insets right="10.0" />
+                           </GridPane.margin>
+                        </Label>
+                        <Label fx:id="lbNumAlumnosNoActivos" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Label fx:id="lbNumMujeres" text="0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                        <Label fx:id="lbNumHombres" text="0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        <Label fx:id="lbNumAlumnosActivos" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label fx:id="lbNumTotalAlumnos" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                     </children>
+                  </GridPane>
+               </children>
+            </AnchorPane>
+            <ComboBox fx:id="cbModoFiltro" prefWidth="150.0" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+            <Label text="Busqueda por:" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
                <GridPane.margin>
-                  <Insets left="25.0" />
+                  <Insets right="162.0" />
                </GridPane.margin>
             </Label>
-            <Label text="Mujeres:" GridPane.columnIndex="2" GridPane.rowIndex="2">
+            <ImageView fx:id="ivNotificacion" fitHeight="46.0" fitWidth="46.0" onMouseClicked="#abrirNotificaciones" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" GridPane.rowSpan="2">
                <GridPane.margin>
-                  <Insets left="25.0" />
+                  <Insets right="300.0" />
+               </GridPane.margin>
+               <image>
+                  <Image url="@../recursos/boton_6_64.png" />
+               </image>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </ImageView>
+            <Label text="Género:" GridPane.rowIndex="3">
+               <GridPane.margin>
+                  <Insets left="13.0" />
                </GridPane.margin>
             </Label>
-            <Label text="Alumnos No Activos:" GridPane.rowIndex="3" />
-            <Label fx:id="lbNumHombres" text="0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-            <Label fx:id="lbNumMujeres" text="0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <Label fx:id="lbNumAlumnosNoActivos" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Label text="Localidad:" GridPane.rowIndex="4">
+               <GridPane.margin>
+                  <Insets left="2.0" />
+               </GridPane.margin>
+            </Label>
+            <ComboBox fx:id="cbGenero" prefWidth="150.0" GridPane.rowIndex="3">
+               <GridPane.margin>
+                  <Insets left="65.0" />
+               </GridPane.margin>
+            </ComboBox>
+            <ComboBox fx:id="cbLocalidad" prefWidth="150.0" GridPane.rowIndex="4">
+               <GridPane.margin>
+                  <Insets left="65.0" />
+               </GridPane.margin>
+            </ComboBox>
+            <Separator orientation="VERTICAL" prefHeight="200.0" GridPane.rowIndex="3" GridPane.rowSpan="2">
+               <GridPane.margin>
+                  <Insets left="245.0" />
+               </GridPane.margin>
+            </Separator>
+            <Separator layoutX="250.0" layoutY="260.0" orientation="VERTICAL" prefHeight="200.0" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" GridPane.rowSpan="2">
+               <GridPane.margin>
+                  <Insets right="260.0" />
+               </GridPane.margin>
+            </Separator>
          </children>
          <BorderPane.margin>
             <Insets left="50.0" right="50.0" />

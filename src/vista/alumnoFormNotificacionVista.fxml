@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<GridPane fx:id="gpFormNotificacion" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="750.0" styleClass="fondo_ventana_degradado_toRight" stylesheets="@../hojasEstilos/Styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.AlumnoFormNotificacionControlador">
+  <columnConstraints>
+    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="0.0" prefWidth="110.0" />
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+      <RowConstraints minHeight="2.0" prefHeight="2.0" vgrow="NEVER" />
+    <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="ALWAYS" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="NEVER" />
+  </rowConstraints>
+   <padding>
+      <Insets left="20.0" right="20.0" />
+   </padding>
+   <children>
+      <Label fx:id="lbTitulo" text="Notificación" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+         <font>
+            <Font name="System Bold" size="24.0" />
+         </font>
+         <padding>
+            <Insets top="15.0" />
+         </padding>
+      </Label>
+      <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.rowIndex="2">
+         <children>
+            <Label text="Remitente" />
+            <Separator maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES" />
+         </children>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </HBox>
+      <Label text="Nombre" GridPane.rowIndex="3">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfNombreUsuario" editable="false" promptText="Nombre Completo" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+      <Label text="Email" GridPane.rowIndex="4">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfEmailUsuario" promptText="Email APP" GridPane.columnIndex="1" GridPane.rowIndex="4">
+         <GridPane.margin>
+            <Insets />
+         </GridPane.margin></TextField>
+      <Label text="Email Copia" GridPane.rowIndex="5">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfEmailCopia" promptText="Introduce el email..." GridPane.columnIndex="1" GridPane.rowIndex="5">
+         <GridPane.margin>
+            <Insets left="210.0" />
+         </GridPane.margin></TextField>
+      <HBox alignment="CENTER_LEFT" layoutX="30.0" layoutY="50.0" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.rowIndex="7">
+         <children>
+            <Label text="Destinatario" />
+            <Separator maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES" />
+         </children>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </HBox>
+      <Label text="Nombre" GridPane.rowIndex="8">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <Label text="Email " GridPane.rowIndex="9">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfNombreAlumno" promptText="Nombre Completo" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+      <TextField fx:id="tfEmailAlumno" promptText="Email" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="18">
+         <children>
+            <Button fx:id="btnEnviar" mnemonicParsing="false" prefWidth="80.0" text="Enviar" />
+            <Button fx:id="btnCancelar" mnemonicParsing="false" prefWidth="80.0" text="Cancelar" />
+         </children>
+      </HBox>
+      <ImageView fx:id="ivImagenTipoFormulario" fitHeight="150.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.rowIndex="17" GridPane.rowSpan="2" GridPane.valignment="TOP">
+         <image>
+            <Image url="@../recursos/email_2_128.png" />
+         </image>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </ImageView>
+      <HBox alignment="CENTER_LEFT" layoutX="30.0" layoutY="210.0" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.rowIndex="10">
+         <children>
+            <Label text="Mensaje" />
+            <Separator maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES" />
+         </children>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </HBox>
+      <Label layoutX="98.0" layoutY="239.0" text="Asunto" GridPane.rowIndex="11">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfAsunto" layoutX="140.0" layoutY="235.0" promptText="Asunto de la notificación" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+      <TextArea fx:id="taMensaje" prefHeight="200.0" prefWidth="200.0" promptText="Escrive aquí tu mensaje...." GridPane.columnIndex="1" GridPane.rowIndex="12" GridPane.rowSpan="2">
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </TextArea>
+      <Label layoutX="92.0" layoutY="357.0" text="Mensaje" GridPane.rowIndex="12">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <ComboBox fx:id="cbEmailCopia" layoutX="140.0" layoutY="302.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+      <CheckBox fx:id="chekbCopiaOculta" mnemonicParsing="false" text="Enviar copia oculta" GridPane.columnIndex="1" GridPane.rowIndex="6">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor></CheckBox>
+      <Pane fx:id="pSeparador" prefHeight="200.0" prefWidth="200.0" styleClass="panelSeparador" GridPane.columnSpan="2">
+         <GridPane.margin>
+            <Insets left="-20.0" right="-20.0" />
+         </GridPane.margin>
+      </Pane>
+      <ImageView fx:id="ivAdjunto" fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="15">
+         <image>
+            <Image url="@../recursos/clip_1_48.png" />
+         </image>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </ImageView>
+      <TextField fx:id="tfRutaAdjunto" GridPane.columnIndex="1" GridPane.rowIndex="16">
+         <GridPane.margin>
+            <Insets />
+         </GridPane.margin>
+      </TextField>
+      <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.rowIndex="14">
+         <children>
+            <Label text="A. adjunto" />
+            <Separator maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES" />
+         </children>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </HBox>
+      <Label text="Ruta" GridPane.rowIndex="16">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <CheckBox fx:id="chekbAdjunto" mnemonicParsing="false" text="Adjuntar archivo" GridPane.columnIndex="1" GridPane.rowIndex="15">
+         <GridPane.margin>
+            <Insets left="50.0" />
+         </GridPane.margin>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </CheckBox>
+   </children>
+</GridPane>

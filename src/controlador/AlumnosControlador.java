@@ -16,6 +16,7 @@ import javafx.beans.binding.IntegerBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -25,6 +26,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -43,7 +45,9 @@ import javafx.stage.StageStyle;
 import modelo.Alumno;
 import modelo.EstadoAlumno;
 import modelo.Genero;
+import modelo.Mensualidad;
 import modelo.Toast;
+import modelo.Usuario;
 import utilidades.Constants;
 import javafx.fxml.Initializable;
 
@@ -55,13 +59,20 @@ public class AlumnosControlador implements Initializable {
     private ConexionBD conexionBD;
     private Logger logUser;
     private Toast toast;
+    private Usuario usuario;
 
     
     @FXML
     private BorderPane bpAlumnos;
 
     @FXML
+    private AnchorPane apFiltro;
+
+    @FXML
     private ImageView ivLupa;
+
+    @FXML
+    private ImageView ivNotificacion;
 
     @FXML
     private Button btnBorrar;
@@ -74,6 +85,15 @@ public class AlumnosControlador implements Initializable {
 
     @FXML
     private Button btnVer;
+
+    @FXML
+    private ComboBox<String> cbGenero;
+
+    @FXML
+    private ComboBox<String> cbLocalidad;
+
+    @FXML
+    private ComboBox<String> cbModoFiltro;
 
     @FXML
     private Label lbNumAlumnosActivos;
@@ -133,17 +153,23 @@ public class AlumnosControlador implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
     	btnBorrar.getStyleClass().add("boton_rojo"); //Añadir clases de estilo CSS a elementos.
+        apFiltro.getStyleClass().add("panel_border");
 
         //Cargar imagenes en ImageView.
         Image imagenLupa;
+        Image notificacion;
         try {
             //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
             imagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png")); //Forma desde IDE y JAR.
+            notificacion = new Image(getClass().getResourceAsStream("/recursos/boton_6_64.png"));
         } catch (Exception e) {
             //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
         	imagenLupa = new Image("/recursos/lupa_lila_2_128.png"); //Forma desde el JAR.
+            notificacion = new Image("/recursos/boton_6_64.png");
         }
-        ivLupa.setImage(imagenLupa); //Establecer la imagen cargada en el ImageView.
+        //Establecer las imagenes cargadas en el ImageView.
+        ivLupa.setImage(imagenLupa); 
+        ivNotificacion.setImage(notificacion);
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
         conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
@@ -176,14 +202,110 @@ public class AlumnosControlador implements Initializable {
             return cellData.getValue().fechaNacimientoProperty().asString(Integer.toString(Period.between(fechaText, LocalDate.now()).getYears()));
         });
 
-        //Con esto la busqueda es automatica al insertar texto en el tfBusqueda.
-        tfBusqueda.textProperty().addListener( (o, ov, nv) -> {
-        	filtro.setPredicate(obj -> {
-        		if (obj.getNombre().toLowerCase().contains(nv.toLowerCase())) return true;
-        		else return false;
-        		
-        	});
+
+        //Configura el ComboBox cbLocalidad
+        cbLocalidadSetup();
+
+        //cbGenero
+        ObservableList<String> listadoGenero = FXCollections.observableArrayList();
+        listadoGenero.setAll(Genero.HOMBRE.toString(), Genero.MUJER.toString(), "AMBOS");
+        cbGenero.setItems(listadoGenero);
+        cbGenero.setValue("AMBOS"); //Valor inicial.
+
+        //Configurar Listener para el ComboBox cbGenero.
+        cbGenero.setOnAction(e -> {
+            tfBusqueda.clear();
+            configurarFiltro("");
         });
+
+        //cbModoFiltro
+        ObservableList<String> tipoBusqueda = FXCollections.observableArrayList();
+        tipoBusqueda.setAll("Id Alumno", "Nombre Alumno");
+        cbModoFiltro.setItems(tipoBusqueda);
+        cbModoFiltro.setValue("Nombre Alumno"); //Valor inicial.
+
+        //Configurar Listener para el ComboBox cbModoFiltro.
+        cbModoFiltro.setOnAction(e -> {
+            tfBusqueda.clear();
+            configurarFiltro("");
+        });
+
+        //Configurar Listener para el TextField tfBusqueda.
+        tfBusqueda.textProperty().addListener( (o, ov, nv) -> {
+            configurarFiltro(nv);
+        });
+    }
+
+
+    /**
+     * Método para manejar el evento que lanza el formulario para enviar notificaciones.
+     * Se invoca al hacer clic en el ImageView ivNotificacion.
+     *
+     * @param event El evento de mouse que desencadena la acción.
+     */
+    @FXML
+    void abrirNotificaciones(MouseEvent event) {
+        int i = indiceSeleccionado();
+        if(i != -1) {
+            Alumno alumnoSeleccionado = tvAlumnos.getSelectionModel().getSelectedItem();
+
+            if(comprobarRequisitosNotificacion(alumnoSeleccionado)) {
+                try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/alumnoFormNotificacionVista.fxml"));
+                GridPane formNotificacion;
+                formNotificacion = (GridPane) loader.load();
+                AlumnoFormNotificacionControlador controller = loader.getController(); // cargo el controlador.
+                
+                Stage ventana= new Stage();
+                ventana.initOwner((Stage) bpAlumnos.getScene().getWindow());
+                ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
+                ventana.initStyle(StageStyle.DECORATED);
+
+                URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
+                ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
+    
+                controller.setModelos(alumnoSeleccionado, usuario);
+    
+                Scene scene = new Scene(formNotificacion);
+                scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
+                ventana.setScene(scene);
+                ventana.setTitle("Notificación Alumno");
+                ventana.showAndWait();
+
+                } catch (IOException e) {
+                    logUser.severe("Excepción: " + e.toString());
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    logUser.severe("Excepción: " + e.toString());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * Comprueba los requisitos necesarios para enviar una notificación al alumno.
+     * Verifica si el email de la aplicación y el email del alumno están configurados correctamente.
+     * Muestra un mensaje de Informcion si no cumple los requisitos.
+     *
+     * @param alumnoNotificacion El objeto Alumno al que se desea enviar la notificación.
+     * @return true si todos los requisitos están cumplidos y la notificación se puede enviar, false en caso contrario.
+     */
+    private boolean comprobarRequisitosNotificacion(Alumno alumnoNotificacion) {
+        if (usuario.getEmailApp() == null || usuario.getEmailApp().isBlank()) {
+            mensajeAviso(AlertType.INFORMATION, 
+                "Fallo Notificación", 
+                "Email Aplicación NO configurado.", 
+                "El usuario no tiene configurado el Email Aplicación.");
+            return false;
+        } else if (alumnoNotificacion.getEmail() == null || alumnoNotificacion.getEmail().isBlank()) {
+            mensajeAviso(AlertType.INFORMATION, 
+                "Fallo Notificación", 
+                "Email de Alumno NO registrado.", 
+                "El Alumno no tiene email registrado en aplicación.");
+            return false;
+        }
+        return true;
     }
 
     
@@ -408,6 +530,70 @@ public class AlumnosControlador implements Initializable {
 
 
     /**
+     * Configura el filtro para la tabla de alumno según los criterios seleccionados.
+     *
+     * @param texto El texto de búsqueda utilizado para filtrar.
+     */
+    private void configurarFiltro(String texto) {
+        filtro.setPredicate(obj -> {
+
+            if ( !(cbGenero.getValue().equals("AMBOS")) && !(obj.generoProperty().getValue().toString().equals(cbGenero.getValue())) ) {
+                return false;
+            }
+            
+            if ( !(cbLocalidad.getValue().equals("TODAS")) && !(obj.getDireccion().localidadProperty().getValue().toString().equals(cbLocalidad.getValue())) ) {
+                return false;
+            }
+        		
+            if (cbModoFiltro.getValue() == "Nombre Alumno") {
+                for(Alumno alumno : listadoAlumnos) {
+                    if(obj.getId() == alumno.getId()) {
+                        if(alumno.getNombreCompleto().toLowerCase().contains(texto.toLowerCase())) {
+                            return true;
+                        }
+                    }    
+                }
+                return false;
+            } else {
+                if(texto.isBlank()) {return true;}
+                if(texto.matches("[0-9]{0,4}") && obj.getId() == Integer.parseInt(texto)) {
+                    return true;
+                }
+
+                return false;
+            }
+        		
+        });
+    }
+
+
+    /**
+     * Configura el ComboBox cbLocalidad.
+     * 
+     */
+    private void cbLocalidadSetup() {
+        ObservableList<String> listadoLocalidades = null;
+        try {
+			listadoLocalidades = FXCollections.observableArrayList(conexionBD.getLocalidades());
+
+            listadoLocalidades.add("TODAS");
+
+            //Carga en el ComboBox los items del listadoLocalidades.
+            cbLocalidad.setItems(listadoLocalidades);
+            cbLocalidad.setValue("TODAS"); //Valor inicial.
+
+            cbLocalidad.setOnAction(e -> {
+                tfBusqueda.clear();
+                configurarFiltro("");
+            });
+		} catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
+			e.printStackTrace();
+		}
+    }
+
+
+    /**
      * Muestra una ventana de dialogo con la informacion pasada como parametros.
      * 
      * @param tipo Tipo de alerta.
@@ -450,5 +636,14 @@ public class AlumnosControlador implements Initializable {
         });
 
         setupDatosTalba(); //configuro los bindign para que se actualice los labels de informacion de la tableViev.
+	}
+
+    /**
+	 * Etablece el usuario que esta usando la aplicación.
+     * 
+	 * @param usuario
+	 */
+	public void setUsuarioActual(Usuario usuarioActual) {
+		this.usuario = usuarioActual;
 	}
 }

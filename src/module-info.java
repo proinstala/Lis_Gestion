@@ -11,6 +11,7 @@ module Lis_Gestion {
 	exports controlador;
 	exports modelo;
 	exports baseDatos;
+	exports utilidades;
 	
 	opens controlador;
 	requires javafx.fxml;

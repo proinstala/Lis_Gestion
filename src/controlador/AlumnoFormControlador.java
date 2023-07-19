@@ -228,7 +228,6 @@ public class AlumnoFormControlador implements Initializable {
 
         //Añado un listener al ComboBox de provincias para realizar una acción cuando se ha seleccionado un item.
         cbProvincia.setOnAction(event -> {
-            System.out.println(cbProvincia.getValue().toString()); //provisional PARA BORRAR
             cbLocalidadSetup(cbProvincia.getValue());
         });
     }

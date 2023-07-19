@@ -12,8 +12,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
-import javax.mail.MessagingException;
-
 import baseDatos.ConexionBD;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
@@ -50,7 +48,6 @@ import modelo.Mensualidad;
 import modelo.Toast;
 import modelo.Usuario;
 import utilidades.Constants;
-import utilidades.Correo;
 import utilidades.Fechas;
 
 public class MensualidadesControlador implements Initializable {
@@ -93,9 +90,6 @@ public class MensualidadesControlador implements Initializable {
 
     @FXML
     private ComboBox<String> cbModoFiltro;
-
-    @FXML
-    private Button btnAplicarFiltro;
 
     @FXML
     private Button btnBorrar;
@@ -290,6 +284,24 @@ public class MensualidadesControlador implements Initializable {
         cbEstado.setValue("TODOS");
         cbModoFiltro.setValue("Nombre Alumno");
 
+        //Configurar Listener para el ComboBox cbMes.
+        cbMes.setOnAction(e -> {
+            tfBusqueda.clear();
+            configurarFiltro("");
+        });
+
+        //Configurar Listener para el ComboBox cbEstado.
+        cbEstado.setOnAction(e -> {
+            tfBusqueda.clear();
+            configurarFiltro("");
+        });
+
+        //Configurar Listener para el ComboBox cbAnio.
+        cbAnio.setOnAction(e -> {
+            tfBusqueda.clear();
+            configurarFiltro("");
+        });
+
         //Configurar Listener para el ComboBox cbModoFiltro.
         cbModoFiltro.setOnAction(e -> {
             tfBusqueda.clear();
@@ -300,26 +312,6 @@ public class MensualidadesControlador implements Initializable {
         tfBusqueda.textProperty().addListener( (o, ov, nv) -> {
             configurarFiltro(nv);
         });
-
-        //Configurar Listener para el Button btnAplicarFiltro.
-        btnAplicarFiltro.setOnMouseClicked( e -> {
-            configurarFiltro(tfBusqueda.getText());
-        });
-
-        /* 
-        ivNotificacion.setOnMouseClicked(e -> {
-            //toast.show((Stage) bpMensualidad.getScene().getWindow(), "EN CONSTRUCCIÓN.\nEste boton es para enviar notificaciones.");
-
-            try {
-            Correo.enviarCorreoSimple(usuario.getEmail(), "Prueba email lis_pilates", "Mensaje de prueba", usuario.getEmailApp(), usuario.getPasswordEmailApp());
-            System.out.println("PRUEBAS: correo enviado.");
-            } catch (MessagingException ex) {
-                System.out.println("ERROR ---- " + e.toString() + "\n");
-                ex.printStackTrace();
-            }
-            
-        });*/
-
     }
 
 
@@ -364,6 +356,12 @@ public class MensualidadesControlador implements Initializable {
     }
 
 
+    /**
+     * Método para manejar el evento que lanza el formulario para enviar notificaciones.
+     * Se invoca al hacer clic en el ImageView ivNotificacion.
+     *
+     * @param event El evento de mouse que desencadena la acción.
+     */
     @FXML
     void abrirNotificaciones(MouseEvent event) {
         int i = indiceSeleccionado();
@@ -407,27 +405,7 @@ public class MensualidadesControlador implements Initializable {
                     e.printStackTrace();
                 }
             }
-
-            
         }
-        
-    }
-
-    private boolean comprobarRequisitosNotificacion(Alumno alumnoNotificacion) {
-        if (usuario.getEmailApp() == null || usuario.getEmailApp().isBlank()) {
-            mensajeAviso(AlertType.INFORMATION, 
-                "Fallo Notificación", 
-                "Email Aplicación NO configurado.", 
-                "El usuario no tiene configurado el Email Aplicación.");
-            return false;
-        } else if (alumnoNotificacion.getEmail() == null || alumnoNotificacion.getEmail().isBlank()) {
-            mensajeAviso(AlertType.INFORMATION, 
-                "Fallo Notificación", 
-                "Email de Alumno NO registrado.", 
-                "El Alumno no tiene email registrado en aplicación.");
-            return false;
-        }
-        return true;
     }
 
 
@@ -814,6 +792,32 @@ public class MensualidadesControlador implements Initializable {
         }
         toast.show((Stage) bpMensualidad.getScene().getWindow(), "No hay seleccionado ninguna Mensualidad!!.");
         return i; //i = -1
+    }
+
+
+    /**
+     * Comprueba los requisitos necesarios para enviar una notificación al alumno.
+     * Verifica si el email de la aplicación y el email del alumno están configurados correctamente.
+     * Muestra un mensaje de Informcion si no cumple los requisitos.
+     *
+     * @param alumnoNotificacion El objeto Alumno al que se desea enviar la notificación.
+     * @return true si todos los requisitos están cumplidos y la notificación se puede enviar, false en caso contrario.
+     */
+    private boolean comprobarRequisitosNotificacion(Alumno alumnoNotificacion) {
+        if (usuario.getEmailApp() == null || usuario.getEmailApp().isBlank()) {
+            mensajeAviso(AlertType.INFORMATION, 
+                "Fallo Notificación", 
+                "Email Aplicación NO configurado.", 
+                "El usuario no tiene configurado el Email Aplicación.");
+            return false;
+        } else if (alumnoNotificacion.getEmail() == null || alumnoNotificacion.getEmail().isBlank()) {
+            mensajeAviso(AlertType.INFORMATION, 
+                "Fallo Notificación", 
+                "Email de Alumno NO registrado.", 
+                "El Alumno no tiene email registrado en aplicación.");
+            return false;
+        }
+        return true;
     }
 
 

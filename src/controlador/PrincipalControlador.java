@@ -279,6 +279,7 @@ public class PrincipalControlador implements Initializable {
 				
 				AlumnosControlador controller = loader.getController(); // cargo el controlador.
 				controller.setListaAlumnos(listadoAlumnos);
+				controller.setUsuarioActual(usuarioActual);
 				
 			} catch (IOException e) {
 				logUser.log(Level.SEVERE, "Excepción: " + e.toString());
