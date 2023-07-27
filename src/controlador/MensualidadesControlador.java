@@ -845,7 +845,7 @@ public class MensualidadesControlador implements Initializable {
     /**
 	 * Etablece el usuario que esta usando la aplicación.
      * 
-	 * @param usuario
+	 * @param usuarioActual el usuario a establecer.
 	 */
 	public void setUsuarioActual(Usuario usuarioActual) {
 		this.usuario = usuarioActual;

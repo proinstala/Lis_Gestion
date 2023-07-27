@@ -309,6 +309,26 @@ public class PrincipalControlador implements Initializable {
 			lInformes.getStyleClass().add("menuSeleccionado");
 			lUsuario.getStyleClass().remove("menuSeleccionado");
 			lAjustes.getStyleClass().remove("menuSeleccionado");
+
+			try {
+				FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/informesVista.fxml"));
+				GridPane informes;
+				
+				informes = (GridPane) loader.load();
+				bpPrincipal.setCenter(informes);
+				
+				InformesControlador controller = loader.getController(); // cargo el controlador.
+				controller.setUsuarioActual(usuarioActual);
+            	//controller.setUsuarioRoot(usuarioRoot);
+				//controller.setControladorPrincipal(this);
+				
+			} catch (IOException e) {
+				logUser.log(Level.SEVERE, "Excepción: " + e.toString());
+				e.printStackTrace();
+			} catch (Exception e) {
+				logUser.log(Level.SEVERE, "Excepción: " + e.toString());
+				e.printStackTrace();
+			}
 		}
     }
 
@@ -553,7 +573,7 @@ public class PrincipalControlador implements Initializable {
 		
 		Boolean logCorrecto = false;
 		try {
-			fhUser = new FileHandler(usuarioActual.getDirectorio().getName() + "\\" + "log"  + "\\" + usuarioActual.getNombreUsuario() + "_log_" + LocalDate.now().getYear() + ".log", true);
+			fhUser = new FileHandler(usuarioActual.getDirectorio().getName() + "\\" + Constants.FOLDER_LOG  + "\\" + usuarioActual.getNombreUsuario() + "_log_" + LocalDate.now().getYear() + ".log", true);
 			
             logUser.addHandler(fhUser); 							//Asociar el log a un fichero log. 
             logUser.setUseParentHandlers(true);	//Establecer si queremos visualizar los mensajes de log por pantalla.

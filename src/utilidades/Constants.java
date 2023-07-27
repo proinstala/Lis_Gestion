@@ -10,6 +10,10 @@ public class Constants {
     public static final String USER = "usuario";
     public static final String USER_ROOT = "usuarioRoot";
 
+    public static final String FOLDER_REPORTS = "reports";
+    public static final String FOLDER_LOG = "log";
+
+
     public static final String EMAIL_APP = "Aplicación";
     public static final String EMAIL_USER = "Personal";
     public static final String EMAIL_OTHER = "Otro";

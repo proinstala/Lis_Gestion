@@ -301,8 +301,8 @@ public class RegistroUserControlador implements Initializable {
     private boolean crearFicherosUsuario(Usuario user) {
         //Crea el directorio principal del usuario.
 		if(user.getDirectorio().mkdir()) {
-            File dirLog = new File(user.getDirectorio().getName() + "\\" + "log");
-            File dirReport = new File(user.getDirectorio().getName() + "\\" + "report");
+            File dirLog = new File(user.getDirectorio().getName() + "\\" + Constants.FOLDER_LOG);
+            File dirReport = new File(user.getDirectorio().getName() + "\\" + Constants.FOLDER_REPORTS);
             
             // Crea el directorio donde se guardarán los archivos de registro (log) del nuevo usuario.
             if (!dirLog.mkdir()) {

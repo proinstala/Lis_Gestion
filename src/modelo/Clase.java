@@ -283,6 +283,7 @@ public class Clase {
 	    return listaAlumnos.contains(alumno);
 	}
 
+
 	@Override
 	public String toString() {
 		return "Clase [id=" + id + ", numero=" + numero + ", tipo=" + tipo + ", horaClase=" + horaClase

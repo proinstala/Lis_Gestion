@@ -119,6 +119,7 @@ public class UsuarioControlador implements Initializable {
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
     }
+    
 
     /**
 	 * Método que se ejecuta cuando se hace clic en la imagen "borrar usuario".

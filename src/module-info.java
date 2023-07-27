@@ -12,6 +12,7 @@ module Lis_Gestion {
 	exports modelo;
 	exports baseDatos;
 	exports utilidades;
+	exports colecciones;
 	
 	opens controlador;
 	requires javafx.fxml;
@@ -22,4 +23,5 @@ module Lis_Gestion {
 	requires java.sql;
 	requires java.mail;
 	requires activation;
+	requires jasperreports;
 }

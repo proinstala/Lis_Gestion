@@ -165,6 +165,23 @@ public class Jornada {
     	}
     	return -1;
     }
+
+
+    /**
+     * Devuelve un entero con el numero de alumnos inscritos en la jornada.
+     * 
+     * @return un entero con el numero de alumnos inscritos en esta jornada.
+     */
+    public int numeroAlumnosEnJornada() {
+        int total = 0;
+        for (int i = 0; i < clases.length; i++) {
+            if(clases[i].getListaAlumnos() != null) {
+                total += clases[i].getListaAlumnos().size();
+            }
+        }
+
+        return total;
+    }
     
     /**
 	 * Devuelve un String con el dia de la semana de esta jornada.

@@ -272,7 +272,7 @@ public class MensualidadFormControlador implements Initializable {
 
             @Override
             public Alumno fromString(String string) {
-                // No se necesita esta implementación para este ejemplo
+                // No se necesita esta implementación para este caso.
                 return null;
             }
         });

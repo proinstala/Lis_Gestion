@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<GridPane fx:id="gpFormInformeJornada" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="600.0" styleClass="fondo_ventana_degradado_toRight" stylesheets="@../hojasEstilos/Styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.InformeFormJornadaControlador">
+  <columnConstraints>
+    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="0.0" prefWidth="110.0" />
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+      <RowConstraints minHeight="2.0" prefHeight="2.0" vgrow="NEVER" />
+    <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="ALWAYS" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="NEVER" />
+  </rowConstraints>
+   <padding>
+      <Insets left="20.0" right="20.0" />
+   </padding>
+   <children>
+      <Label fx:id="lbTitulo" text="Informe Jornada" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+         <font>
+            <Font name="System Bold" size="24.0" />
+         </font>
+         <padding>
+            <Insets top="15.0" />
+         </padding>
+      </Label>
+      <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.rowIndex="2">
+         <children>
+            <Label text="Metadatos" />
+            <Separator maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES" />
+         </children>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </HBox>
+      <Label text="Autor" GridPane.rowIndex="4">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfNombreUsuario" editable="false" promptText="Nombre Completo" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+      <Label text="Teléfono" GridPane.rowIndex="5">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfTelefono" promptText="Telefono de contacto" GridPane.columnIndex="1" GridPane.rowIndex="5">
+         <GridPane.margin>
+            <Insets />
+         </GridPane.margin></TextField>
+      <Label text="Email" GridPane.rowIndex="6">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfEmail" promptText="Introduce el email..." GridPane.columnIndex="1" GridPane.rowIndex="6">
+         <GridPane.margin>
+            <Insets left="210.0" />
+         </GridPane.margin></TextField>
+      <HBox alignment="CENTER_LEFT" layoutX="30.0" layoutY="50.0" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.rowIndex="9">
+         <children>
+            <Label text="Jornada" />
+            <Separator maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES" />
+         </children>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </HBox>
+      <Label text="Jornada" GridPane.rowIndex="10">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="16">
+         <children>
+            <Button fx:id="btnGenerar" mnemonicParsing="false" prefWidth="80.0" text="Generar" />
+            <Button fx:id="btnCancelar" mnemonicParsing="false" prefWidth="80.0" text="Cancelar" />
+         </children>
+      </HBox>
+      <ImageView fx:id="ivImagenTipoFormulario" fitHeight="150.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.rowIndex="15" GridPane.rowSpan="2" GridPane.valignment="TOP">
+         <image>
+            <Image url="@../recursos/calendar_2_72.png" />
+         </image>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </ImageView>
+      <TextArea fx:id="taTexto" prefHeight="200.0" prefWidth="200.0" promptText="Escrive aquí tu comentario o anotación...." wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="7" GridPane.rowSpan="2">
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </TextArea>
+      <Label layoutX="92.0" layoutY="357.0" text="Texto" GridPane.rowIndex="7">
+         <GridPane.margin>
+            <Insets right="10.0" />
+         </GridPane.margin>
+      </Label>
+      <ComboBox fx:id="cbEmail" layoutX="140.0" layoutY="302.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+      <CheckBox fx:id="chekbMetadatos" mnemonicParsing="false" text="Editar Metadatos" GridPane.columnIndex="1" GridPane.rowIndex="3">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor></CheckBox>
+      <Pane fx:id="pSeparador" prefHeight="200.0" prefWidth="200.0" styleClass="panelSeparador" GridPane.columnSpan="2">
+         <GridPane.margin>
+            <Insets left="-20.0" right="-20.0" />
+         </GridPane.margin>
+      </Pane>
+      <CheckBox fx:id="chekbComentario" mnemonicParsing="false" text="Añadir Comentario Jornada" GridPane.columnIndex="1" GridPane.rowIndex="11">
+         <GridPane.margin>
+            <Insets left="220.0" />
+         </GridPane.margin>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </CheckBox>
+      <DatePicker fx:id="dpJornada" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+      <Label fx:id="lbInfoJornada" text="Jornada no validad!." textFill="RED" GridPane.columnIndex="1" GridPane.rowIndex="10">
+         <GridPane.margin>
+            <Insets left="220.0" />
+         </GridPane.margin>
+         <font>
+            <Font size="13.0" />
+         </font>
+      </Label>
+      <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.rowIndex="12">
+         <children>
+            <Label text="Modo" />
+            <Separator maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES" />
+         </children>
+         <GridPane.margin>
+            <Insets top="10.0" />
+         </GridPane.margin>
+      </HBox>
+      <RadioButton fx:id="rbMostrar" mnemonicParsing="false" text="Mostrar" GridPane.columnIndex="1" GridPane.rowIndex="13" />
+      <RadioButton fx:id="rbGuardar" mnemonicParsing="false" text="Guardar" GridPane.columnIndex="1" GridPane.rowIndex="13">
+         <GridPane.margin>
+            <Insets left="98.0" />
+         </GridPane.margin>
+      </RadioButton>
+      <Label text="Nombre" GridPane.columnIndex="1" GridPane.rowIndex="13">
+         <GridPane.margin>
+            <Insets left="200.0" />
+         </GridPane.margin>
+      </Label>
+      <TextField fx:id="tfNombreInforme" GridPane.columnIndex="1" GridPane.rowIndex="13">
+         <GridPane.margin>
+            <Insets left="250.0" />
+         </GridPane.margin>
+      </TextField>
+      <Separator orientation="VERTICAL" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="13" GridPane.rowSpan="2" GridPane.vgrow="NEVER">
+         <GridPane.margin>
+            <Insets bottom="5.0" left="180.0" top="5.0" />
+         </GridPane.margin>
+      </Separator>
+      <Label text="Semana:" GridPane.columnIndex="1" GridPane.rowIndex="11">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label text="Nº Alumnos:" GridPane.columnIndex="1" GridPane.rowIndex="11">
+         <GridPane.margin>
+            <Insets left="100.0" />
+         </GridPane.margin>
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label fx:id="lbSemana" text="0" GridPane.columnIndex="1" GridPane.rowIndex="11">
+         <GridPane.margin>
+            <Insets left="55.0" />
+         </GridPane.margin>
+      </Label>
+      <Label fx:id="lbNumeroAlumnos" text="0" GridPane.columnIndex="1" GridPane.rowIndex="11">
+         <GridPane.margin>
+            <Insets left="180.0" />
+         </GridPane.margin>
+      </Label>
+      <RadioButton fx:id="rbPdf" mnemonicParsing="false" text="pdf" GridPane.columnIndex="1" GridPane.rowIndex="14">
+         <GridPane.margin>
+            <Insets left="255.0" />
+         </GridPane.margin>
+      </RadioButton>
+      <RadioButton fx:id="rbHtml" mnemonicParsing="false" text="html" GridPane.columnIndex="1" GridPane.rowIndex="14">
+         <GridPane.margin>
+            <Insets left="320.0" />
+         </GridPane.margin>
+      </RadioButton>
+      <Label text="Formato" GridPane.columnIndex="1" GridPane.rowIndex="14">
+         <GridPane.margin>
+            <Insets left="200.0" />
+         </GridPane.margin>
+      </Label>
+   </children>
+</GridPane>
