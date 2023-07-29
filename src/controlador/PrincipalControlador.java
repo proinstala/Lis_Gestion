@@ -42,8 +42,8 @@ public class PrincipalControlador implements Initializable {
 	
 	private ResourceBundle recursos;
 	private String menuSeleccionado = "ninguno";
-	private ObservableList<Alumno> listadoAlumnos;
-	private ObservableList<Mensualidad> listadoMensualidades;
+	private ObservableList<Alumno> listadoAlumnosGeneral;
+	private ObservableList<Mensualidad> listadoMensualidadesGeneral;
 	private ConexionBD conexionBD;
 	private Toast toast = new Toast();
 
@@ -194,7 +194,7 @@ public class PrincipalControlador implements Initializable {
 				
 				JornadaControlador controller = loader.getController(); // cargo el controlador.
 				controller.setControladorPrincipal(this);
-				controller.setListaAlumnos(listadoAlumnos);
+				controller.setListaAlumnos(listadoAlumnosGeneral);
 				controller.inicializacion(jornada);
 				
 			} catch (IOException e) {
@@ -236,8 +236,8 @@ public class PrincipalControlador implements Initializable {
 				
 				MensualidadesControlador controller = loader.getController(); // cargo el controlador.
 				//controller.setControladorPrincipal(this);
-				controller.setListaAlumnos(listadoAlumnos);
-				controller.setListaMensualidades(listadoMensualidades);
+				controller.setListaAlumnos(listadoAlumnosGeneral);
+				controller.setListaMensualidades(listadoMensualidadesGeneral);
 				controller.setUsuarioActual(usuarioActual);
 				
 			} catch (IOException e) {
@@ -278,7 +278,7 @@ public class PrincipalControlador implements Initializable {
 				bpPrincipal.setCenter(alumnos);
 				
 				AlumnosControlador controller = loader.getController(); // cargo el controlador.
-				controller.setListaAlumnos(listadoAlumnos);
+				controller.setListaAlumnos(listadoAlumnosGeneral);
 				controller.setUsuarioActual(usuarioActual);
 				
 			} catch (IOException e) {
@@ -319,8 +319,8 @@ public class PrincipalControlador implements Initializable {
 				
 				InformesControlador controller = loader.getController(); // cargo el controlador.
 				controller.setUsuarioActual(usuarioActual);
-            	//controller.setUsuarioRoot(usuarioRoot);
-				//controller.setControladorPrincipal(this);
+            	controller.setListaMensualidades(listadoMensualidadesGeneral);
+				controller.setListaAlumnos(listadoAlumnosGeneral);
 				
 			} catch (IOException e) {
 				logUser.log(Level.SEVERE, "Excepción: " + e.toString());
@@ -604,10 +604,10 @@ public class PrincipalControlador implements Initializable {
 		cargarVistaInicio();
 		
 		try {
-			listadoAlumnos = FXCollections.observableArrayList(conexionBD.getListadoAlumnos());
-			listadoMensualidades = FXCollections.observableArrayList(conexionBD.getListadoMensualidades());
-			for (Alumno a : listadoAlumnos) {
-				for (Mensualidad m : listadoMensualidades) {
+			listadoAlumnosGeneral = FXCollections.observableArrayList(conexionBD.getListadoAlumnos());
+			listadoMensualidadesGeneral = FXCollections.observableArrayList(conexionBD.getListadoMensualidades());
+			for (Alumno a : listadoAlumnosGeneral) {
+				for (Mensualidad m : listadoMensualidadesGeneral) {
 					if(a.getId() == m.getIdAlumno()) {a.addMensualidad(m);}
 				}
 			}
@@ -624,7 +624,8 @@ public class PrincipalControlador implements Initializable {
 	 */
 	public void cerrarSesion() {
 		this.usuarioActual = null;
-		listadoAlumnos = null;
+		listadoAlumnosGeneral = null;
+		listadoMensualidadesGeneral = null;
 		conexionBD.setUsuario(usuarioRoot);
 		if (fhUser != null) {fhUser.close();} //Cerrar el FileHandler del log
 

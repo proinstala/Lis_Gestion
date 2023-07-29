@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_mensualidad" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="7c78f702-2f23-4992-a51a-098b24f7ec33">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Data_Adapter_Alumno"/>
+	<parameter name="autor" class="java.lang.String">
+		<parameterDescription><![CDATA[Nombre del autor del informe.]]></parameterDescription>
+	</parameter>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="id" class="java.lang.Integer">
+		<fieldDescription><![CDATA[id]]></fieldDescription>
+	</field>
+	<field name="idAlumno" class="java.lang.Integer">
+		<fieldDescription><![CDATA[idAlumno]]></fieldDescription>
+	</field>
+	<field name="fecha" class="java.time.YearMonth">
+		<fieldDescription><![CDATA[fecha]]></fieldDescription>
+	</field>
+	<field name="mesMensualidad_ES" class="java.lang.String">
+		<fieldDescription><![CDATA[mesMensualidad_ES]]></fieldDescription>
+	</field>
+	<field name="asistenciasSemanales" class="java.lang.Integer">
+		<fieldDescription><![CDATA[asistenciasSemanales]]></fieldDescription>
+	</field>
+	<field name="formaPago" class="modelo.FormaPago">
+		<fieldDescription><![CDATA[formaPago]]></fieldDescription>
+	</field>
+	<field name="estadoPago" class="modelo.EstadoPago">
+		<fieldDescription><![CDATA[estadoPago]]></fieldDescription>
+	</field>
+	<field name="fechaPago" class="java.time.LocalDate">
+		<fieldDescription><![CDATA[fechaPago]]></fieldDescription>
+	</field>
+	<field name="importe" class="java.lang.Double">
+		<fieldDescription><![CDATA[importe]]></fieldDescription>
+	</field>
+	<field name="anotacion" class="java.lang.String">
+		<fieldDescription><![CDATA[anotacion]]></fieldDescription>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="99" splitType="Stretch">
+			<staticText>
+				<reportElement x="10" y="40" width="60" height="20" uuid="a55fcf87-be5c-42c8-86e5-df2431da67a8">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<text><![CDATA[Autor:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="90" y="40" width="100" height="20" uuid="eac20b18-02e8-402e-84bf-f900dd3a0e04">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$P{autor}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch">
+			<staticText>
+				<reportElement x="114" y="0" width="100" height="30" uuid="fcd104e2-b15a-4e73-9e92-c5a03426503f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="b2f08d0b-cdcf-430c-a77a-d9cb604215c8"/>
+				</reportElement>
+				<text><![CDATA[idAlumno]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="125" splitType="Stretch">
+			<textField>
+				<reportElement x="114" y="51" width="100" height="30" uuid="f3d5dfdd-e4d3-4265-8885-bd349bef94f8">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="b2f08d0b-cdcf-430c-a77a-d9cb604215c8"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{idAlumno}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

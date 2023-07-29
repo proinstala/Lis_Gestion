@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -16,6 +17,8 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import modelo.Alumno;
+import modelo.Mensualidad;
 import modelo.Usuario;
 import utilidades.Constants;
 
@@ -23,6 +26,8 @@ public class InformesControlador implements Initializable {
 
     private Logger logUser;
     private Usuario usuario;
+    private ObservableList<Mensualidad> listadoMensualidadesGeneral;
+    private ObservableList<Alumno> listadoAlumnosGeneral;
 
     @FXML
     private Button btnAlumnoClases;
@@ -193,6 +198,8 @@ public class InformesControlador implements Initializable {
             ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
 
             controller.setUsuario(usuario);
+            controller.setListaMensualidades(listadoMensualidadesGeneral);
+            controller.setListaAlumnos(listadoAlumnosGeneral);
 
             Scene scene = new Scene(formInforme);
             scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); // Añade hoja de estilos.
@@ -217,6 +224,27 @@ public class InformesControlador implements Initializable {
 	 */
 	public void setUsuarioActual(Usuario usuarioActual) {
 		this.usuario = usuarioActual;
+	}
+
+
+    /**
+     * Establece la lista de mensualidades para mostrar en la tabla.
+     * Configura el filtro, los eventos de selección y los datos de la tabla.
+     * 
+     * @param lista La lista de mensualidades a mostrar.
+     */
+    public void setListaMensualidades(ObservableList<Mensualidad> lista) {
+        listadoMensualidadesGeneral = lista; //Guarda la lista pasada a la lista de Clasecontrolador.
+    }
+
+
+    /**
+     * Establece la lista de alumnos en el controlador.
+     *
+     * @param lista La lista de alumnos a establecer.
+     */
+    public void setListaAlumnos(ObservableList<Alumno> lista) {
+        listadoAlumnosGeneral = lista;
 	}
     
 }
