@@ -2,6 +2,7 @@ package controlador;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -13,12 +14,15 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import colecciones.ColeccionMensualidades;
+
+import baseDatos.ConexionBD;
+import colecciones.ColeccionAlumnos;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -40,9 +44,8 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Alumno;
-import modelo.EstadoPago;
-import modelo.Mensualidad;
-import modelo.MensualidadReport;
+import modelo.EstadoAlumno;
+import modelo.Genero;
 import modelo.Toast;
 import modelo.Usuario;
 import net.sf.jasperreports.engine.JRException;
@@ -54,16 +57,24 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.swing.JRViewer;
 import net.sf.jasperreports.view.JasperViewer;
+import utilidades.CadenaUtil;
 import utilidades.Constants;
-import utilidades.Fechas;
 
-public class InformeFormMensualidadesControlador implements Initializable {
 
-    private ObservableList<Alumno> listadoAlumnosGeneral;
-    private FilteredList<Mensualidad> filtro;
+public class InformeFormAlumnosControlador implements Initializable {
+
+    private final String ORDEN_ID = "ID";
+    private final String ORDEN_NOMBRE = "NOMBRE";
+    private final String ORDEN_LOCALIDAD = "LOCALIDAD";
+    private final String ORDEN_ESTADO = "ESTADO";
+    private final String ORDEN_GENERO = "GENERO";
+
+    private FilteredList<Alumno> filtro;
     private ObservableList<String> tipoEmail;
     private DateTimeFormatter formatter;
     private DateTimeFormatter formatterTime;
+    private DecimalFormat decimalFormat;
+    private ConexionBD conexionBD;
     private Logger logUser;
     private Toast toast;
     private Usuario newUsuario;
@@ -79,28 +90,31 @@ public class InformeFormMensualidadesControlador implements Initializable {
     private Button btnGenerar;
 
     @FXML
-    private ComboBox<Integer> cbAnio;
+    private ComboBox<String> cbEstado;
+
+    @FXML
+    private ComboBox<String> cbGenero;
+
+    @FXML
+    private ComboBox<String> cbLocalidad;
 
     @FXML
     private ComboBox<String> cbEmail;
 
     @FXML
-    private ComboBox<String> cbEstado;
-
-    @FXML
-    private ComboBox<String> cbMes;
+    private ComboBox<String> cbOrdenar;
 
     @FXML
     private CheckBox chekbMetadatos;
 
     @FXML
-    private GridPane gpFormInformeMensualidad;
+    private GridPane gpFormInformeAlumno;
 
     @FXML
     private ImageView ivImagenTipoFormulario;
 
     @FXML
-    private Label lbNumeroMensualidades;
+    private Label lbNumeroAlumnos;
 
     @FXML
     private Label lbTitulo;
@@ -135,7 +149,7 @@ public class InformeFormMensualidadesControlador implements Initializable {
     @FXML
     private TextField tfTelefono;
 
-    
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //Añadir clases de estilo CSS a elementos.
@@ -145,14 +159,15 @@ public class InformeFormMensualidadesControlador implements Initializable {
         Image formulario;
         try {
             //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
-            formulario = new Image(getClass().getResourceAsStream("/recursos/calendar_2_72.png")); //Forma desde IDE y JAR.
+            formulario = new Image(getClass().getResourceAsStream("/recursos/id_1_72.png")); //Forma desde IDE y JAR.
         } catch (Exception e) {
             //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
-            formulario = new Image("/recursos/calendar_2_72.png"); //Forma desde el JAR.
+            formulario = new Image("/recursos/id_1_72.png"); //Forma desde el JAR.
         }
         //Establecer las imagenes cargadas en los ImageView.
         ivImagenTipoFormulario.setImage(formulario);
 
+        conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
         toast = new Toast();
 
@@ -161,18 +176,21 @@ public class InformeFormMensualidadesControlador implements Initializable {
         
         //Formateador de fecha y hora sin milisegundos para el nombre del informe
         formatterTime = DateTimeFormatter.ofPattern("dd_MM_yyyy-HH_mm_ss");
+        
+        //formateador de numero decimal para mostrar un digito en los decimales.
+        decimalFormat = new DecimalFormat("#0.0");
 
         //Configura los controles, establece sus listener y establece los valores por defecto.
         configurarControles();
 
         //Configurar un evento de clic del ratón para el botón "Cancelar".
         btnCancelar.setOnMouseClicked(e -> {
-            ((Stage) gpFormInformeMensualidad.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
+            ((Stage) gpFormInformeAlumno.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
         });
         
         //Configurar un evento de clic del ratón para el botón "Generar".
         btnGenerar.setOnMouseClicked(e -> {
-            if (comprobarCampos() && generarColeccionMensualidades()) {
+            if (comprobarCampos() && generarColeccionAlumnos()) {
                 generarInforme();
             } 
         });
@@ -263,62 +281,55 @@ public class InformeFormMensualidadesControlador implements Initializable {
         nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime);
         tfNombreInforme.setText(nombreInforme);
 
-        //Creo un ArrayList de Integer con valores de 2020 hasta 2050 y cargo el ArrayList en el ComboBox cbAnio.
-        int yearInicial = 2020;
-        ArrayList<Integer> listaYears = new ArrayList<Integer>();
-        for (int i = 0; i <= 30; i++) {
-            listaYears.add(yearInicial + i);
-        }
-        //Si el año actual no esta en la lista, lo agrega.
-        if(!listaYears.contains(LocalDate.now().getYear())) {
-            listaYears.add(LocalDate.now().getYear());
-        }
-        cbAnio.setItems(FXCollections.observableArrayList(listaYears));
+        //Configura el ComboBox cbEstado.
+        ObservableList<String> listadoEstado = FXCollections.observableArrayList();
+        listadoEstado.setAll(EstadoAlumno.ACTIVO.toString(), EstadoAlumno.BAJA.toString(), "TODOS");
+        cbEstado.setItems(listadoEstado);
+        cbEstado.setValue("TODOS"); //Valor inicial.
 
-        //Creo un ObservableList<String> con el nombre de los meses del año. Cargo la lista en el ComboBox cbMes.
-        ObservableList<String> listMeses = FXCollections.observableArrayList(Fechas.obtenerMesesDelAnio().values());
-        listMeses.add("TODOS"); //Añado a listMeses el valor TODOS.
-        cbMes.setItems(listMeses);
-
-        //Convieto los valores de EstadoPago a String y los añadao a listaEstados. Cargo la lista en el ComboBox cbEstado.
-        ArrayList<String> listaEstados = new ArrayList<String>();
-        for (EstadoPago e : EstadoPago.values()) {
-            listaEstados.add(e.toString());
-        }
-        listaEstados.add("TODOS"); //Añado a listaEstados el valor TODOS.
-        cbEstado.setItems(FXCollections.observableArrayList(listaEstados));
-
-        //Valor inicial del ComboBox cbAnio.
-        try{
-            cbAnio.setValue(LocalDate.now().getYear()); //Establece el año actual marcado por defecto.
-        }catch (IllegalArgumentException e) {
-            cbAnio.setValue(2020); //Establece este año si el año actual no se encuentra entre los valores del ComboBox cbAnio.
-            logUser.severe("Excepción: " + e.toString());
-            e.printStackTrace();
-        } catch (Exception e) {
-            logUser.severe("Excepción: " + e.toString());
-            e.printStackTrace();
-        }
-
-        cbMes.setValue(Fechas.obtenerNombreMes(LocalDate.now().getMonthValue())); //Valor inicial del ComboBox cbMes.
-        cbEstado.setValue("TODOS"); //Valor inicial del ComboBox cbEstado.
-
-        //Configurar Listener para el ComboBox cbMes.
-        cbMes.setOnAction(e -> {
-            configurarFiltro("");
-            System.out.println("Filtro Tam: " + filtro.size());
-        });
-
-        //Configurar Listener para el ComboBox cbEstado.
+        //Configurar Listener para el ComboBox cbGenero.
         cbEstado.setOnAction(e -> {
             configurarFiltro("");
-            System.out.println("Filtro Tam: " + filtro.size());
         });
 
-        //Configurar Listener para el ComboBox cbAnio.
-        cbAnio.setOnAction(e -> {
+        //Configura el ComboBox cbGenero.
+        ObservableList<String> listadoGenero = FXCollections.observableArrayList();
+        listadoGenero.setAll(Genero.HOMBRE.toString(), Genero.MUJER.toString(), "AMBOS");
+        cbGenero.setItems(listadoGenero);
+        cbGenero.setValue("AMBOS"); //Valor inicial.
+
+        //Configurar Listener para el ComboBox cbGenero.
+        cbGenero.setOnAction(e -> {
             configurarFiltro("");
-            System.out.println("Filtro Tam: " + filtro.size());
+        });
+
+        //Configura el ComboBox cbLocalidad.
+        ObservableList<String> listadoLocalidades = null;
+        try {
+			listadoLocalidades = FXCollections.observableArrayList(conexionBD.getLocalidades());
+            listadoLocalidades.add("TODAS");
+
+            //Carga en el ComboBox los items del listadoLocalidades.
+            cbLocalidad.setItems(listadoLocalidades);
+            cbLocalidad.setValue("TODAS"); //Valor inicial.
+
+            cbLocalidad.setOnAction(e -> {
+                configurarFiltro("");
+            });
+		} catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
+			e.printStackTrace();
+		}
+
+        //Configura el ComboBox cbOrdenar.
+        ObservableList<String> listadoOrden = FXCollections.observableArrayList();
+        listadoOrden.setAll(ORDEN_ID, ORDEN_NOMBRE, ORDEN_LOCALIDAD, ORDEN_ESTADO, ORDEN_GENERO);
+        cbOrdenar.setItems(listadoOrden);
+        cbOrdenar.setValue("ID"); //Valor inicial.
+
+        //Configurar Listener para el ComboBox cbOrdenar.
+        cbOrdenar.setOnAction(e -> {
+            configurarFiltro("");
         });
     }
 
@@ -330,7 +341,7 @@ public class InformeFormMensualidadesControlador implements Initializable {
      */
     private String textoInforme() {
         String texto;
-        texto = "Informe de Mensualidades general de Alumnos.";
+        texto = "Informe de datos personales de Alumnos inscritos en el centro.";
         return texto;
     }
 
@@ -341,16 +352,17 @@ public class InformeFormMensualidadesControlador implements Initializable {
      * @param texto El texto de búsqueda utilizado para filtrar.
      */
     private void configurarFiltro(String texto) {
+
         filtro.setPredicate(obj -> {
-            if (obj.fechaProperty().getValue().getYear() != cbAnio.getValue()) {
+            if (!(cbEstado.getValue().equals("TODOS")) && !(obj.estadoProperty().getValue().toString().equals(cbEstado.getValue()))) {
                 return false;
             }
 
-            if (!(cbMes.getValue().equals("TODOS")) && !(Fechas.obtenerNombreMes(obj.fechaProperty().getValue().getMonthValue()).equals(cbMes.getValue()))) {
+            if (!(cbGenero.getValue().equals("AMBOS")) && !(obj.generoProperty().getValue().toString().equals(cbGenero.getValue()))) {
                 return false;
             }
 
-            if (!(cbEstado.getValue().equals("TODOS")) && !(obj.estadoPagoProperty().getValue().toString().equals(cbEstado.getValue()))) {
+            if (!(cbLocalidad.getValue().equals("TODAS")) && !(obj.getDireccion().localidadProperty().getValue().toString().equals(cbLocalidad.getValue()))) {
                 return false;
             }
 
@@ -359,44 +371,57 @@ public class InformeFormMensualidadesControlador implements Initializable {
     }
 
 
-    /**
-     * Genera una colección de objetos de tipo MensualidadReport basada en una lista de Mensualidad y un listado general de Alumnos.
-     * La colección resultante se ordena por fecha de Mensualidad de forma ascendente.
-     * La colección se establece en la clase ColeccionMensualidades mediante el método estático setColeccionMensualidades.
-     * 
-     * @return true si la generación de la colección fue exitosa, false en caso de error.
+     /**
+     * Genera y ordena la colección de alumnos (filtro) utilizando un comparador basado en el criterio de ordenamiento seleccionado.
+     * Luego establece la colección ordenada como la lista de alumnos en la clase ColeccionAlumnos.
+     *
+     * @return true si se generó y ordenó correctamente la colección de alumnos, false en caso de error.
      */
-    private boolean generarColeccionMensualidades() {
+    private boolean generarColeccionAlumnos() {
         try {
-            ArrayList<Mensualidad> listaMensualidadReport = new ArrayList<Mensualidad>();
-        
-            //Iterar sobre cada Mensualidad en el filtro.
-            for (Mensualidad mensualidad : filtro) {
-                MensualidadReport mReport = new MensualidadReport(mensualidad); //Crear un objeto MensualidadReport a partir de la Mensualidad actual.
-            
-                //Buscar el Alumno correspondiente en el listado general de Alumnos y establecer su nombre en el MensualidadReport.
-                for (Alumno alumno : listadoAlumnosGeneral) {
-                    if (mensualidad.getIdAlumno() == alumno.getId()) {
-                        mReport.setNombreAlumno(alumno.getNombreCompleto());
-                        break;
-                    }
+            //Crea el comparador para ordenar la lista de alumnos por el criterio seleccionado.
+            Comparator<Alumno> comparador = null;
+
+            switch (cbOrdenar.getValue()) {
+                case ORDEN_ID -> {
+                    comparador = Comparator.comparingInt(Alumno::getId);
                 }
 
-            	listaMensualidadReport.add(mReport); //Agregar el MensualidadReport a la lista listaMensualidadReport.
+                case ORDEN_NOMBRE -> {
+                    comparador = Comparator.comparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
+                }
+
+                case ORDEN_LOCALIDAD -> {
+                    comparador = Comparator.comparing((Alumno alumno) -> alumno.getDireccion().getLocalidad()).thenComparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
+                }
+
+                case ORDEN_ESTADO -> {
+                    comparador = Comparator.comparing(Alumno::getEstado).thenComparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
+                }
+
+                case ORDEN_GENERO -> {
+                    comparador = Comparator.comparing(Alumno::getGenero).thenComparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
+                }
+
+                default -> {
+                    comparador = Comparator.comparingInt(Alumno::getId);
+                }
             }
             
-            //Crear el comparador para ordenar por fecha ascendente
-            Comparator<Mensualidad> comparadorFechaAscendente = Comparator.comparing(Mensualidad::getFecha);
-
-            //Ordenar la lista listaMensualidadReport por fecha ascendente
-            Collections.sort(listaMensualidadReport, comparadorFechaAscendente);
+            //ArrayList<Alumno> listaAlumnos = new ArrayList<Alumno>(filtro);
+            //Collections.sort(listaAlumnos, comparador);
             
-            //Establece la lista de mensualidades a ColeccionMensualidades.
-            ColeccionMensualidades.setColeccionMensualidades(listaMensualidadReport);
+            SortedList<Alumno> sortedList = new SortedList<Alumno>(filtro);
+            
+            //Ordena la lista sortedList (colección de alumnos) utilizando el comparador.
+            sortedList.setComparator(comparador);
+            
+            //Establece la lista ordenada de alumnos en la clase ColeccionAlumnos.
+            ColeccionAlumnos.setColeccionAlumnos(sortedList);
             
         } catch (Exception e) {
             //En caso de excepción, mostrar un mensaje de error y registrar la excepción en el log del usuario.
-            toast.show((Stage) gpFormInformeMensualidad.getScene().getWindow(),"Fallo al generar informe.\n" + e.toString());
+            toast.show((Stage) gpFormInformeAlumno.getScene().getWindow(),"Fallo al generar informe.\n" + e.toString());
             logUser.severe("Excepción al generar informe: " + e.toString());
 			e.printStackTrace();
             return false;
@@ -415,7 +440,7 @@ public class InformeFormMensualidadesControlador implements Initializable {
         JasperReport jasperReport;
     	JasperPrint print;
         InputStream jasperStream;
-        jasperStream = getClass().getResourceAsStream("/reports/report_mensualidad_general.jasper");
+        jasperStream = getClass().getResourceAsStream("/reports/report_alumno.jasper");
         
         //Configurar los parámetros necesarios para el informe.
         HashMap<String, Object> parameters = configuracionParametrosInforme();
@@ -423,8 +448,8 @@ public class InformeFormMensualidadesControlador implements Initializable {
     	try {
 			jasperReport = (JasperReport) JRLoader.loadObject(jasperStream); //Cargar el archivo de reporte como un objeto JasperReport.
 
-            //Rellenar el informe utilizando el JasperReport, los parámetros y la colección de Mensualidades.
-			print = JasperFillManager.fillReport( jasperReport, parameters, new JRBeanCollectionDataSource(ColeccionMensualidades.getColeccionMensualidades()));
+            //Rellenar el informe utilizando el JasperReport, los parámetros y la colección de Alumnos.
+			print = JasperFillManager.fillReport( jasperReport, parameters, new JRBeanCollectionDataSource(ColeccionAlumnos.getColeccionAlumnos()));
 			
             //Verificar el modo de generación del informe.
             if(grupoModo.getSelectedToggle().equals(rbMostrar)) {
@@ -449,26 +474,26 @@ public class InformeFormMensualidadesControlador implements Initializable {
                 }
 
                 //Mostrar una notificación de éxito en la interfaz gráfica.
-                toast.show((Stage) ((Stage) gpFormInformeMensualidad.getScene().getWindow()).getOwner(),"Informe Generado!.");
+                toast.show((Stage) ((Stage) gpFormInformeAlumno.getScene().getWindow()).getOwner(),"Informe Generado!.");
 
                 //Cerrar la ventana actual después de enviar el correo.
-                ((Stage) gpFormInformeMensualidad.getScene().getWindow()).close(); // Obtener la referencia al Stage actual y cerrarlo.
+                ((Stage) gpFormInformeAlumno.getScene().getWindow()).close(); // Obtener la referencia al Stage actual y cerrarlo.
             }
 			
 		} catch (JRException e) {
             //En caso de excepción JRException, mostrar un mensaje de error y registrar la excepción en el log de errores.
-            toast.show((Stage) gpFormInformeMensualidad.getScene().getWindow(),"Fallo al generar informe.\n" + e.toString());
+            toast.show((Stage) gpFormInformeAlumno.getScene().getWindow(),"Fallo al generar informe.\n" + e.toString());
             logUser.severe("Excepción al generar informe: " + e.toString());
 			e.printStackTrace();
 
 		} catch (Exception e) {
             //En caso de excepción general, mostrar un mensaje de error y registrar la excepción en el log de errores.
-            toast.show((Stage) gpFormInformeMensualidad.getScene().getWindow(),"Fallo al generar informe.\n" + e.toString());
+            toast.show((Stage) gpFormInformeAlumno.getScene().getWindow(),"Fallo al generar informe.\n" + e.toString());
             logUser.severe("Excepción al grnerar informe: " + e.toString());
             e.printStackTrace();
         }
     }
-    
+
 
     /**
      * Configura y devuelve un HashMap que contiene los parámetros necesarios para generar el informe.
@@ -477,37 +502,27 @@ public class InformeFormMensualidadesControlador implements Initializable {
      */
     private HashMap<String, Object> configuracionParametrosInforme() {
     	HashMap<String, Object> parameters = new HashMap<String, Object>();
-    	Double importe_total = 0.0;
-    	Double importe_pagadas = 0.0;
-    	Double importe_pendientes = 0.0;
-    	Double importe_resto = 0.0;
-    	Integer cont_pagadas = 0;
-    	Integer cont_pendientes = 0;
-    	Integer cont_resto = 0;
     	
-        //Calcular los totales de importes y conteo de mensualidades en diferentes estados.
-        for (Mensualidad mensualidad : filtro) {
-            double importe = mensualidad.getImporte();
-            switch (mensualidad.getEstadoPago()) {
-                case PAGADO ->{
-                    importe_pagadas += importe;
-                    cont_pagadas++;
-                }
-                    
-                case PENDIENTE -> {
-                    importe_pendientes += importe;
-                    cont_pendientes++;
-                }
-                    
-                default -> {
-                    importe_resto += importe;
-                    cont_resto++;
-                }
-            }
-        }
+    	Integer cont_hombres = 0;
+    	Integer cont_mujeres = 0;
+    	Double cont_edad = 0.0;
     	
-        //Calcular el importe total sumando los importes pagados, pendientes y resto.
-    	importe_total = importe_pagadas + importe_pendientes + importe_resto;
+        //Calcular los totales Alumnos hombres y mujeres y suma las edades.
+    	for(Alumno a : filtro) {
+    		switch (a.getGenero()) {
+	    		case HOMBRE -> {
+	    			cont_hombres++;
+	    		}
+	    		
+	    		case MUJER -> {
+	    			cont_mujeres++;
+	    		}
+    		}
+    		cont_edad += a.getEdad();
+    	}
+    	
+        //Calcula la media de edad de los Alumnos en la lista filtro.
+    	Double media_edad = cont_edad / filtro.size();
     	
         //Establecer los parámetros en el HashMap.
     	parameters.put("autor", (tfNombreUsuario.getText()));
@@ -515,17 +530,14 @@ public class InformeFormMensualidadesControlador implements Initializable {
     	parameters.put("email", tfEmail.getText());
     	parameters.put("fecha_informe", LocalDate.now().format(formatter));
     	parameters.put("texto_informe",  (taTexto.getText() == null) ? "" : taTexto.getText());
-        parameters.put("total_mensualidades", lbNumeroMensualidades.getText());
-        parameters.put("filtro_anio", cbAnio.getValue().toString());
-        parameters.put("filtro_mes", cbMes.getValue().toString());
-        parameters.put("filtro_estado", cbEstado.getValue().toString());
-        parameters.put("importe_total", importe_total + " €");
-        parameters.put("importe_pagadas", importe_pagadas + " €");
-        parameters.put("importe_pendientes", importe_pendientes + " €");
-        parameters.put("importe_resto", importe_resto + " €");
-        parameters.put("cont_pagadas", cont_pagadas);
-        parameters.put("cont_pendientes", cont_pendientes);
-        parameters.put("cont_resto", cont_resto);
+        parameters.put("total_alumnos", lbNumeroAlumnos.getText());
+        parameters.put("cont_hombres", cont_hombres);
+        parameters.put("cont_mujeres", cont_mujeres);
+        parameters.put("media_edad", decimalFormat.format(media_edad));
+        parameters.put("filtro_localidad", cbLocalidad.getValue().toString());
+        parameters.put("filtro_genero", CadenaUtil.capitalize(cbGenero.getValue().toString()));
+        parameters.put("filtro_estado", CadenaUtil.capitalize(cbEstado.getValue().toString()));
+        parameters.put("orden_lista", CadenaUtil.capitalize(cbOrdenar.getValue().toString()));
         
     	return parameters; //Devolver el HashMap con los parámetros configurados.
     }
@@ -580,7 +592,7 @@ public class InformeFormMensualidadesControlador implements Initializable {
         Alert alerta = new Alert(tipo);
         alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
         alerta.setTitle(tiutlo);
-        alerta.initOwner((Stage) gpFormInformeMensualidad.getScene().getWindow());
+        alerta.initOwner((Stage) gpFormInformeAlumno.getScene().getWindow());
         alerta.setHeaderText(cabecera);
         alerta.setContentText(cuerpo);
         alerta.initStyle(StageStyle.DECORATED);
@@ -617,40 +629,28 @@ public class InformeFormMensualidadesControlador implements Initializable {
 
 
     /**
-     * Establece la lista de mensualidades.
-     * Configura el filtro, los eventos de selección y los datos del filtro.
-     * 
-     * @param lista La lista de mensualidades a mostrar.
-     */
-    public void setListaMensualidades(ObservableList<Mensualidad> lista) {
-        //listadoMensualidadesGeneral = lista; //Guarda la lista pasada a la lista de Clasecontrolador.
-		filtro = new FilteredList<Mensualidad>(lista); //Inicia el filtro pasándole el listado de mensualidades.
-		
-        configurarFiltro(""); //Configura el filtro.
-        setupDatosFiltro(); // Configura los bindings para actualizar los labels de información del filtro.
-	}
-
-    
-    /**
-     * Configura los Labels que muestran los datos del filtro y las propiedades enlazadas.
-     * Actualiza los labels con la información del filtro.
-     */
-    private void setupDatosFiltro() {
-        IntegerBinding totalMensualidades = Bindings.createIntegerBinding(
-                () -> (int) filtro.stream().count(), filtro);
-        
-        lbNumeroMensualidades.textProperty()
-                .bind(Bindings.createStringBinding(() -> String.format("%d", totalMensualidades.get()), totalMensualidades));
-    }
-
-
-    /**
      * Establece la lista de alumnos en el controlador.
      *
      * @param lista La lista de alumnos a establecer.
      */
     public void setListaAlumnos(ObservableList<Alumno> lista) {
-        listadoAlumnosGeneral = lista;
+		filtro = new FilteredList<Alumno>(lista); //Inicia el filtro pasándole el listado de alumnos.
+		
+        configurarFiltro(""); //Configura el filtro.
+        setupDatosFiltro(); // Configura los bindings para actualizar los labels de información del filtro.
 	}
+
+
+    /**
+     * Configura los Labels que muestran los datos del filtro y las propiedades enlazadas.
+     * Actualiza los labels con la información del filtro.
+     */
+    private void setupDatosFiltro() {
+        IntegerBinding totalAlumnos = Bindings.createIntegerBinding(
+                () -> (int) filtro.stream().count(), filtro);
+        
+        lbNumeroAlumnos.textProperty()
+                .bind(Bindings.createStringBinding(() -> String.format("%d", totalAlumnos.get()), totalAlumnos));
+    }
     
 }

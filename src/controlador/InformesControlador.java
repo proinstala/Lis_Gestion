@@ -30,6 +30,9 @@ public class InformesControlador implements Initializable {
     private ObservableList<Alumno> listadoAlumnosGeneral;
 
     @FXML
+    private Button btnAlumnos;
+
+    @FXML
     private Button btnAlumnoClases;
 
     @FXML
@@ -113,6 +116,18 @@ public class InformesControlador implements Initializable {
 
         btnMensualidades.setOnMouseClicked(e -> {
             abrirFormMensualidades();
+        });
+
+        btnAlumnos.setOnMouseClicked(e -> {
+            abrirFormAlumnos();
+        });
+
+        btnAlumnoMensualidad.setOnMouseClicked(e -> {
+            abrirFormAlumnosMensualidad();
+        });
+
+        btnAlumnoClases.setOnMouseClicked(e -> {
+            abrirFormAlumnosClase();
         });
     }
 
@@ -199,6 +214,108 @@ public class InformesControlador implements Initializable {
 
             controller.setUsuario(usuario);
             controller.setListaMensualidades(listadoMensualidadesGeneral);
+            controller.setListaAlumnos(listadoAlumnosGeneral);
+
+            Scene scene = new Scene(formInforme);
+            scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); // Añade hoja de estilos.
+            ventana.setScene(scene);
+            ventana.setTitle("Nuevo Informe");
+            ventana.showAndWait();
+
+        } catch (IOException e) {
+            logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
+        }
+    }
+
+
+    private void abrirFormAlumnos() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/informeFormAlumnosVista.fxml"));
+            GridPane formInforme;
+            formInforme = (GridPane) loader.load();
+            InformeFormAlumnosControlador controller = loader.getController(); // cargo el controlador.
+
+            Stage ventana = new Stage();
+            ventana.initOwner((Stage) gpInformes.getScene().getWindow());
+            ventana.initModality(Modality.APPLICATION_MODAL); // modalida para bloquear las ventanas de detras.
+            ventana.initStyle(StageStyle.DECORATED);
+
+            URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
+            ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
+
+            controller.setUsuario(usuario);
+            controller.setListaAlumnos(listadoAlumnosGeneral);
+
+            Scene scene = new Scene(formInforme);
+            scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); // Añade hoja de estilos.
+            ventana.setScene(scene);
+            ventana.setTitle("Nuevo Informe");
+            ventana.showAndWait();
+
+        } catch (IOException e) {
+            logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
+        }
+    }
+
+
+    private void abrirFormAlumnosMensualidad() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/informeFormAlumnosMensualidadVista.fxml"));
+            GridPane formInforme;
+            formInforme = (GridPane) loader.load();
+            InformeFormAlumnosMensualidadControlador controller = loader.getController(); // cargo el controlador.
+
+            Stage ventana = new Stage();
+            ventana.initOwner((Stage) gpInformes.getScene().getWindow());
+            ventana.initModality(Modality.APPLICATION_MODAL); // modalida para bloquear las ventanas de detras.
+            ventana.initStyle(StageStyle.DECORATED);
+
+            URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
+            ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
+
+            controller.setUsuario(usuario);
+            controller.setListaAlumnos(listadoAlumnosGeneral);
+
+            Scene scene = new Scene(formInforme);
+            scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); // Añade hoja de estilos.
+            ventana.setScene(scene);
+            ventana.setTitle("Nuevo Informe");
+            ventana.showAndWait();
+
+        } catch (IOException e) {
+            logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
+        }
+    }
+
+
+     private void abrirFormAlumnosClase() {
+         try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/informeFormAlumnosClaseVista.fxml"));
+            GridPane formInforme;
+            formInforme = (GridPane) loader.load();
+            InformeFormAlumnosClaseControlador controller = loader.getController(); // cargo el controlador.
+
+            Stage ventana = new Stage();
+            ventana.initOwner((Stage) gpInformes.getScene().getWindow());
+            ventana.initModality(Modality.APPLICATION_MODAL); // modalida para bloquear las ventanas de detras.
+            ventana.initStyle(StageStyle.DECORATED);
+
+            URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
+            ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
+
+            controller.setUsuario(usuario);
             controller.setListaAlumnos(listadoAlumnosGeneral);
 
             Scene scene = new Scene(formInforme);

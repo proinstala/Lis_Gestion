@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import modelo.Alumno;
+import modelo.AlumnoReport;
 import modelo.Clase;
 import modelo.Direccion;
 import modelo.EstadoAlumno;
@@ -2048,6 +2049,155 @@ public class ConexionBD implements Cloneable{
         }
 
         return listaClases;
+    }
+
+
+    /**
+     * Obtiene una lista de objetos AlumnoReport que contienen información de los alumnos y sus clases asociadas para un año específico.
+     *
+     * @param listaAlumnos La lista de alumnos para generar de los que se van a generar las listas de clases.
+     * @param year         El año para filtrar las clases asociadas a los alumnos.
+     * @return Una lista de objetos AlumnoReport que contiene información de los alumnos y sus clases asociadas.
+     * @throws SQLException Si ocurre algún error durante la consulta a la base de datos.
+     */
+    public ArrayList<AlumnoReport> getListaAlumnoReport(ArrayList<Alumno> listaAlumnos, int year) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        ArrayList<AlumnoReport> listaAlumnoReport = null;
+        conn = cn.conectar();
+
+        //--------------------------------------------------------------
+        //strftime('%W', fecha) -> devuelve el numero de semana.
+        //strftime('%Y', fecha) -> devuelve el año.
+        //strftime('%m', fecha) -> devuelve el numero de mes.
+        //--------------------------------------------------------------
+
+        //Consulta a base de datos.
+        String sql = "SELECT C.id, C.numero, C.tipo, C.hora, C.anotaciones FROM CLASE_ALUMNO CS JOIN CLASE C ON(CS.clase_id = C.id)"
+                    + "WHERE CS.alumno_id = ? AND strftime('%Y', C.jornada) = ?;";
+        
+        try {
+            listaAlumnoReport = new ArrayList<AlumnoReport>();
+            ps = conn.prepareStatement(sql);
+
+            for (Alumno alumno : listaAlumnos) {
+                ArrayList<Clase> listaClases = new ArrayList<Clase>();
+                ps.setInt(1, alumno.getId());
+                ps.setString(2, Integer.toString(year));
+                res = ps.executeQuery();
+
+                //Recorre las filas devueltas por la consulta y crea por cada fila un Objeto de tipo Clase añadiendolo al Array listaClases.
+                while (res.next()) {
+                    //Crea un Enumerado de tipo TipoClase a partir del valor rescatado en el campo tipo del registro que se esta recorriendo.
+                    TipoClase tipo;
+                    try {
+                        tipo = TipoClase.valueOf(res.getString(3));
+                    } catch (IllegalArgumentException e) {
+                        logger.severe("Excepción: " + e.toString());
+                        tipo = null;
+                    }
+
+                    //Crea un Enumerado de tipo HoraClase a partir del valor rescatado en el campo tipo del registro que se esta recorriendo.
+                    HoraClase hora;
+                    try {
+                        String[] partes = res.getString(4).split(":"); //Crea un Array con la hora y los minutos
+                        hora = HoraClase.getHoraClase(Integer.parseInt(partes[0]), Integer.parseInt(partes[1]));
+                    } catch (IllegalArgumentException e) {
+                        logger.severe("Excepción: " + e.toString());
+                        hora = null;
+                    }
+
+                    //Añade una nueva Clase con la informacion de la fila recorrida a listaClases.
+                    Clase clase = new Clase(res.getInt(1), res.getInt(2), tipo, hora, res.getString(5));
+                    listaClases.add(clase);
+                    
+                }
+                listaAlumnoReport.add(new AlumnoReport(alumno, listaClases));
+            }
+        } catch (SQLException e) {
+            logger.severe("Excepción SQL: " + e.toString());
+            e.printStackTrace();
+        } finally { 
+            if(ps != null) {ps.close();}
+            if(res != null) {res.close();} 
+        }
+        
+        cn.desconectar(conn);
+        return listaAlumnoReport;
+    }
+
+
+    /**
+     * Obtiene una lista de objetos AlumnoReport que contienen información de los alumnos y sus clases asociadas para un año y un mes específico.
+     *
+     * @param listaAlumnos La lista de alumnos para generar de los que se van a generar las listas de clases.
+     * @param fecha         El año y mes para filtrar las clases asociadas a los alumnos.
+     * @return Una lista de objetos AlumnoReport que contiene información de los alumnos y sus clases asociadas.
+     * @throws SQLException Si ocurre algún error durante la consulta a la base de datos.
+     */
+    public ArrayList<AlumnoReport> getListaAlumnoReport(ArrayList<Alumno> listaAlumnos, YearMonth fecha) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        ArrayList<AlumnoReport> listaAlumnoReport = null;
+        conn = cn.conectar();
+
+        //--------------------------------------------------------------
+        //strftime('%W', fecha) -> devuelve el numero de semana.
+        //strftime('%Y', fecha) -> devuelve el año.
+        //strftime('%m', fecha) -> devuelve el numero de mes.
+        //--------------------------------------------------------------
+
+        //Consulta a base de datos.
+        String sql = "SELECT C.id, C.numero, C.tipo, C.hora, C.anotaciones FROM CLASE_ALUMNO CS JOIN CLASE C ON(CS.clase_id = C.id)"
+                    + "WHERE CS.alumno_id = ? AND strftime('%Y', C.jornada) = ? AND strftime('%m', C.jornada) = ?;";
+        
+        try {
+            listaAlumnoReport = new ArrayList<AlumnoReport>();
+            ps = conn.prepareStatement(sql);
+
+            for (Alumno alumno : listaAlumnos) {
+                ArrayList<Clase> listaClases = new ArrayList<Clase>();
+                ps.setInt(1, alumno.getId());
+                ps.setString(2, Integer.toString(fecha.getYear()));
+                ps.setString(3, (fecha.getMonthValue() < 10)? "0" + fecha.getMonthValue() : Integer.toString(fecha.getMonthValue()));
+                res = ps.executeQuery();
+
+                //Recorre las filas devueltas por la consulta y crea por cada fila un Objeto de tipo Clase añadiendolo al Array listaClases.
+                while (res.next()) {
+                    //Crea un Enumerado de tipo TipoClase a partir del valor rescatado en el campo tipo del registro que se esta recorriendo.
+                    TipoClase tipo;
+                    try {
+                        tipo = TipoClase.valueOf(res.getString(3));
+                    } catch (IllegalArgumentException e) {
+                        logger.severe("Excepción: " + e.toString());
+                        tipo = null;
+                    }
+
+                    //Crea un Enumerado de tipo HoraClase a partir del valor rescatado en el campo tipo del registro que se esta recorriendo.
+                    HoraClase hora;
+                    try {
+                        String[] partes = res.getString(4).split(":"); //Crea un Array con la hora y los minutos
+                        hora = HoraClase.getHoraClase(Integer.parseInt(partes[0]), Integer.parseInt(partes[1]));
+                    } catch (IllegalArgumentException e) {
+                        logger.severe("Excepción: " + e.toString());
+                        hora = null;
+                    }
+
+                    //Añade una nueva Clase al Array ListaClases en la posicion posicionArray.
+                    Clase clase = new Clase(res.getInt(1), res.getInt(2), tipo, hora, res.getString(5));
+                    listaClases.add(clase);
+                    
+                }
+                listaAlumnoReport.add(new AlumnoReport(alumno, listaClases));
+            }
+        } catch (SQLException e) {
+            logger.severe("Excepción SQL: " + e.toString());
+            e.printStackTrace();
+        } finally { 
+            if(ps != null) {ps.close();}
+            if(res != null) {res.close();} 
+        }
+        
+        cn.desconectar(conn);
+        return listaAlumnoReport;
     }
 
     
