@@ -44,6 +44,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Alumno;
+import modelo.AlumnoReport;
 import modelo.EstadoAlumno;
 import modelo.Genero;
 import modelo.Toast;
@@ -408,9 +409,23 @@ public class InformeFormAlumnosControlador implements Initializable {
                 }
             }
             
-            //ArrayList<Alumno> listaAlumnos = new ArrayList<Alumno>(filtro);
-            //Collections.sort(listaAlumnos, comparador);
+            /*
+            //Crea una nueva lista para guardar los alumnos como objetos AlumnoReport
+            ArrayList<Alumno> listaAlumnosReport = new ArrayList<Alumno>();
             
+            //Recorre la lista filtro y crea AlumnoReport con los datos de alumnos de la lista filtro. 
+            for(Alumno a : filtro) {
+            	AlumnoReport alumnoR = new AlumnoReport(a); //Crea un AlumnoReport con los datos del alumno que se esta recorriendo.
+            	listaAlumnosReport.add(alumnoR); //Guarda el alumnoReport en listaAlumnosReport.
+            }
+            
+            Collections.sort(listaAlumnosReport, comparador); //Ordena la lista utilizando el comparador.
+            ColeccionAlumnos.setColeccionAlumnos(listaAlumnosReport); //Establece la lista ordenada de alumnos en la clase ColeccionAlumnos.
+            */
+            
+             
+            //codigo para ordenar la lista filtro. -------------------------------------
+        
             SortedList<Alumno> sortedList = new SortedList<Alumno>(filtro);
             
             //Ordena la lista sortedList (colección de alumnos) utilizando el comparador.
@@ -418,6 +433,8 @@ public class InformeFormAlumnosControlador implements Initializable {
             
             //Establece la lista ordenada de alumnos en la clase ColeccionAlumnos.
             ColeccionAlumnos.setColeccionAlumnos(sortedList);
+            //--------------------------------------------------------------------------
+            
             
         } catch (Exception e) {
             //En caso de excepción, mostrar un mensaje de error y registrar la excepción en el log del usuario.

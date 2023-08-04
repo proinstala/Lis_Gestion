@@ -43,6 +43,7 @@ import modelo.Jornada;
 import modelo.TipoClase;
 import modelo.Toast;
 import utilidades.Constants;
+import utilidades.Fechas;
 
 public class ClaseControlador implements Initializable {
 
@@ -461,7 +462,7 @@ public class ClaseControlador implements Initializable {
 	 */
 	public void setClaseIniciacion(int numeroClase) {
 		this.numeroClase = numeroClase;
-		lbDiaSemana.setText(jornada.obtenerDiaSemana());
+		lbDiaSemana.setText(Fechas.obtenerDiaSemana(jornada.getFecha()));
 		formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");//Formato dd/MM/yy
 		lbFecha.setText(jornada.getFecha().format(formatter));
 		cargarClase(numeroClase); //llama a la funcion cargarClase pasandole el numero de la clase que tiene que cargar.

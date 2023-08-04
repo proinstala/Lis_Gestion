@@ -553,7 +553,7 @@
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="11"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{fechaNacimiento}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[java.time.LocalDate.parse($F{fechaNacimiento}.toString()).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement mode="Opaque" x="305" y="0" width="75" height="25" backcolor="#DDD6DE" uuid="a41b92d7-fbf8-4e59-839d-451487448b40">

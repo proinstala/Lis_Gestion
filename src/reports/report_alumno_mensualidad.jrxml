@@ -542,16 +542,6 @@
 				<textFieldExpression><![CDATA[$P{cont_resto}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="470" y="240" width="15" height="20" uuid="3937f699-9883-48d8-a901-90b0e6eb0c4a">
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<text><![CDATA[-]]></text>
-			</staticText>
-			<staticText>
 				<reportElement x="470" y="260" width="15" height="20" uuid="8bfd09ba-cace-40ec-93cd-c5be5bf7f575">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -852,7 +842,7 @@
 					<rightPen lineColor="#FFFFFF"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{fechaNacimiento}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[java.time.LocalDate.parse($F{fechaNacimiento}.toString()).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement mode="Opaque" x="255" y="0" width="65" height="15" backcolor="#DDD6DE" uuid="4394f4af-32cb-41c7-adfa-461d96c423c3">
@@ -990,7 +980,7 @@
 								<rightPen lineWidth="1.25" lineColor="#FFFFFF"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Middle"/>
-							<textFieldExpression><![CDATA[$F{fechaPago}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[java.time.LocalDate.parse($F{fechaPago}.toString()).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))]]></textFieldExpression>
 						</textField>
 						<textField>
 							<reportElement mode="Opaque" x="405" y="0" width="50" height="15" backcolor="#B7AAD6" uuid="0b3e90ed-9b5b-4206-8e4a-dbcffe0fa4ef">

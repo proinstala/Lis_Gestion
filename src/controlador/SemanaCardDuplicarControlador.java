@@ -226,7 +226,7 @@ public class SemanaCardDuplicarControlador implements Initializable {
      */
     private LocalDate[] obtenerFechasSemana(LocalDate fecha) { 
         
-        int numeroSemana = fecha.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);; //Número de semana que deseas obtener.
+        int numeroSemana = fecha.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR); //Número de semana que deseas obtener.
         int anio = fecha.getYear(); // Año correspondiente
 
         //Obtener WeekFields basado en la configuración regional predeterminada.

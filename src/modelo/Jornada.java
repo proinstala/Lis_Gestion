@@ -182,26 +182,6 @@ public class Jornada {
 
         return total;
     }
-    
-    /**
-	 * Devuelve un String con el dia de la semana de esta jornada.
-	 * 
-	 * @return Un String con el dia de la semana de esta jornada.
-	 */
-	public String obtenerDiaSemana() {
-		String nombreDia = "";
-		DayOfWeek diaDeLaSemana = this.getFecha().getDayOfWeek();
-		switch (diaDeLaSemana.name()) {
-		case "MONDAY" -> nombreDia = "Lunes";
-		case "TUESDAY" -> nombreDia = "Martes";
-		case "WEDNESDAY" -> nombreDia = "Miércoles";
-		case "THURSDAY" -> nombreDia = "Jueves";
-		case "FRIDAY" -> nombreDia = "Viernes";
-		case "SATURDAY" -> nombreDia = "Sábado";
-		case "SUNDAY" -> nombreDia = "Domingo";
-		}
-		
-		return nombreDia;
-	}
+   
 
 }

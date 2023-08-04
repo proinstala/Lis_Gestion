@@ -1,5 +1,6 @@
 package modelo;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 /**
@@ -8,7 +9,7 @@ import java.util.ArrayList;
  */
 public class AlumnoReport extends Alumno {
     
-    private ArrayList<Clase> listaClases;
+    private ArrayList<ClaseReport> listaClases;
 
 
     /**
@@ -18,7 +19,7 @@ public class AlumnoReport extends Alumno {
      */
     public AlumnoReport(Alumno alumno) {
         super(alumno);
-        this.listaClases = new ArrayList<Clase>();
+        this.listaClases = new ArrayList<ClaseReport>();
     }
 
     
@@ -28,7 +29,7 @@ public class AlumnoReport extends Alumno {
      * @param alumno Objeto de la clase Alumno.
      * @param listaClases lista de clases asociada al alumno.
      */
-    public AlumnoReport(Alumno alumno, ArrayList<Clase> listaClases) {
+    public AlumnoReport(Alumno alumno, ArrayList<ClaseReport> listaClases) {
         super(alumno);
         this.listaClases = listaClases;
     }
@@ -38,8 +39,8 @@ public class AlumnoReport extends Alumno {
      * 
      * @return Copia de la lista de clases.
      */
-    public ArrayList<Clase> getListaClases() {
-        return new ArrayList<Clase>(this.listaClases);
+    public ArrayList<ClaseReport> getListaClases() {
+        return new ArrayList<ClaseReport>(this.listaClases);
     }
 
     /**
@@ -47,7 +48,16 @@ public class AlumnoReport extends Alumno {
      * 
      * @param listaClases Lista de clases a establecer.
      */
-    public void setListaClases(ArrayList<Clase> listaClases){
+    public void setListaClases(ArrayList<ClaseReport> listaClases){
         this.listaClases = listaClases;
+    }
+    
+    /**
+     * Obtiene la fecha de nacimiento con formato "dd/MM/yyyy".
+     * 
+     * @return String con la fecha de nacimiento formateada.
+     */
+    public String getFechaNacimientoFormateada() {
+    	return this.getFechaNacimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 }

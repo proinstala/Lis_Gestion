@@ -54,6 +54,7 @@ import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.swing.JRViewer;
 import net.sf.jasperreports.view.JasperViewer;
 import utilidades.Constants;
+import utilidades.Fechas;
 
 public class InformeFormJornadaControlador implements Initializable {
     
@@ -366,7 +367,7 @@ public class InformeFormJornadaControlador implements Initializable {
     	parameters.put("textoInforme",  (taTexto.getText() == null) ? "" : taTexto.getText());
     	parameters.put("jornada", jornada.getFecha().format(formatter));
     	parameters.put("comentario_jornada", (chekbComentario.isSelected()) ? jornada.getComentario() : "");
-    	parameters.put("dia_semana", jornada.obtenerDiaSemana());
+    	parameters.put("dia_semana", Fechas.obtenerDiaSemana(jornada.getFecha()));
         parameters.put("semana", lbSemana.getText());
         parameters.put("total_alumnos", lbNumeroAlumnos.getText());
         

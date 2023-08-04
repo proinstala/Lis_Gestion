@@ -49,6 +49,7 @@ import javafx.util.converter.NumberStringConverter;
 import modelo.Alumno;
 import modelo.AlumnoReport;
 import modelo.Clase;
+import modelo.ClaseReport;
 import modelo.EstadoAlumno;
 import modelo.Genero;
 import modelo.Toast;
@@ -409,7 +410,7 @@ public class InformeFormAlumnosClaseControlador implements Initializable{
 
         //Configurar Listener para el ComboBox cbMes.
         cbMes.setOnAction(e -> {
-            listaAlumnoReport = obtenerListadoAlumnosReport();
+            //listaAlumnoReport = obtenerListadoAlumnosReport();
             configurarClasesAlumnos();
         });
 
@@ -419,21 +420,13 @@ public class InformeFormAlumnosClaseControlador implements Initializable{
 
     /**
      * Obtiene un listado de objetos AlumnoReport que contienen información de los alumnos y sus clases asociadas,
-     * filtrados por año y mes seleccionados.
+     * filtrados por el año seleccionado.
      *
      * @return Un ArrayList de objetos AlumnoReport que contiene información de los alumnos y sus clases asociadas.
      */
     private ArrayList<AlumnoReport> obtenerListadoAlumnosReport() { 
             try {
-                //Verifica si se seleccionó "TODOS" en el ComboBox de mes.
-                if(cbMes.getValue().equals("TODOS")) {
-                    //Si el mes seleccionado es "TODOS", se obtiene el listado de informes para todo el año seleccionado.
-                    return conexionBD.getListaAlumnoReport(listaAlumnosGeneral, cbAnio.getValue());
-                } else {
-                    //Si se seleccionó un mes específico, se crea un objeto YearMonth con el año y mes seleccionados.
-                    YearMonth fecha = YearMonth.of(cbAnio.getValue(), cbMes.getSelectionModel().getSelectedIndex() + 1);
-                    return conexionBD.getListaAlumnoReport(listaAlumnosGeneral, fecha); // Se obtiene el listado de informes para el año y mes específicos.
-                }
+                return conexionBD.getListaAlumnoReport(listaAlumnosGeneral, cbAnio.getValue());
             } catch (Exception e) {
                 //En caso de excepción, mostrar una notificación de error en la interfaz gráfica, registrar la excepción en el log del usuario y cerrar este Stage.
                 toast.show((Stage) ((Stage) gpFormInformeAlumnoClase.getScene().getWindow()).getOwner(),"Fallo al generar formulario informe.\n" + e.toString());
@@ -542,17 +535,40 @@ public class InformeFormAlumnosClaseControlador implements Initializable{
     /**
      * Configura la lista de alumnos que se mostrará en el informe con sus respectivas clases asociadas, a partir de los resultados obtenidos
      * tras filtrar la lista de alumnos y el listado de alumnosReport.
+     * 
      */
     private void configurarClasesAlumnos() {
-        listaAlumnosClases = new ArrayList<Alumno>();
-        int totalClases = 0;
+        listaAlumnosClases = new ArrayList<Alumno>(); //Inicializa la lista que se muestra en el informe.
+        int totalClases = 0; //Inicializa el contador total de clases.
 
         for (Alumno a : filtro) {
             for (AlumnoReport alumnoR : listaAlumnoReport) {
                 //Verifica si el ID del alumno coincide con el ID del alumno en el informe de alumno (AlumnoReport).
                 if(a.getId() == alumnoR.getId()) {
-                    listaAlumnosClases.add(alumnoR); //Agrega el alumnoR al listado que se mostrara en el informe.
-                    totalClases += alumnoR.getListaClases().size(); //Suma el total de clases del alumno al total general.
+                    ArrayList<ClaseReport> listaClasesFiltrada;
+
+                    if (cbMes.getValue().equals("TODOS")) { 
+                        listaClasesFiltrada = new ArrayList<ClaseReport>(alumnoR.getListaClases()); //inicializa la lista de clases filtrada con las lista de clases del alumnoR.
+                    } else {
+                        listaClasesFiltrada = new ArrayList<ClaseReport>(); //Inicializa la lista de clases filtrada.
+
+                        //Itera sobre el listado de clases del alumnoR para comprobar cuales coninciden con el mes seleccionado en cbMes.
+                        for (ClaseReport clase : alumnoR.getListaClases()) {
+                            if(clase.getFechaJornada().getMonthValue() == (cbMes.getSelectionModel().getSelectedIndex()) +1) {
+                                listaClasesFiltrada.add(clase); //Agrega la clase al listado filtrado.
+                            }
+                        }
+                    }
+                    
+                    //Define un comparador para ordenar las clases por fecha y número.
+                    Comparator<ClaseReport> comparador = Comparator.comparing(ClaseReport::getFechaJornada).thenComparing(ClaseReport::getNumero);
+                    Collections.sort(listaClasesFiltrada, comparador); //Odena la lista segun los criterios seleccionados.
+
+                    //Crea una copia del alumnoR y se le establece la lista de clases filtrada.
+                    AlumnoReport alumnoRCopia = new AlumnoReport(alumnoR, listaClasesFiltrada);
+
+                    listaAlumnosClases.add(alumnoRCopia); //Agrega el alumnoRCopia al listado que se mostrara en el informe.
+                    totalClases += alumnoRCopia.getListaClases().size(); //Suma el total de clases del alumno al total general.
                 }
             }
         }
@@ -700,10 +716,22 @@ public class InformeFormAlumnosClaseControlador implements Initializable{
     private HashMap<String, Object> configuracionParametrosInforme() {
     	HashMap<String, Object> parameters = new HashMap<String, Object>();
     	
+    	Double media_edad = 0.0;
+    	Double cont_years = 0.0;
+    	int cont_hombres = 0;
+    	int cont_mujeres = 0;
+    	
         //Itera sobre la lista listaAlumnosMensualidades.
     	for(Alumno a : listaAlumnosClases) {
-
+    		if(a.getGenero().equals(Genero.HOMBRE)) {
+    			cont_hombres ++;
+    		} else {
+    			cont_mujeres ++;
+    		}
+    		cont_years += a.getEdad();
     	}
+    	
+    	media_edad = cont_years / listaAlumnosClases.size();
     	
         //Establecer los parámetros en el HashMap.
     	parameters.put("autor", (tfNombreUsuario.getText()));
@@ -714,6 +742,9 @@ public class InformeFormAlumnosClaseControlador implements Initializable{
 
         parameters.put("total_alumnos", lbNumeroAlumnos.getText());
         parameters.put("total_clases", lbNumeroClases.getText());
+        parameters.put("cont_hombres", cont_hombres);
+        parameters.put("cont_mujeres", cont_mujeres);
+        parameters.put("media_edad", "" + decimalFormat.format(media_edad));
 
         parameters.put("filtro_alumno", (checkbAlumnos.isSelected())? "Todos" : "" + cbAlumnos.getValue().getId() + " - " + cbAlumnos.getValue().getNombreCompleto());
         parameters.put("filtro_localidad", (checkbAlumnos.isSelected())? cbLocalidad.getValue().toString() : " ");

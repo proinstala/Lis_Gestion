@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import modelo.Alumno;
 import modelo.AlumnoReport;
 import modelo.Clase;
+import modelo.ClaseReport;
 import modelo.Direccion;
 import modelo.EstadoAlumno;
 import modelo.EstadoPago;
@@ -2072,7 +2073,7 @@ public class ConexionBD implements Cloneable{
         //--------------------------------------------------------------
 
         //Consulta a base de datos.
-        String sql = "SELECT C.id, C.numero, C.tipo, C.hora, C.anotaciones FROM CLASE_ALUMNO CS JOIN CLASE C ON(CS.clase_id = C.id)"
+        String sql = "SELECT C.id, C.numero, C.tipo, C.hora, C.anotaciones, C.jornada FROM CLASE_ALUMNO CS JOIN CLASE C ON(CS.clase_id = C.id)"
                     + "WHERE CS.alumno_id = ? AND strftime('%Y', C.jornada) = ?;";
         
         try {
@@ -2080,7 +2081,7 @@ public class ConexionBD implements Cloneable{
             ps = conn.prepareStatement(sql);
 
             for (Alumno alumno : listaAlumnos) {
-                ArrayList<Clase> listaClases = new ArrayList<Clase>();
+                ArrayList<ClaseReport> listaClases = new ArrayList<ClaseReport>();
                 ps.setInt(1, alumno.getId());
                 ps.setString(2, Integer.toString(year));
                 res = ps.executeQuery();
@@ -2108,7 +2109,8 @@ public class ConexionBD implements Cloneable{
 
                     //Añade una nueva Clase con la informacion de la fila recorrida a listaClases.
                     Clase clase = new Clase(res.getInt(1), res.getInt(2), tipo, hora, res.getString(5));
-                    listaClases.add(clase);
+                    ClaseReport claseReport = new ClaseReport(clase, LocalDate.parse(res.getString(6)));
+                    listaClases.add(claseReport);
                     
                 }
                 listaAlumnoReport.add(new AlumnoReport(alumno, listaClases));
@@ -2146,7 +2148,7 @@ public class ConexionBD implements Cloneable{
         //--------------------------------------------------------------
 
         //Consulta a base de datos.
-        String sql = "SELECT C.id, C.numero, C.tipo, C.hora, C.anotaciones FROM CLASE_ALUMNO CS JOIN CLASE C ON(CS.clase_id = C.id)"
+        String sql = "SELECT C.id, C.numero, C.tipo, C.hora, C.anotaciones, C.jornada FROM CLASE_ALUMNO CS JOIN CLASE C ON(CS.clase_id = C.id)"
                     + "WHERE CS.alumno_id = ? AND strftime('%Y', C.jornada) = ? AND strftime('%m', C.jornada) = ?;";
         
         try {
@@ -2154,7 +2156,7 @@ public class ConexionBD implements Cloneable{
             ps = conn.prepareStatement(sql);
 
             for (Alumno alumno : listaAlumnos) {
-                ArrayList<Clase> listaClases = new ArrayList<Clase>();
+                ArrayList<ClaseReport> listaClases = new ArrayList<ClaseReport>();
                 ps.setInt(1, alumno.getId());
                 ps.setString(2, Integer.toString(fecha.getYear()));
                 ps.setString(3, (fecha.getMonthValue() < 10)? "0" + fecha.getMonthValue() : Integer.toString(fecha.getMonthValue()));
@@ -2183,8 +2185,8 @@ public class ConexionBD implements Cloneable{
 
                     //Añade una nueva Clase al Array ListaClases en la posicion posicionArray.
                     Clase clase = new Clase(res.getInt(1), res.getInt(2), tipo, hora, res.getString(5));
-                    listaClases.add(clase);
-                    
+                    ClaseReport claseReport = new ClaseReport(clase, LocalDate.parse(res.getString(6)));
+                    listaClases.add(claseReport);
                 }
                 listaAlumnoReport.add(new AlumnoReport(alumno, listaClases));
             }

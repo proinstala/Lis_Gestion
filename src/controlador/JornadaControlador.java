@@ -767,7 +767,7 @@ public class JornadaControlador implements Initializable {
 			this.jornadaOriginal = jorn; //Asigna la jornada pasada como parametro a jornadaOriginal.
 			jornada = new Jornada(jornadaOriginal); //pasar los datos de jornadaOriginal a jornada para que los cambios no afecten directamente a jornadaOriginal
 			dpFecha.setValue(jornada.getFecha());	//Asigna la fecha de la jornada al datePiker.
-			lbDiaSemana.setText(jornada.obtenerDiaSemana()); //Asigna el dia de la semana de la jornada en el Label lbDiaSemana.
+			lbDiaSemana.setText(Fechas.obtenerDiaSemana(jornada.getFecha())); //Asigna el dia de la semana de la jornada en el Label lbDiaSemana.
 			
 			//Cambio los alumnos que tiene cada clase por los alumnos de la aplicacion.
 			for(Clase clase : jorn.getClases()) {

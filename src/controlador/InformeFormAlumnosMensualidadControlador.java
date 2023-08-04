@@ -46,6 +46,7 @@ import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Alumno;
+import modelo.AlumnoReport;
 import modelo.EstadoAlumno;
 import modelo.EstadoPago;
 import modelo.Genero;

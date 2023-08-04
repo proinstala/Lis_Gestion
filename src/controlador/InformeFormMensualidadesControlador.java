@@ -415,7 +415,7 @@ public class InformeFormMensualidadesControlador implements Initializable {
         JasperReport jasperReport;
     	JasperPrint print;
         InputStream jasperStream;
-        jasperStream = getClass().getResourceAsStream("/reports/report_mensualidad_general.jasper");
+        jasperStream = getClass().getResourceAsStream("/reports/report_mensualidad.jasper");
         
         //Configurar los parámetros necesarios para el informe.
         HashMap<String, Object> parameters = configuracionParametrosInforme();
