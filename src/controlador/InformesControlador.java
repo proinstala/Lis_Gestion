@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,12 +21,14 @@ import modelo.Mensualidad;
 import modelo.Usuario;
 import utilidades.Constants;
 
+
 public class InformesControlador implements Initializable {
 
     private Logger logUser;
     private Usuario usuario;
     private ObservableList<Mensualidad> listadoMensualidadesGeneral;
     private ObservableList<Alumno> listadoAlumnosGeneral;
+
 
     @FXML
     private Button btnAlumnos;
@@ -105,27 +106,32 @@ public class InformesControlador implements Initializable {
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
 
-        //Configurar un evento de clic del ratón para el botón "Abrir" de Informe Clases.
+        //Configurar un evento de clic del ratón para el botón "Abrir" de Informe Clases para lanzar la ventana de formulario.
         btnClases.setOnMouseClicked(e -> {
             abrirFormClase();
         });
 
+        //Configurar un evento de clic del ratón para el botón "Abrir" de Informe Jornadas para lanzar la ventana de formulario.
         btnJornadas.setOnMouseClicked(e -> {
             abrirFormJornada();
         });
 
+        //Configurar un evento de clic del ratón para el botón "Abrir" de Informe Mensualidades para lanzar la ventana de formulario.
         btnMensualidades.setOnMouseClicked(e -> {
             abrirFormMensualidades();
         });
 
+        //Configurar un evento de clic del ratón para el botón "Abrir" de Informe Alumnos para lanzar la ventana de formulario.
         btnAlumnos.setOnMouseClicked(e -> {
             abrirFormAlumnos();
         });
 
+        //Configurar un evento de clic del ratón para el botón "Abrir" de Informe Alumno/Mensualidad para lanzar la ventana de formulario.
         btnAlumnoMensualidad.setOnMouseClicked(e -> {
             abrirFormAlumnosMensualidad();
         });
 
+        //Configurar un evento de clic del ratón para el botón "Abrir" de Informe Alumno/Clase para lanzar la ventana de formulario.
         btnAlumnoClases.setOnMouseClicked(e -> {
             abrirFormAlumnosClase();
         });
@@ -196,6 +202,7 @@ public class InformesControlador implements Initializable {
             e.printStackTrace();
         }
     }
+
 
     private void abrirFormMensualidades() {
         try {
@@ -345,18 +352,17 @@ public class InformesControlador implements Initializable {
 
 
     /**
-     * Establece la lista de mensualidades para mostrar en la tabla.
-     * Configura el filtro, los eventos de selección y los datos de la tabla.
+     * Establece la lista de mensualidades para este controlador.
      * 
-     * @param lista La lista de mensualidades a mostrar.
+     * @param lista La lista de mensualidades a establecer.
      */
     public void setListaMensualidades(ObservableList<Mensualidad> lista) {
-        listadoMensualidadesGeneral = lista; //Guarda la lista pasada a la lista de Clasecontrolador.
+        listadoMensualidadesGeneral = lista; 
     }
 
 
     /**
-     * Establece la lista de alumnos en el controlador.
+     * Establece la lista de alumnos para este controlador.
      *
      * @param lista La lista de alumnos a establecer.
      */

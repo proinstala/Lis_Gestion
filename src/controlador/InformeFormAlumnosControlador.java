@@ -6,15 +6,12 @@ import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import baseDatos.ConexionBD;
 import colecciones.ColeccionAlumnos;
 import javafx.beans.binding.Bindings;
@@ -44,7 +41,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Alumno;
-import modelo.AlumnoReport;
 import modelo.EstadoAlumno;
 import modelo.Genero;
 import modelo.Toast;
@@ -272,15 +268,11 @@ public class InformeFormAlumnosControlador implements Initializable {
         rbPdf.setToggleGroup(grupoFormato);
         rbHtml.setToggleGroup(grupoFormato);
 
-        grupoFormato.selectedToggleProperty().addListener(e -> {
-            
-        });
-
         rbPdf.setSelected(true); //Selecciona el RadioButton rbPdf como seleccionado por defecto.
 
         taTexto.setText(textoInforme()); //Establece el texto predefinido en el TextArea taTexto.
-        nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime);
-        tfNombreInforme.setText(nombreInforme);
+        nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime); //Nombre predefinido para el informe. "informe_dd_MM_yyyy-HH_mm_ss".
+        tfNombreInforme.setText(nombreInforme); //Establece el texto predefinido para el nombre del informe en el TextField tfNombreInforme.
 
         //Configura el ComboBox cbEstado.
         ObservableList<String> listadoEstado = FXCollections.observableArrayList();
@@ -342,7 +334,7 @@ public class InformeFormAlumnosControlador implements Initializable {
      */
     private String textoInforme() {
         String texto;
-        texto = "Informe de datos personales de Alumnos inscritos en el centro.";
+        texto = "Informe Alumnos inscritos en el centro mostrando algunos de sus datos.";
         return texto;
     }
 
@@ -424,16 +416,11 @@ public class InformeFormAlumnosControlador implements Initializable {
             */
             
              
-            //codigo para ordenar la lista filtro. -------------------------------------
-        
-            SortedList<Alumno> sortedList = new SortedList<Alumno>(filtro);
-            
-            //Ordena la lista sortedList (colección de alumnos) utilizando el comparador.
-            sortedList.setComparator(comparador);
-            
-            //Establece la lista ordenada de alumnos en la clase ColeccionAlumnos.
-            ColeccionAlumnos.setColeccionAlumnos(sortedList);
-            //--------------------------------------------------------------------------
+            //codigo para ordenar la lista filtro. --------------------------------------------------------------------------------
+            SortedList<Alumno> sortedList = new SortedList<Alumno>(filtro); 
+            sortedList.setComparator(comparador); //Ordena la lista sortedList (colección de alumnos) utilizando el comparador.
+            ColeccionAlumnos.setColeccionAlumnos(sortedList); //Establece la lista ordenada de alumnos en la clase ColeccionAlumnos.
+            //---------------------------------------------------------------------------------------------------------------------
             
             
         } catch (Exception e) {

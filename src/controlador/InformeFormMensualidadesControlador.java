@@ -57,6 +57,7 @@ import net.sf.jasperreports.view.JasperViewer;
 import utilidades.Constants;
 import utilidades.Fechas;
 
+
 public class InformeFormMensualidadesControlador implements Initializable {
 
     private ObservableList<Alumno> listadoAlumnosGeneral;
@@ -253,17 +254,13 @@ public class InformeFormMensualidadesControlador implements Initializable {
         rbPdf.setToggleGroup(grupoFormato);
         rbHtml.setToggleGroup(grupoFormato);
 
-        grupoFormato.selectedToggleProperty().addListener(e -> {
-            
-        });
-
         rbPdf.setSelected(true); //Selecciona el RadioButton rbPdf como seleccionado por defecto.
 
         taTexto.setText(textoInforme()); //Establece el texto predefinido en el TextArea taTexto.
-        nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime);
-        tfNombreInforme.setText(nombreInforme);
+        nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime); //Nombre predefinido para el informe. "informe_dd_MM_yyyy-HH_mm_ss".
+        tfNombreInforme.setText(nombreInforme); //Establece el texto predefinido para el nombre del informe en el TextField tfNombreInforme.
 
-        //Creo un ArrayList de Integer con valores de 2020 hasta 2050 y cargo el ArrayList en el ComboBox cbAnio.
+        //Crea un ArrayList de Integer con valores de 2020 hasta 2050 y cargo el ArrayList en el ComboBox cbAnio.
         int yearInicial = 2020;
         ArrayList<Integer> listaYears = new ArrayList<Integer>();
         for (int i = 0; i <= 30; i++) {
@@ -275,12 +272,12 @@ public class InformeFormMensualidadesControlador implements Initializable {
         }
         cbAnio.setItems(FXCollections.observableArrayList(listaYears));
 
-        //Creo un ObservableList<String> con el nombre de los meses del año. Cargo la lista en el ComboBox cbMes.
+        //Crea un ObservableList<String> con el nombre de los meses del año. Cargo la lista en el ComboBox cbMes.
         ObservableList<String> listMeses = FXCollections.observableArrayList(Fechas.obtenerMesesDelAnio().values());
         listMeses.add("TODOS"); //Añado a listMeses el valor TODOS.
         cbMes.setItems(listMeses);
 
-        //Convieto los valores de EstadoPago a String y los añadao a listaEstados. Cargo la lista en el ComboBox cbEstado.
+        //Conviete los valores de EstadoPago a String y los añadao a listaEstados. Cargo la lista en el ComboBox cbEstado.
         ArrayList<String> listaEstados = new ArrayList<String>();
         for (EstadoPago e : EstadoPago.values()) {
             listaEstados.add(e.toString());
@@ -330,7 +327,7 @@ public class InformeFormMensualidadesControlador implements Initializable {
      */
     private String textoInforme() {
         String texto;
-        texto = "Informe de Mensualidades general de Alumnos.";
+        texto = "Informe de Mensualidades de Alumnos.";
         return texto;
     }
 

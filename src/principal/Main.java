@@ -30,7 +30,6 @@ public class Main extends Application {
 		
 		loader = new FXMLLoader();
 		loader.setLocation(getClass().getResource("/vista/PrincipalVista.fxml"));
-		//loader.setResources(resourceBundle);
 		aplicacion = (BorderPane)loader.load();
 		
 		controller = loader.getController();
@@ -41,7 +40,6 @@ public class Main extends Application {
 		URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen
 		this.primaryStage.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana	
 
-		//this.primaryStage.setTitle(resourceBundle.getString("window.stagePrincipal"));
 		this.primaryStage.setTitle("Lis Gestión");
 		this.primaryStage.setScene(scene);
 		this.primaryStage.setMinHeight(800);

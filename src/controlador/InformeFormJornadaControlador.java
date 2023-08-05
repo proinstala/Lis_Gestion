@@ -13,7 +13,6 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import baseDatos.ConexionBD;
 import colecciones.ColeccionClases;
 import javafx.beans.binding.Bindings;
@@ -55,6 +54,7 @@ import net.sf.jasperreports.swing.JRViewer;
 import net.sf.jasperreports.view.JasperViewer;
 import utilidades.Constants;
 import utilidades.Fechas;
+
 
 public class InformeFormJornadaControlador implements Initializable {
     
@@ -162,12 +162,12 @@ public class InformeFormJornadaControlador implements Initializable {
         formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Crear un formateador de fecha con el patrón "dd/MM/yyyy".
         dpJornada.setConverter(new LocalDateStringConverter(formatter, null)); //Establecer un convertidor de cadena de fecha para el control DatePicker dpFechaNacimiento.
 
-        //Formateador de fecha y hora sin milisegundos para el nombre del informe
+        //Formateador de fecha y hora sin milisegundos para el nombre del informe.
         formatterTime = DateTimeFormatter.ofPattern("dd_MM_yyyy-HH_mm_ss");
 
+        //Configura los controles de la interfaz grafica.
         configurarControles();
         
-
         //Configura un evento para el Datepiker "Jornada"
         dpJornada.setOnAction(event -> {
         	LocalDate fechaSeleccionada = dpJornada.getValue(); //Guardo la fecha seleccionada en fechaSeleccionada.
@@ -195,7 +195,6 @@ public class InformeFormJornadaControlador implements Initializable {
             if (comprobarCampos()) {
                 generarInforme();
             }
-            
         });
     }
 
@@ -259,7 +258,6 @@ public class InformeFormJornadaControlador implements Initializable {
             }
         });
 
-
         //Configura un grupo de ToggleButtons para los modos de guardado y visualización de informes.
         grupoModo = new ToggleGroup();
 
@@ -289,15 +287,11 @@ public class InformeFormJornadaControlador implements Initializable {
         rbPdf.setToggleGroup(grupoFormato);
         rbHtml.setToggleGroup(grupoFormato);
 
-        grupoFormato.selectedToggleProperty().addListener(e -> {
-            
-        });
-
         rbPdf.setSelected(true); //Selecciona el RadioButton rbPdf como seleccionado por defecto.
 
         taTexto.setText(textoInforme()); //Establece el texto predefinido en el TextArea taTexto.
-        nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime);
-        tfNombreInforme.setText(nombreInforme);
+        nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime); //Nombre predefinido para el informe. "informe_dd_MM_yyyy-HH_mm_ss".
+        tfNombreInforme.setText(nombreInforme); //Establece el texto predefinido para el nombre del informe en el TextField tfNombreInforme.
     }
 
 
@@ -350,7 +344,6 @@ public class InformeFormJornadaControlador implements Initializable {
      */
     private void generarInforme() {
         //Configurar la colección de clases con la lista de clases de la jornada actual.
-        //ColeccionAlumnos.setColeccionAlumnos(clase.getListaAlumnos());
         ColeccionClases.setColeccionClases(Arrays.asList(jornada.getClases()));
         
         JasperReport jasperReport;

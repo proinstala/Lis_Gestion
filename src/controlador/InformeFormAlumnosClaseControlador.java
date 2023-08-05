@@ -2,11 +2,9 @@ package controlador;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +14,6 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import baseDatos.ConexionBD;
 import colecciones.ColeccionAlumnos;
 import javafx.beans.binding.Bindings;
@@ -48,7 +45,6 @@ import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Alumno;
 import modelo.AlumnoReport;
-import modelo.Clase;
 import modelo.ClaseReport;
 import modelo.EstadoAlumno;
 import modelo.Genero;
@@ -67,8 +63,8 @@ import utilidades.CadenaUtil;
 import utilidades.Constants;
 import utilidades.Fechas;
 
-public class InformeFormAlumnosClaseControlador implements Initializable{
 
+public class InformeFormAlumnosClaseControlador implements Initializable {
 
     private final String ORDEN_ID = "ID";
     private final String ORDEN_NOMBRE = "NOMBRE";
@@ -193,7 +189,7 @@ public class InformeFormAlumnosClaseControlador implements Initializable{
 
         conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
-        toast = new Toast();
+        toast = new Toast(); //Crea una instancia de clase Toast para mostrar notificaciones en la interfaz grafica.
 
         //Modifica el formato en el que se muestra la fecha en el DatePicker.
         formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Crear un formateador de fecha con el patrón "dd/MM/yyyy".
@@ -304,8 +300,8 @@ public class InformeFormAlumnosClaseControlador implements Initializable{
         rbPdf.setSelected(true); //Selecciona el RadioButton rbPdf como seleccionado por defecto.
 
         taTexto.setText(textoInforme()); //Establece el texto predefinido en el TextArea taTexto.
-        nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime);
-        tfNombreInforme.setText(nombreInforme);
+        nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime); //Nombre predefinido para el informe. "informe_dd_MM_yyyy-HH_mm_ss".
+        tfNombreInforme.setText(nombreInforme); //Establece el texto predefinido para el nombre del informe en el TextField tfNombreInforme.
 
         //Configura el ComboBox cbEstado.
         ObservableList<String> listadoEstado = FXCollections.observableArrayList();
@@ -410,7 +406,6 @@ public class InformeFormAlumnosClaseControlador implements Initializable{
 
         //Configurar Listener para el ComboBox cbMes.
         cbMes.setOnAction(e -> {
-            //listaAlumnoReport = obtenerListadoAlumnosReport();
             configurarClasesAlumnos();
         });
 
@@ -443,6 +438,7 @@ public class InformeFormAlumnosClaseControlador implements Initializable{
 
     /**
      * Configura el ComboBox de Alumnos.
+     * 
      */
     private void configurarCbAlumnos() {
         //Establecer el texto a mostrar en el ComboBox utilizando un CellFactory.
@@ -490,7 +486,7 @@ public class InformeFormAlumnosClaseControlador implements Initializable{
      */
     private String textoInforme() {
         String texto;
-        texto = "Informe de Alumnos y clases filtrando los datos segun la configuración establecida.";
+        texto = "Informe de Alumnos y clases en las que esta inscrito filtrando los datos segun la configuración establecida.";
         return texto;
     }
 

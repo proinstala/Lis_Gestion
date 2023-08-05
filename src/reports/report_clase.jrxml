@@ -89,7 +89,7 @@
 			</rectangle>
 			<image onErrorType="Icon">
 				<reportElement x="0" y="1" width="90" height="89" uuid="67d4bab2-8e6e-4848-9b0a-f86c7e87be9e"/>
-				<imageExpression><![CDATA["/src/recursos/logo_nuevo_original_fondo.png"]]></imageExpression>
+				<imageExpression><![CDATA["recursos/logo_nuevo_original_fondo.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement x="0" y="28" width="555" height="45" uuid="38384c1d-17b6-4326-9207-59f622affaf2"/>

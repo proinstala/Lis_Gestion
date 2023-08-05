@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.InputStream;
-
 import baseDatos.ConexionBD;
 import colecciones.ColeccionAlumnos;
 import javafx.beans.binding.Bindings;
@@ -198,7 +197,6 @@ public class InformeFormClaseControlador implements Initializable {
             if (comprobarCampos()) {
                 generarInforme();
             }
-            
         });
     }
 
@@ -313,8 +311,8 @@ public class InformeFormClaseControlador implements Initializable {
         rbPdf.setSelected(true); //Selecciona el RadioButton rbPdf como seleccionado por defecto.
 
         taTexto.setText(textoInforme()); //Establece el texto predefinido en el TextArea taTexto.
-        nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime);
-        tfNombreInforme.setText(nombreInforme);
+        nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime); //Nombre predefinido para el informe. "informe_dd_MM_yyyy-HH_mm_ss".
+        tfNombreInforme.setText(nombreInforme); //Establece el texto predefinido para el nombre del informe en el TextField tfNombreInforme.
     }
 
 

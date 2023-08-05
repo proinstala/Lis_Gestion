@@ -95,7 +95,7 @@
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
-				<imageExpression><![CDATA["src/recursos/logo_nuevo_original_fondo.png"]]></imageExpression>
+				<imageExpression><![CDATA["recursos/logo_nuevo_original_fondo.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement x="0" y="28" width="555" height="45" uuid="572fd8e2-f00b-45b0-bd95-a69daab65f5d">

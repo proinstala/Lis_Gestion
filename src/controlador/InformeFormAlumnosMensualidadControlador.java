@@ -14,7 +14,6 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import baseDatos.ConexionBD;
 import colecciones.ColeccionAlumnos;
 import javafx.beans.binding.Bindings;
@@ -22,7 +21,6 @@ import javafx.beans.binding.IntegerBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -46,7 +44,6 @@ import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Alumno;
-import modelo.AlumnoReport;
 import modelo.EstadoAlumno;
 import modelo.EstadoPago;
 import modelo.Genero;
@@ -66,8 +63,8 @@ import utilidades.CadenaUtil;
 import utilidades.Constants;
 import utilidades.Fechas;
 
-public class InformeFormAlumnosMensualidadControlador implements Initializable {
 
+public class InformeFormAlumnosMensualidadControlador implements Initializable {
 
     private final String ORDEN_ID = "ID";
     private final String ORDEN_NOMBRE = "NOMBRE";
@@ -304,8 +301,8 @@ public class InformeFormAlumnosMensualidadControlador implements Initializable {
         rbPdf.setSelected(true); //Selecciona el RadioButton rbPdf como seleccionado por defecto.
 
         taTexto.setText(textoInforme()); //Establece el texto predefinido en el TextArea taTexto.
-        nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime);
-        tfNombreInforme.setText(nombreInforme);
+        nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime); //Nombre predefinido para el informe. "informe_dd_MM_yyyy-HH_mm_ss".
+        tfNombreInforme.setText(nombreInforme); //Establece el texto predefinido para el nombre del informe en el TextField tfNombreInforme.
 
         //Configura el ComboBox cbEstado.
         ObservableList<String> listadoEstado = FXCollections.observableArrayList();
@@ -596,16 +593,12 @@ public class InformeFormAlumnosMensualidadControlador implements Initializable {
             ColeccionAlumnos.setColeccionAlumnos(listaAlumnosMensualidades);
             
             /* 
-            //codigo para ordenar la lista filtro. -------------------------------------
+            //codigo para ordenar la lista filtro. ----------------------------------------------------------------------------------
 
             SortedList<Alumno> sortedList = new SortedList<Alumno>(filtro);
-            
-            //Ordena la lista sortedList (colección de alumnos) utilizando el comparador.
-            sortedList.setComparator(comparador);
-            
-            //Establece la lista ordenada de alumnos en la clase ColeccionAlumnos.
-            ColeccionAlumnos.setColeccionAlumnos(sortedList);
-            //--------------------------------------------------------------------------
+            sortedList.setComparator(comparador); //Ordena la lista sortedList (colección de alumnos) utilizando el comparador.
+            ColeccionAlumnos.setColeccionAlumnos(sortedList); //Establece la lista ordenada de alumnos en la clase ColeccionAlumnos.
+            //-----------------------------------------------------------------------------------------------------------------------
             */
             
         } catch (Exception e) {
@@ -692,7 +685,6 @@ public class InformeFormAlumnosMensualidadControlador implements Initializable {
     private HashMap<String, Object> configuracionParametrosInforme() {
     	HashMap<String, Object> parameters = new HashMap<String, Object>();
     	
-        Double importe_total = 0.0;
     	Double importe_pagadas = 0.0;
     	Double importe_pendientes = 0.0;
     	Double importe_resto = 0.0;
@@ -727,7 +719,7 @@ public class InformeFormAlumnosMensualidadControlador implements Initializable {
     	}
     	
     	//Calcular el importe total sumando los importes pagados, pendientes y resto.
-    	importe_total = importe_pagadas + importe_pendientes + importe_resto;
+    	Double importe_total = importe_pagadas + importe_pendientes + importe_resto;
     	
         //Establecer los parámetros en el HashMap.
     	parameters.put("autor", (tfNombreUsuario.getText()));
