@@ -393,6 +393,24 @@ public class PrincipalControlador implements Initializable {
 			lInformes.getStyleClass().remove("menuSeleccionado");
 			lUsuario.getStyleClass().remove("menuSeleccionado");
 			lAjustes.getStyleClass().add("menuSeleccionado");
+
+			try {
+				FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/ajustesVista.fxml"));
+				GridPane ajustes;
+				
+				ajustes = (GridPane) loader.load();
+				bpPrincipal.setCenter(ajustes);
+				
+				AjustesControlador controller = loader.getController(); // cargo el controlador.
+				controller.setListaAlumnos(listadoAlumnosGeneral);
+            	
+			} catch (IOException e) {
+				logUser.log(Level.SEVERE, "Excepción: " + e.toString());
+				e.printStackTrace();
+			} catch (Exception e) {
+				logUser.log(Level.SEVERE, "Excepción: " + e.toString());
+				e.printStackTrace();
+			}
 		}
     }
 

@@ -6,8 +6,9 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.Year;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
@@ -52,10 +53,15 @@ import utilidades.Fechas;
 
 public class MensualidadesControlador implements Initializable {
 
+    private final String ORDEN_ID_MENSUALIDAD = "ID_MENSUALIDAD";
+    private final String ORDEN_ID_ALUMNO = "ID_ALUMNO";
+    private final String ORDEN_NOMBRE = "NOMBRE";
+    private final String ORDEN_ESTADO_PAGO = "ESTADO_PAGO";
+    private final String ORDEN_FECHA = "FECHA";
+
     private FilteredList<Mensualidad> filtro;
     private ObservableList<Alumno> listadoAlumnosGeneral;
     private ObservableList<Mensualidad> listadoMensualidadesGeneral;
-    private DateTimeFormatter formatter;
     private Usuario usuario;
     private ConexionBD conexionBD;
     private Logger logUser;
@@ -90,6 +96,9 @@ public class MensualidadesControlador implements Initializable {
 
     @FXML
     private ComboBox<String> cbModoFiltro;
+
+    @FXML
+    private ComboBox<String> cbOrden;
 
     @FXML
     private Button btnBorrar;
@@ -311,6 +320,17 @@ public class MensualidadesControlador implements Initializable {
         //Configurar Listener para el TextField tfBusqueda.
         tfBusqueda.textProperty().addListener( (o, ov, nv) -> {
             configurarFiltro(nv);
+        });
+
+        //Configura el ComboBox cbOrden.
+        ObservableList<String> listadoOrden = FXCollections.observableArrayList();
+        listadoOrden.setAll(ORDEN_ID_MENSUALIDAD, ORDEN_ID_ALUMNO, ORDEN_NOMBRE, ORDEN_FECHA, ORDEN_ESTADO_PAGO);
+        cbOrden.setItems(listadoOrden);
+        cbOrden.setValue(ORDEN_ID_ALUMNO); //Valor inicial.
+
+        //Configurar Listener para el ComboBox cbOrdenar.
+        cbOrden.setOnAction(e -> {
+            ordenarListaMensualidades();
         });
     }
 
@@ -654,6 +674,68 @@ public class MensualidadesControlador implements Initializable {
             if(tvMensualidades.getSelectionModel().getSelectedIndex() == -1) {
                 limpiarMensualidadSeleccionada();
             }
+    }
+
+
+    /**
+     * Ordena la colección de mensualidades (listadoMensualidadesGeneral) utilizando un comparador basado en el criterio de ordenamiento seleccionado.
+     *
+     */
+    private void ordenarListaMensualidades() {
+        //Crea el comparador para ordenar la lista de mensualidades "listadoMensualidadesGeneral" por el criterio seleccionado.
+        Comparator<Mensualidad> comparador = null;
+
+        switch (cbOrden.getValue()) {
+            case ORDEN_ID_MENSUALIDAD -> {
+                comparador = Comparator.comparingInt(Mensualidad::getId);
+            }
+
+            case ORDEN_ID_ALUMNO -> {
+                comparador = Comparator.comparingInt(Mensualidad::getIdAlumno);
+            }
+
+            case ORDEN_NOMBRE -> {
+                comparador = Comparator.comparing((Mensualidad mensualidad) -> { 
+                    int idAlumno1 = mensualidad.getIdAlumno();
+            
+                    Optional<Alumno> optionalAlumno = listadoAlumnosGeneral.stream()
+                        .filter(a -> a.getId() == idAlumno1).findFirst();
+            
+                    return optionalAlumno.map(Alumno::getNombreCompleto).orElse("");
+                });
+            }
+                    
+            /*
+            //Otra forma de ordenar por nombre
+            case ORDEN_NOMBRE -> {
+                comparador = Comparator.comparing((Mensualidad mensualidad) -> { 
+                    int idAlumno1 = mensualidad.getIdAlumno();
+                    Alumno alum = null;
+                    for(Alumno a : listadoAlumnosGeneral) {
+                        if(idAlumno1 == a.getId()) {
+                            alum = a;
+                            break;
+                        }
+                    }
+
+                    return alum != null ? alum.getNombreCompleto() : "";
+                });
+            }*/
+
+            case ORDEN_FECHA -> {
+                comparador = Comparator.comparing(Mensualidad::getFecha).thenComparing(Mensualidad::getIdAlumno);
+            }
+
+            case ORDEN_ESTADO_PAGO -> {
+                comparador = Comparator.comparing(Mensualidad::getEstadoPago).thenComparing(Mensualidad::getFecha).thenComparing(Mensualidad::getIdAlumno);
+            }
+
+            default -> {
+                comparador = Comparator.comparing(Mensualidad::getFecha).thenComparing(Mensualidad::getIdAlumno);
+            }
+        }
+        
+        Collections.sort(listadoMensualidadesGeneral, comparador); //Odena la lista de alumnos "listadoAlumnos" segun los criterios seleccionados.
     }
 
 

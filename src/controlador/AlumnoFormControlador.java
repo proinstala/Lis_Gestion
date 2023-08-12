@@ -394,10 +394,11 @@ public class AlumnoFormControlador implements Initializable {
         boolean camposCorrectos = false;
 
         //Expresiones regulares para validar los campos.
-        Pattern nombrePattern = Pattern.compile("[A-Z][a-z]{1,30}([\\s][A-Z][a-z]{1,30})?$"); //Expresion regular para comprobar un nombre simple o compuesto.
+
+        Pattern nombrePattern = Pattern.compile("[A-ZÑ][a-zñáéíóú]{1,30}([\\s][A-ZÑ][a-zñáéíóú]{1,30}){0,2}$"); //Expresion regular para comprobar un nombre simple o compuesto.
 		Matcher nombreMatch = nombrePattern.matcher(tfNombre.getText());
 
-        Pattern apellidoPattern = Pattern.compile("[A-Z][a-z]{1,40}$"); 
+        Pattern apellidoPattern = Pattern.compile("[A-Z][a-zñáéíóú]{1,40}$"); 
         Matcher apellido1Matcher = apellidoPattern.matcher(tfApellido1.getText());
         Matcher apellido2Matcher = apellidoPattern.matcher(tfApellido2.getText());
 

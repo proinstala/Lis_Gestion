@@ -846,7 +846,7 @@ public class InformeFormAlumnosClaseControlador implements Initializable {
      */
     public void setListaAlumnos(ObservableList<Alumno> lista) {
         listaAlumnosGeneral = new ArrayList<Alumno>(lista);
-		filtro = new FilteredList<Alumno>(lista); //Inicia el filtro pasándole el listado de alumnos.
+		filtro = new FilteredList<Alumno>(lista); //Inicia el filtro pasándole el listado de alumnos. 
 		
         cbAlumnos.setItems(FXCollections.observableArrayList(lista));
         cbAlumnos.setValue(lista.get(0)); //Selecciona por defecto el primer item de la lista.

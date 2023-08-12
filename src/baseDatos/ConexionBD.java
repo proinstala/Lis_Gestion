@@ -196,6 +196,7 @@ public class ConexionBD implements Cloneable{
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "nombre TEXT NOT NULL, " +
                     "provincia_id INTEGER NOT NULL, " +
+                    "UNIQUE (provincia_id, nombre), " +
                     "FOREIGN KEY (provincia_id) REFERENCES provincia (id));";
             st.execute(sql);
 
@@ -2467,11 +2468,166 @@ public class ConexionBD implements Cloneable{
 
 
     /**
+     * Actualiza el nombre de una localidad en la base de datos.
+     * 
+     * @param provincia Provincia a la que pertenece la localidad.
+     * @param oldLocalidad Nombre actual de la localidad.
+     * @param newLocalidad Nuevo nombre para la localidad.
+     * @return true si se modifica y no hay errores, false si no.
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
+     */
+    public boolean actualizarNombreLocalidad(String provincia, String oldLocalidad, String newLocalidad) throws SQLException{
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+        boolean result = false;
+
+        try {       
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement("UPDATE LOCALIDAD SET nombre = ? WHERE nombre = ? and provincia_id = (SELECT id FROM PROVINCIA WHERE nombre = ?);");
+            ps.setString(1, newLocalidad);
+            ps.setString(2, oldLocalidad);
+            ps.setString(3, provincia);
+            
+            int filas = ps.executeUpdate();
+            
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+
+            //Comprueba si ha modificado alguna fila y si es así, establece a true la variable result.
+            if (filas > 0) {
+                result = true;
+            }
+        } catch (SQLException e) {
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
+            e.printStackTrace();
+        } catch (Exception e) {
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
+            e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true);
+            if(ps != null) {ps.close();}
+        }
+
+        cn.desconectar(conn);
+        return result;
+    }
+
+
+    /**
+     * Inserta una nueva localidad en la base de datos.
+     * 
+     * @param provincia Provincia a la que pertenece la localidad.
+     * @param localidad Nombre de la nueva localidad.
+     * @return true si se ha añadido la localidad, false si no.
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
+     */
+    public boolean insertarLocalidad(String provincia, String localidad) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        conn = cn.conectar();
+
+        try {
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement("INSERT INTO LOCALIDAD " +
+                    "(nombre, provincia_id) " +
+                    "VALUES (?, (SELECT id FROM PROVINCIA WHERE nombre = ?));");
+
+            ps.setString(1, localidad);
+            ps.setString(2, provincia);
+            
+            int filas = ps.executeUpdate();
+            
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            
+            if(filas > 0) {
+                result = true;
+            }
+        } catch (SQLException e) {
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
+            e.printStackTrace();
+        } catch (Exception e) {
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
+            e.printStackTrace();
+        } finally { 
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            if(ps != null) {ps.close();} 
+        }
+        
+        cn.desconectar(conn);
+        return result;
+    }
+
+    /**
+     * Borra una localidad de la base de datos.
+     * 
+     * @param provincia Nombre de la provincia a la que pertenece la localidad a borrar.
+     * @param localidad Nombre de la localidad a borrar.
+     * @return true si se borra la localidad, false si no.
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
+     */
+    public boolean borrarLocalidad(String provincia, String localidad) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+        boolean result = false;
+
+        try {
+            conn.setAutoCommit(false);
+
+            //sentencia sql para obtener el numero de direcciones que tienen como localidad a la que se intenta borrar.
+            String sql = "SELECT count(id) FROM DIRECCION " +
+                    "WHERE localidad_id = (SELECT id FROM LOCALIDAD WHERE nombre = ? " +
+                    "AND provincia_id = (SELECT id FROM PROVINCIA WHERE nombre = ?));";
+
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, localidad);
+            ps.setString(2, provincia);
+           
+            res = ps.executeQuery();
+            int direcciones_count = res.getInt(1); 
+           
+            //Si la localidad no tiene direcciones asociadas, borra la localidad.
+            if (direcciones_count == 0) {
+                sql = "DELETE FROM LOCALIDAD WHERE nombre = ? AND provincia_id = (SELECT id FROM PROVINCIA WHERE nombre = ?);";
+                ps = conn.prepareStatement(sql); 
+                ps.setString(1, localidad);
+                ps.setString(2, provincia);
+                int filas = ps.executeUpdate();
+
+                conn.commit(); //Confirma la transacción de la inserción de los datos.
+
+                if(filas > 0) {
+                    result = true;
+                }
+            } else {
+                //Si la localidad tiene direcciones asociadas, inserta un mensaje en el log.
+                logger.warning("Intento de borrado de localidad: " + localidad  + ". Esta localidad tiene " + direcciones_count + " direcciones asociadas.");
+            }
+        } catch (SQLException e) {
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
+            e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
+            if(ps != null) {ps.close();}
+            if(res != null) {res.close();} 
+        }
+
+        cn.desconectar(conn);
+        return result;
+    }
+
+
+    /**
      * Actualiza los datos del alumno en la base de datos. 
      * 
      * @param alumno Alumno de donde se obtine la informacion.
      * @return true si se modifica y no hay errores, false si no.
-     * @throws SQLException
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
      */
     public boolean modificarAlumno(Alumno alumno) throws SQLException{
         ConexionBD cn = INSTANCE;
@@ -2524,7 +2680,7 @@ public class ConexionBD implements Cloneable{
      * 
      * @param alumno Alumno del que se va ha borrar sus datos de la base de datos.
      * @return true si borra el alumno y sus datos, false si no.
-     * @throws SQLException
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
      */
     public boolean borrarAlumno(Alumno alumno) throws SQLException {
         ConexionBD cn = INSTANCE;
@@ -2572,7 +2728,7 @@ public class ConexionBD implements Cloneable{
      * @param idAlumno Identificador del alumno del que se va a obtener la información
      * @param jornada Jornada de la que se va a extraer la semana para la busqueda.
      * @return int con el numero de clases que esta incrito el alumno en la semana de la jornada pasada como parametro o -1 si hay algun problema.
-     * @throws SQLException
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
      */
     public int numeroClasesInscrito(int idAlumno, Jornada jornada ) throws SQLException {
         ConexionBD cn = INSTANCE;
@@ -2610,7 +2766,7 @@ public class ConexionBD implements Cloneable{
      * 
      * @param jornada jornada de donde se obtienen los alumnos a comprobar.
      * @return un ArrayList<Alumno> con los alumnos que superarían su número de asistencias semanales si se copia la jornada.
-     * @throws SQLException
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
      */
     public ArrayList<Alumno> controlCopiaJornada(Jornada jornada ) throws SQLException {
         ConexionBD cn = INSTANCE;
@@ -2853,6 +3009,52 @@ public class ConexionBD implements Cloneable{
             if(st != null) {st.close();}
         }
         
+        cn.desconectar(conn);
+        return result;
+    }
+
+
+    /**
+     * Actualiza el precio de las clases.
+     * 
+     * @param numeroClases Numero de aistencias a clase.
+     * @param precio Nuevo precio de las asistencias a clase.
+     * @return true si la modificacion es exitosa, false de lo contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
+     */
+    public boolean actualizarPrecioClase(int numeroClases, Double precio) throws SQLException{
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+        boolean result = false;
+
+        try {       
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement("UPDATE PRECIO_CLASE SET precio = ? WHERE numero_clases = ?;");
+            ps.setDouble(1, precio);
+            ps.setInt(2, numeroClases);
+            
+            int filas = ps.executeUpdate();
+
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+
+            //Comprueba si ha modificado alguna fila y si es así, establece a true la variable result.
+            if (filas > 0) {
+                 result = true;
+            }
+        } catch (SQLException e) {
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
+            e.printStackTrace();
+        } catch (Exception e) {
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
+            e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true);
+            if(ps != null) {ps.close();}
+        }
+
         cn.desconectar(conn);
         return result;
     }

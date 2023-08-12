@@ -354,14 +354,84 @@ public class Mensualidad {
 
 
      @Override
+     public int hashCode() {
+          final int prime = 31;
+          int result = 1;
+          result = prime * result + ((id == null) ? 0 : id.hashCode());
+          result = prime * result + ((idAlumno == null) ? 0 : idAlumno.hashCode());
+          result = prime * result + ((fecha == null) ? 0 : fecha.hashCode());
+          result = prime * result + ((fechaPago == null) ? 0 : fechaPago.hashCode());
+          result = prime * result + ((formaPago == null) ? 0 : formaPago.hashCode());
+          result = prime * result + ((estadoPago == null) ? 0 : estadoPago.hashCode());
+          result = prime * result + ((asistenciasSemanales == null) ? 0 : asistenciasSemanales.hashCode());
+          result = prime * result + ((importe == null) ? 0 : importe.hashCode());
+          result = prime * result + ((anotacion == null) ? 0 : anotacion.hashCode());
+          return result;
+     }
+
+     @Override
+     public boolean equals(Object obj) {
+          if (this == obj)
+               return true;
+          if (obj == null)
+               return false;
+          if (getClass() != obj.getClass())
+               return false;
+          Mensualidad other = (Mensualidad) obj;
+          if (id == null) {
+               if (other.id != null)
+                    return false;
+          } else if (!id.equals(other.id))
+               return false;
+          if (idAlumno == null) {
+               if (other.idAlumno != null)
+                    return false;
+          } else if (!idAlumno.equals(other.idAlumno))
+               return false;
+          if (fecha == null) {
+               if (other.fecha != null)
+                    return false;
+          } else if (!fecha.equals(other.fecha))
+               return false;
+          if (fechaPago == null) {
+               if (other.fechaPago != null)
+                    return false;
+          } else if (!fechaPago.equals(other.fechaPago))
+               return false;
+          if (formaPago == null) {
+               if (other.formaPago != null)
+                    return false;
+          } else if (!formaPago.equals(other.formaPago))
+               return false;
+          if (estadoPago == null) {
+               if (other.estadoPago != null)
+                    return false;
+          } else if (!estadoPago.equals(other.estadoPago))
+               return false;
+          if (asistenciasSemanales == null) {
+               if (other.asistenciasSemanales != null)
+                    return false;
+          } else if (!asistenciasSemanales.equals(other.asistenciasSemanales))
+               return false;
+          if (importe == null) {
+               if (other.importe != null)
+                    return false;
+          } else if (!importe.equals(other.importe))
+               return false;
+          if (anotacion == null) {
+               if (other.anotacion != null)
+                    return false;
+          } else if (!anotacion.equals(other.anotacion))
+               return false;
+          return true;
+     }
+
+
+     @Override
      public String toString() {
           return "Mensualidad [id=" + id + ", idAlumno=" + idAlumno + ", fecha=" + fecha + ", fechaPago=" + fechaPago
                     + ", formaPago=" + formaPago + ", estadoPago=" + estadoPago + ", asistenciasSemanales="
                     + asistenciasSemanales + ", importe=" + importe + ", anotacion=" + anotacion + "]";
      }
-
-     
-
-     
 
 }

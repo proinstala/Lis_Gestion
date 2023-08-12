@@ -6,12 +6,14 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-
 import baseDatos.ConexionBD;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.IntegerBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -45,13 +47,18 @@ import javafx.stage.StageStyle;
 import modelo.Alumno;
 import modelo.EstadoAlumno;
 import modelo.Genero;
-import modelo.Mensualidad;
 import modelo.Toast;
 import modelo.Usuario;
 import utilidades.Constants;
 import javafx.fxml.Initializable;
 
 public class AlumnosControlador implements Initializable {
+
+    private final String ORDEN_ID = "ID";
+    private final String ORDEN_NOMBRE = "NOMBRE";
+    private final String ORDEN_LOCALIDAD = "LOCALIDAD";
+    private final String ORDEN_ESTADO = "ESTADO";
+    private final String ORDEN_GENERO = "GENERO";
 
     private FilteredList<Alumno> filtro;
     private ObservableList<Alumno> listadoAlumnos;
@@ -87,6 +94,12 @@ public class AlumnosControlador implements Initializable {
     private Button btnVer;
 
     @FXML
+    private ComboBox<String> cbEstado;
+
+    @FXML
+    private ComboBox<String> cbOrden;
+
+    @FXML
     private ComboBox<String> cbGenero;
 
     @FXML
@@ -109,6 +122,9 @@ public class AlumnosControlador implements Initializable {
 
     @FXML
     private Label lbNumTotalAlumnos;
+
+    @FXML
+    private Label lbMediaEdad;
 
     @FXML
     private TextField tfBusqueda;
@@ -192,8 +208,10 @@ public class AlumnosControlador implements Initializable {
             return localidad;
         });
         
-        //Mostamos los datos en la columna Fecha Compra Formateados. Se muestra la edad, no la fecha de nacimiento.
+        
         formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Crear un formateador de fecha con el patrón "dd/MM/yyyy".
+        
+        //Mostamos los datos en la columna Fecha Compra Formateados. Se muestra la edad, no la fecha de nacimiento.
         colFechaNacimiento.setCellValueFactory(cellData -> {
         	//LocalDate fechaText = cellData.getValue().getFechaNacimiento();
         	//return cellData.getValue().fechaNacimientoProperty().asString(fechaText.format(formatter).toString());
@@ -218,6 +236,18 @@ public class AlumnosControlador implements Initializable {
             configurarFiltro("");
         });
 
+        //Configurar el ComboBox cbEstado.
+        ObservableList<String> listadoEstado = FXCollections.observableArrayList();
+        listadoEstado.setAll(EstadoAlumno.ACTIVO.toString(), EstadoAlumno.BAJA.toString(), "TODOS");
+        cbEstado.setItems(listadoEstado);
+        cbEstado.setValue("TODOS"); //Valor inicial.
+
+        //Configurar Listener para el ComboBox cbEstado.
+        cbEstado.setOnAction(e -> {
+            tfBusqueda.clear();
+            configurarFiltro("");
+        });
+
         //cbModoFiltro
         ObservableList<String> tipoBusqueda = FXCollections.observableArrayList();
         tipoBusqueda.setAll("Id Alumno", "Nombre Alumno");
@@ -234,9 +264,20 @@ public class AlumnosControlador implements Initializable {
         tfBusqueda.textProperty().addListener( (o, ov, nv) -> {
             configurarFiltro(nv);
         });
+
+        //Configura el ComboBox cbOrden.
+        ObservableList<String> listadoOrden = FXCollections.observableArrayList();
+        listadoOrden.setAll(ORDEN_ID, ORDEN_NOMBRE, ORDEN_LOCALIDAD, ORDEN_ESTADO, ORDEN_GENERO);
+        cbOrden.setItems(listadoOrden);
+        cbOrden.setValue("ID"); //Valor inicial.
+
+        //Configurar Listener para el ComboBox cbOrdenar.
+        cbOrden.setOnAction(e -> {
+            ordenarListaAlumnos();
+        });
     }
 
-
+    
     /**
      * Método para manejar el evento que lanza el formulario para enviar notificaciones.
      * Se invoca al hacer clic en el ImageView ivNotificacion.
@@ -282,6 +323,7 @@ public class AlumnosControlador implements Initializable {
             }
         }
     }
+
 
     /**
      * Comprueba los requisitos necesarios para enviar una notificación al alumno.
@@ -514,6 +556,10 @@ public class AlumnosControlador implements Initializable {
         IntegerBinding bajasCount = Bindings.createIntegerBinding(
                 () -> (int) filtro.stream().filter(alumno -> alumno.getEstado() == EstadoAlumno.BAJA).count(), filtro);
 
+        DoubleBinding edadCount = Bindings.createDoubleBinding(
+            () -> (Double) filtro.stream().mapToDouble(Alumno::getEdad).sum(), filtro);
+
+
         lbNumHombres.textProperty()
                 .bind(Bindings.createStringBinding(() -> String.format("%d", hombresCount.get()), hombresCount));
 
@@ -525,7 +571,9 @@ public class AlumnosControlador implements Initializable {
 
         lbNumAlumnosNoActivos.textProperty()
                 .bind(Bindings.createStringBinding(() -> String.format("%d", bajasCount.get()), bajasCount));
-
+        
+        lbMediaEdad.textProperty()
+                .bind(Bindings.createStringBinding(() -> String.format("%.1f", (edadCount.get() / filtro.size())), edadCount));
     }
 
 
@@ -542,6 +590,10 @@ public class AlumnosControlador implements Initializable {
             }
             
             if ( !(cbLocalidad.getValue().equals("TODAS")) && !(obj.getDireccion().localidadProperty().getValue().toString().equals(cbLocalidad.getValue())) ) {
+                return false;
+            }
+
+            if ( !(cbEstado.getValue().equals("TODOS")) && !(obj.estadoProperty().getValue().toString().equals(cbEstado.getValue())) ) {
                 return false;
             }
         		
@@ -562,8 +614,45 @@ public class AlumnosControlador implements Initializable {
 
                 return false;
             }
-        		
         });
+    }
+
+
+    /**
+     * Ordena la colección de alumnos (listadoAlumnos) utilizando un comparador basado en el criterio de ordenamiento seleccionado.
+     *
+     */
+    private void ordenarListaAlumnos() {
+        //Crea el comparador para ordenar la lista de alumnos "listadoAlumnos" por el criterio seleccionado.
+        Comparator<Alumno> comparador = null;
+
+        switch (cbOrden.getValue()) {
+            case ORDEN_ID -> {
+                comparador = Comparator.comparingInt(Alumno::getId);
+            }
+
+            case ORDEN_NOMBRE -> {
+                comparador = Comparator.comparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
+            }
+
+            case ORDEN_LOCALIDAD -> {
+                comparador = Comparator.comparing((Alumno alumno) -> alumno.getDireccion().getLocalidad()).thenComparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
+            }
+
+            case ORDEN_ESTADO -> {
+                comparador = Comparator.comparing(Alumno::getEstado).thenComparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
+            }
+
+            case ORDEN_GENERO -> {
+                comparador = Comparator.comparing(Alumno::getGenero).thenComparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
+            }
+
+            default -> {
+                comparador = Comparator.comparingInt(Alumno::getId);
+            }
+        }
+        
+        Collections.sort(listadoAlumnos, comparador); //Odena la lista de alumnos "listadoAlumnos" segun los criterios seleccionados.
     }
 
 
