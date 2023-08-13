@@ -1,27 +1,26 @@
 package modelo;
 
 import java.io.File;
-
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class Usuario {
 
-     private IntegerProperty id;
+/**
+ * Esta es una clase que representa un Usuario de la aplicación "Lis Gestión".
+ * 
+ * @author David Jimenez Alonso.
+ * 
+ */
+public class Usuario extends Persona {
+
      private StringProperty nombreUsuario;
-     private StringProperty nombre;
-     private StringProperty apellido1;
-     private StringProperty apellido2;
      private StringProperty password;
      private ObjectProperty<File> directorio;
-     private IntegerProperty telefono;
-     private StringProperty email;
      private StringProperty emailApp;
      private StringProperty passwordEmailApp;
+
 
      /**
       * Constructor sin parametros.
@@ -29,91 +28,80 @@ public class Usuario {
       * 
       */
      public Usuario() {
-          this.id = new SimpleIntegerProperty();
+          super();
+
           this.nombreUsuario = new SimpleStringProperty(null);
-          this.nombre = new SimpleStringProperty(null);
-          this.apellido1 = new SimpleStringProperty(null);
-          this.apellido2 = new SimpleStringProperty(null);
           this.password = new SimpleStringProperty(null);
           this.directorio = new SimpleObjectProperty<File>(null);
-          this.telefono = new SimpleIntegerProperty();
-          this.email = new SimpleStringProperty(null);
           this.emailApp = new SimpleStringProperty(null);
           this.passwordEmailApp = new SimpleStringProperty(null);
      }
 
+
+     /**
+      * Contructor con parametros.
+      * Crea un objeto de tipo Usuario con los datos pasados por parametros.
+      *
+      * @param id Identificador del usuario.
+      * @param nombreUsuario Nombre de usuario del usuario.
+      * @param nombre Nombre del usuario.
+      * @param apellido1 Primer apellido del usuario.
+      * @param apellido2 Segundo Apellido del usuario.
+      * @param password Password de usuario.
+      * @param directorio Directorio donde se guardan los datos del usuario.
+      * @param telefono Número de telefono del usuario.
+      * @param email Direccion de correo electronico del usuario.
+      * @param emailApp Direccion de correo electronico para la aplicación.
+      * @param passwordEmailApp Password de la dirección de correo eletronico de la aplicación.
+      */
      public Usuario(int id, String nombreUsuario, String nombre, String apellido1, String apellido2, String password, File directorio,
                int telefono, String email, String emailApp, String passwordEmailApp) {
-          this.id = new SimpleIntegerProperty(id);
+          super(id, nombre, apellido1, apellido2, telefono, email);
+
           this.nombreUsuario = new SimpleStringProperty(nombreUsuario);
-          this.nombre = new SimpleStringProperty(nombre);
-          this.apellido1 = new SimpleStringProperty(apellido1);
-          this.apellido2 = new SimpleStringProperty(apellido2);
           this.password = new SimpleStringProperty(password);
           this.directorio = new SimpleObjectProperty<File>(directorio);
-          this.telefono = new SimpleIntegerProperty(telefono);
-          this.email = new SimpleStringProperty(email);
           this.emailApp = new SimpleStringProperty(emailApp);
           this.passwordEmailApp = new SimpleStringProperty(passwordEmailApp);
      }
 
+
+     /**
+      * Contructor con parametros. 
+      * Crea un objeto de tipo Usuario con los datos pasados por parametros.
+      *
+      * @param id Identificador del usuario.
+      * @param nombreUsuario Nombre de usuario del usuario.
+      * @param password Password de usuario.
+      * @param directorio Directorio donde se guardan los datos del usuario.
+      */
      public Usuario(int id, String nombreUsuario, String password, File directorio) {
-          this.id = new SimpleIntegerProperty(id);
+          super(id, "", "", "", 0, "");
+
           this.nombreUsuario = new SimpleStringProperty(nombreUsuario);
-          this.nombre = new SimpleStringProperty(null);
-          this.apellido1 = new SimpleStringProperty(null);
-          this.apellido2 = new SimpleStringProperty(null);
           this.password = new SimpleStringProperty(password);
           this.directorio = new SimpleObjectProperty<File>(directorio);
-          this.telefono = new SimpleIntegerProperty();
-          this.email = new SimpleStringProperty(null);
           this.emailApp = new SimpleStringProperty(null);
           this.passwordEmailApp = new SimpleStringProperty(null);
      }
 
      
+     /**
+	 * Contructor de copia.
+	 * Crea un objeto de tipo Usuario con los datos del objeto pasado como parametro.
+	 * 
+	 * @param u Objeto de donde se obtienen los datos para la copia.
+	 */
      public Usuario(Usuario u) {
-          id = new SimpleIntegerProperty(u.getId());
+          super(u);
+
           nombreUsuario = new SimpleStringProperty(u.getNombreUsuario());
-          nombre = new SimpleStringProperty(u.getNombre());
-          apellido1 = new SimpleStringProperty(u.getApellido1());
-          apellido2 = new SimpleStringProperty(u.getApellido2());
           password = new SimpleStringProperty(u.getPassword());
           directorio = new SimpleObjectProperty<File>(u.getDirectorio());
-          telefono = new SimpleIntegerProperty(u.getTelefono());
-          email = new SimpleStringProperty(u.getEmail());
           emailApp = new SimpleStringProperty(u.getEmailApp());
           passwordEmailApp = new SimpleStringProperty(u.getPasswordEmailApp());
      }
-      
 
-     // id -----------------------------------------
-     /**
-      * Obtiene la propiedad del ID del usuario.
-      *
-      * @return La propiedad del ID del usuario.
-      */
-     public IntegerProperty idProperty() {
-          return id;
-     }
-
-     /**
-      * Obtiene el ID del usuario.
-      *
-      * @return El ID del usuario.
-      */
-     public int getId() {
-          return id.get();
-     }
-
-     /**
-      * Establece el ID del usuario.
-      *
-      * @param id El nuevo ID para el usuario.
-      */
-     public void setId(int id) {
-          this.id.set(id);
-     }
 
      // nombre usuario --------------------------------
      /**
@@ -121,7 +109,7 @@ public class Usuario {
       *
       * @return La propiedad del nombreUsuario del usuario.
       */
-      public StringProperty nombreUsuarioProperty() {
+     public StringProperty nombreUsuarioProperty() {
           return nombreUsuario;
      }
 
@@ -143,90 +131,7 @@ public class Usuario {
           this.nombreUsuario.set(nombreUsuario);
      }
 
-     // nombre -----------------------------------
-     /**
-      * Obtiene la propiedad del nombre del usuario.
-      *
-      * @return La propiedad del nombre del usuario.
-      */
-     public StringProperty nombreProperty() {
-          return nombre;
-     }
-
-     /**
-      * Obtiene el nombre del usuario.
-      *
-      * @return El nombre del usuario.
-      */
-     public String getNombre() {
-          return this.nombre.get();
-     }
-
-     /**
-      * Establece el nombre del usuario.
-      *
-      * @param nombre El nuevo nombre para el usuario.
-      */
-     public void setNombre(String nombre) {
-          this.nombre.set(nombre);
-     }
-
-     // apellido1 -----------------------------------
-     /**
-      * Obtiene la propiedad del primer apellido del usuario.
-      *
-      * @return La propiedad del primer apellido del usuario.
-      */
-     public StringProperty apellido1Property() {
-          return apellido1;
-     }
-
-     /**
-      * Obtiene el primer apellido del usuario.
-      *
-      * @return El primer apellido del usuario.
-      */
-     public String getApellido1() {
-          return this.apellido1.get();
-     }
-
-     /**
-      * Establece el primer apellido del usuario.
-      *
-      * @param apellido1 El nuevo primer apellido para el usuario.
-      */
-     public void setApellido1(String apellido1) {
-          this.apellido1.set(apellido1);
-     }
-
-     // apellido2 -----------------------------------
-     /**
-      * Obtiene la propiedad del segundo apellido del usuario.
-      *
-      * @return La propiedad del segundo apellido del usuario.
-      */
-     public StringProperty apellido2Property() {
-          return apellido2;
-     }
-
-     /**
-      * Obtiene el segundo apellido del usuario.
-      *
-      * @return El segundo apellido del usuario.
-      */
-     public String getApellido2() {
-          return this.apellido2.get();
-     }
-
-     /**
-      * Establece el segundo apellido del usuario.
-      *
-      * @param apellido2 El nuevo segundo apellido para el usuario.
-      */
-     public void setApellido2(String apellido2) {
-          this.apellido2.set(apellido2);
-     }
-
+     
      // password -----------------------------------
      /**
       * Obtiene la propiedad del password del usuario.
@@ -254,6 +159,7 @@ public class Usuario {
      public void setPassword(String password) {
           this.password.set(password);
      }
+
 
      // directorio ------------------------------------
      /**
@@ -283,61 +189,6 @@ public class Usuario {
           this.directorio.set(directorio);
      }
 
-     // telefono -----------------------------------------
-     /**
-      * Obtiene la propiedad del telefono del usuario.
-      *
-      * @return La propiedad del telefono del usuario.
-      */
-     public IntegerProperty telefonoProperty() {
-          return telefono;
-     }
-
-     /**
-      * Obtiene el telefono del usuario.
-      *
-      * @return El telefono del usuario.
-      */
-     public int getTelefono() {
-          return telefono.get();
-     }
-
-     /**
-      * Establece el telefono del usuario.
-      *
-      * @param id El nuevo telefono para el usuario.
-      */
-     public void setTelefono(int telefono) {
-          this.telefono.set(telefono);
-     }
-
-     // email -----------------------------------
-     /**
-      * Obtiene la propiedad del email del usuario.
-      *
-      * @return La propiedad del email del usuario.
-      */
-     public StringProperty emailProperty() {
-          return email;
-     }
-
-     /**
-      * Obtiene el email del usuario.
-      *
-      * @return El email del usuario.
-      */
-     public String getEmail() {
-          return this.email.get();
-     }
-
-     /**
-      * Establece el email del usuario.
-      *
-      * @param email El nuevo email para el usuario.
-      */
-     public void setEmail(String email) {
-          this.email.set(email);
-     }
 
      // emailApp -----------------------------------
      /**
@@ -367,6 +218,7 @@ public class Usuario {
           this.emailApp.set(emailApp);
      }
 
+
      // passwordEmailApp -----------------------------------
      /**
       * Obtiene la propiedad del passwordEmailApp del usuario.
@@ -395,6 +247,7 @@ public class Usuario {
           this.passwordEmailApp.set(passwordEmailApp);
      }
 
+
      /**
 	 * Obtine un String con el nombre y apellidos del Usuario.
 	 * 
@@ -404,13 +257,60 @@ public class Usuario {
 		return getNombre() + " " + getApellido1() + " " + getApellido2();
 	}
 
+     
      @Override
-     public String toString() {
-          return "Usuario [id=" + id + ", nombre=" + nombre + ", apellido1=" + apellido1 + ", apellido2=" + apellido2
-                    + ", password=" + password + ", directorio=" + directorio + ", telefono=" + telefono + ", email=" + email
-                    + ", emailApp=" + emailApp + ", passwordEmailApp=" + passwordEmailApp + "]";
+     public int hashCode() {
+          final int prime = 31;
+          int result = super.hashCode();
+          result = prime * result + ((nombreUsuario == null) ? 0 : nombreUsuario.hashCode());
+          result = prime * result + ((password == null) ? 0 : password.hashCode());
+          result = prime * result + ((directorio == null) ? 0 : directorio.hashCode());
+          result = prime * result + ((emailApp == null) ? 0 : emailApp.hashCode());
+          result = prime * result + ((passwordEmailApp == null) ? 0 : passwordEmailApp.hashCode());
+          return result;
      }
 
-     
+     @Override
+     public boolean equals(Object obj) {
+          if (this == obj)
+               return true;
+          if (!super.equals(obj))
+               return false;
+          if (getClass() != obj.getClass())
+               return false;
+          Usuario other = (Usuario) obj;
+          if (nombreUsuario == null) {
+               if (other.nombreUsuario != null)
+                    return false;
+          } else if (!nombreUsuario.equals(other.nombreUsuario))
+               return false;
+          if (password == null) {
+               if (other.password != null)
+                    return false;
+          } else if (!password.equals(other.password))
+               return false;
+          if (directorio == null) {
+               if (other.directorio != null)
+                    return false;
+          } else if (!directorio.equals(other.directorio))
+               return false;
+          if (emailApp == null) {
+               if (other.emailApp != null)
+                    return false;
+          } else if (!emailApp.equals(other.emailApp))
+               return false;
+          if (passwordEmailApp == null) {
+               if (other.passwordEmailApp != null)
+                    return false;
+          } else if (!passwordEmailApp.equals(other.passwordEmailApp))
+               return false;
+          return true;
+     }
+
+     @Override
+     public String toString() {
+          return super.toString() + "Usuario [nombreUsuario=" + nombreUsuario + ", password=" + password + ", directorio=" + directorio
+                    + ", emailApp=" + emailApp + ", passwordEmailApp=" + passwordEmailApp + "]";
+     }
 
 }

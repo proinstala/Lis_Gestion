@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+
 /**
  * Esta es una clase que representa una Persona en Java.
  */
@@ -16,6 +17,7 @@ public abstract class Persona {
 	protected StringProperty apellido2;
     protected IntegerProperty telefono;
 	protected StringProperty email;
+
 
     /**
      * Contructor sin parametros.
@@ -29,6 +31,7 @@ public abstract class Persona {
 		this.telefono = new SimpleIntegerProperty();
 		this.email = new SimpleStringProperty(null);
     }
+
 
     /**
 	 * Contructor con parametros.
@@ -54,9 +57,9 @@ public abstract class Persona {
 
     /**
 	 * Contructor de copia.
-	 * Crea un objeto de tipo Alumno con los datos del objeto pasado como parametro.
+	 * Crea un objeto de tipo Persona con los datos del objeto pasado como parametro.
 	 * 
-	 * @param a Objeto de donde se obtienen los datos para la copia.
+	 * @param p Objeto de donde se obtienen los datos para la copia.
 	 */
 	protected Persona(Persona p) {
 		id = new SimpleIntegerProperty(p.getId());
@@ -125,6 +128,7 @@ public abstract class Persona {
 		this.nombre.set(nombre);
 	}
 	
+
 	// apellido1 -----------------------------------
 	/**
      * Obtiene la propiedad del primer apellido de la persona.
@@ -182,6 +186,7 @@ public abstract class Persona {
 		this.apellido2.set(apellido2);
 	}
 
+
     // telefono -----------------------------------------
 	/**
      * Obtiene la propiedad del teléfono de la persona.
@@ -210,6 +215,7 @@ public abstract class Persona {
 		this.telefono.set(telefono);
 	}
 	
+
 	// email -----------------------------------
 	/**
 	 * Obtiene la propiedad del email de la persona.
@@ -237,4 +243,68 @@ public abstract class Persona {
 	public void setEmail(String email) {
 		this.email.set(email);
 	}
+
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((nombre == null) ? 0 : nombre.hashCode());
+		result = prime * result + ((apellido1 == null) ? 0 : apellido1.hashCode());
+		result = prime * result + ((apellido2 == null) ? 0 : apellido2.hashCode());
+		result = prime * result + ((telefono == null) ? 0 : telefono.hashCode());
+		result = prime * result + ((email == null) ? 0 : email.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Persona other = (Persona) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (nombre == null) {
+			if (other.nombre != null)
+				return false;
+		} else if (!nombre.equals(other.nombre))
+			return false;
+		if (apellido1 == null) {
+			if (other.apellido1 != null)
+				return false;
+		} else if (!apellido1.equals(other.apellido1))
+			return false;
+		if (apellido2 == null) {
+			if (other.apellido2 != null)
+				return false;
+		} else if (!apellido2.equals(other.apellido2))
+			return false;
+		if (telefono == null) {
+			if (other.telefono != null)
+				return false;
+		} else if (!telefono.equals(other.telefono))
+			return false;
+		if (email == null) {
+			if (other.email != null)
+				return false;
+		} else if (!email.equals(other.email))
+			return false;
+		return true;
+	}
+
+
+	@Override
+	public String toString() {
+		return "Persona [id=" + id + ", nombre=" + nombre + ", apellido1=" + apellido1 + ", apellido2=" + apellido2
+				+ ", telefono=" + telefono + ", email=" + email + "]";
+	}
+
 }

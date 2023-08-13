@@ -4,13 +4,11 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.YearMonth;
 import java.util.ArrayList;
-
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+
 
 /**
  * Esta es una clase que representa un Alumno en Java.
@@ -18,38 +16,29 @@ import javafx.beans.property.StringProperty;
  * @author David Jimenez Alonso
  *
  */
-public class Alumno implements Cloneable {
+public class Alumno extends Persona implements Cloneable {
 	
-	private IntegerProperty id;
-	private StringProperty nombre;
-	private StringProperty apellido1;
-	private StringProperty apellido2;
 	private ObjectProperty<Genero> genero;
 	private ObjectProperty<LocalDate> fechaNacimiento;
 	private ObjectProperty<Direccion> direccion;
-	private IntegerProperty telefono;
-	private StringProperty email;
 	private ObjectProperty<EstadoAlumno> estado;
 	private IntegerProperty asistenciaSemanal;
 	private ObjectProperty<FormaPago> formaPago;
 
 	private ArrayList<Mensualidad> listaMensualidades;
 	
+
 	/**
 	 * Constructor sin parametros.
 	 * Crea un objeto de tipo Alumno con sus campos a null.
 	 */
 	public Alumno() {
-		this.id = new SimpleIntegerProperty();
-		this.nombre = new SimpleStringProperty(null);
-		this.apellido1 = new SimpleStringProperty(null);
-		this.apellido2 = new SimpleStringProperty(null);
+		super();
+		
 		this.genero = new SimpleObjectProperty<Genero>(null);
 		this.fechaNacimiento = new SimpleObjectProperty<LocalDate>(null);
 		this.direccion = new SimpleObjectProperty<Direccion>(null, "direccion");
 		this.direccion.set(null);
-		this.telefono = new SimpleIntegerProperty();
-		this.email = new SimpleStringProperty(null);
 		this.estado = new SimpleObjectProperty<EstadoAlumno>(null);
 		this.asistenciaSemanal = new SimpleIntegerProperty(1);
 		this.formaPago = new SimpleObjectProperty<FormaPago>(null);
@@ -76,16 +65,13 @@ public class Alumno implements Cloneable {
 	 */
 	public Alumno(int id, String nombre, String apellido1, String apellido2, Genero genero, Direccion direccion,
 			LocalDate fechaNacimiento, int telefono, String email, EstadoAlumno estado,  int asistenciaSemanal, FormaPago formaPago) {
-		this.id = new SimpleIntegerProperty(id);
-		this.nombre = new SimpleStringProperty(nombre);
-		this.apellido1 = new SimpleStringProperty(apellido1);
-		this.apellido2 = new SimpleStringProperty(apellido2);
+		
+		super(id, nombre, apellido1, apellido2, telefono, email);
+	
 		this.genero = new SimpleObjectProperty<Genero>(genero);
 		this.fechaNacimiento = new SimpleObjectProperty<LocalDate>(fechaNacimiento);
 		this.direccion = new SimpleObjectProperty<Direccion>(direccion, "direccion");
 		this.direccion.set(direccion);
-		this.telefono = new SimpleIntegerProperty(telefono);
-		this.email = new SimpleStringProperty(email);
 		this.estado = new SimpleObjectProperty<EstadoAlumno>(estado);
 		this.asistenciaSemanal = new SimpleIntegerProperty(asistenciaSemanal);
 		this.formaPago = new SimpleObjectProperty<FormaPago>(formaPago);
@@ -113,22 +99,20 @@ public class Alumno implements Cloneable {
 	 */
 	public Alumno(int id, String nombre, String apellido1, String apellido2, Genero genero, Direccion direccion, LocalDate fechaNacimiento,
 			int telefono, String email, EstadoAlumno estado, int asistenciaSemanal, FormaPago formaPago, ArrayList<Mensualidad> listaMensualidades) {
-		this.id = new SimpleIntegerProperty(id);
-		this.nombre = new SimpleStringProperty(nombre);
-		this.apellido1 = new SimpleStringProperty(apellido1);
-		this.apellido2 = new SimpleStringProperty(apellido2);
+		
+		super(id, nombre, apellido1, apellido2, telefono, email);
+		
 		this.genero = new SimpleObjectProperty<Genero>(genero);
 		this.fechaNacimiento = new SimpleObjectProperty<LocalDate>(fechaNacimiento);
 		this.direccion = new SimpleObjectProperty<Direccion>(direccion, "direccion");
 		this.direccion.set(direccion);
-		this.telefono = new SimpleIntegerProperty(telefono);
-		this.email = new SimpleStringProperty(email);
 		this.estado = new SimpleObjectProperty<EstadoAlumno>(estado);
 		this.asistenciaSemanal = new SimpleIntegerProperty(asistenciaSemanal);
 		this.formaPago = new SimpleObjectProperty<FormaPago>(formaPago);
 		this.listaMensualidades = new ArrayList<Mensualidad>(listaMensualidades);
 	}
 	
+
 	/**
 	 * Contructor de copia.
 	 * Crea un objeto de tipo Alumno con los datos del objeto pasado como parametro.
@@ -136,15 +120,11 @@ public class Alumno implements Cloneable {
 	 * @param a Objeto de donde se obtienen los datos para la copia.
 	 */
 	public Alumno(Alumno a) {
-		id = new SimpleIntegerProperty(a.getId());
-		nombre = new SimpleStringProperty(a.getNombre());
-		apellido1 = new SimpleStringProperty(a.getApellido1());
-		apellido2 = new SimpleStringProperty(a.getApellido2());
+		super(a);
+
 		genero = new SimpleObjectProperty<Genero>(a.getGenero());
 		fechaNacimiento = new SimpleObjectProperty<LocalDate>(a.getFechaNacimiento());
 		direccion = new SimpleObjectProperty<Direccion>(a.getDireccion());
-		telefono = new SimpleIntegerProperty(a.getTelefono());
-		email = new SimpleStringProperty(a.getEmail());
 		estado = new SimpleObjectProperty<EstadoAlumno>(a.getEstado());
 		asistenciaSemanal = new SimpleIntegerProperty(a.getAsistenciaSemanal());
 		formaPago = new SimpleObjectProperty<FormaPago>(a.getFormaPago());
@@ -170,120 +150,6 @@ public class Alumno implements Cloneable {
 		obj.setFormaPago(this.formaPago.getValue());
 		obj.setListaMensualidades(new ArrayList<Mensualidad>(this.getListaMensualidades()));
 		return obj;
-	}
-	
-	// id -----------------------------------------
-	/**
-     * Obtiene la propiedad del ID del alumno.
-     *
-     * @return La propiedad del ID del alumno.
-     */
-	public IntegerProperty idProperty() {
-		return id;
-	}
-
-	/**
-     * Obtiene el ID del alumno.
-     *
-     * @return El ID del alumno.
-     */
-	public int getId() {
-		return id.get();
-	}
-
-	/**
-     * Establece el ID del alumno.
-     *
-     * @param id El nuevo ID para el alumno.
-     */
-	public void setId(int id) {
-		this.id.set(id);
-	}
-	
-	
-	// nombre -----------------------------------
-	/**
-     * Obtiene la propiedad del nombre del alumno.
-     *
-     * @return La propiedad del nombre del alumno.
-     */
-	public StringProperty nombreProperty() {
-		return nombre;
-	}
-
-	/**
-     * Obtiene el nombre del alumno.
-     *
-     * @return El nombre del alumno.
-     */
-	public String getNombre() {
-		return this.nombre.get();
-	}
-
-	/**
-     * Establece el nombre del alumno.
-     *
-     * @param nombre El nuevo nombre para el alumno.
-     */
-	public void setNombre(String nombre) {
-		this.nombre.set(nombre);
-	}
-	
-	// apellido1 -----------------------------------
-	/**
-     * Obtiene la propiedad del primer apellido del alumno.
-     *
-     * @return La propiedad del primer apellido del alumno.
-     */
-	public StringProperty apellido1Property() {
-		return apellido1;
-	}
-
-	/**
-     * Obtiene el primer apellido del alumno.
-     *
-     * @return El primer apellido del alumno.
-     */
-	public String getApellido1() {
-		return this.apellido1.get();
-	}
-
-	/**
-     * Establece el primer apellido del alumno.
-     *
-     * @param apellido1 El nuevo primer apellido para el alumno.
-     */
-	public void setApellido1(String apellido1) {
-		this.apellido1.set(apellido1);
-	}
-	
-	
-	// apellido2 -----------------------------------
-	/**
-     * Obtiene la propiedad del segundo apellido del alumno.
-     *
-     * @return La propiedad del segundo apellido del alumno.
-     */
-	public StringProperty apellido2Property() {
-		return apellido2;
-	}
-
-	/**
-     * Obtiene el segundo apellido del alumno.
-     *
-     * @return El segundo apellido del alumno.
-     */
-	public String getApellido2() {
-		return this.apellido2.get();
-	}
-
-	/**
-     * Establece el segundo apellido del alumno.
-     *
-     * @param apellido2 El nuevo segundo apellido para el alumno.
-     */
-	public void setApellido2(String apellido2) {
-		this.apellido2.set(apellido2);
 	}
 	
 	
@@ -372,63 +238,6 @@ public class Alumno implements Cloneable {
 	public void setDireccion(Direccion direccion) {
 		this.direccion.set(direccion);
 	}
-	
-		
-	// telefono -----------------------------------------
-	/**
-     * Obtiene la propiedad del teléfono del alumno.
-     *
-     * @return La propiedad del teléfono del alumno.
-     */
-	public IntegerProperty telefonoProperty() {
-		return telefono;
-	}
-
-	/**
-	 * Obtiene el teléfono del alumno.
-	 *
-	 * @return El teléfono del alumno.
-	 */
-	public int getTelefono() {
-		return telefono.get();
-	}
-
-	/**
-	 * Establece el teléfono del alumno.
-	 *
-	 * @param telefono El nuevo teléfono para el alumno.
-	 */
-	public void setTelefono(int telefono) {
-		this.telefono.set(telefono);
-	}
-	
-	// email -----------------------------------
-	/**
-	 * Obtiene la propiedad del email del alumno.
-	 *
-	 * @return La propiedad del email del alumno.
-	 */
-	public StringProperty emailProperty() {
-		return email;
-	}
-
-	/**
-	 * Obtiene el email del alumno.
-	 *
-	 * @return El email del alumno.
-	 */
-	public String getEmail() {
-		return this.email.get();
-	}
-
-	/**
-	 * Establece el email del alumno.
-	 *
-	 * @param email El nuevo email para el alumno.
-	 */
-	public void setEmail(String email) {
-		this.email.set(email);
-	}
 
 
 	// estado ------------------------------------
@@ -459,6 +268,7 @@ public class Alumno implements Cloneable {
 		this.estado.set(estado);
 	}
 
+
 	// asistenciaSemanal -----------------------------------------
 	/**
 	 * Obtiene la propiedad de la asistenciaSemanal del alumno.
@@ -488,7 +298,7 @@ public class Alumno implements Cloneable {
 	}
 
 
-	 // formaPago ------------------------------------
+	// formaPago ------------------------------------
 	/**
      * Obtiene la propiedad de formaPago del alumno.
      *
@@ -510,7 +320,7 @@ public class Alumno implements Cloneable {
 	/**
      * Establece el formaPago del alumno.
      *
-     * @param genero La nueva formaPago para el alumno.
+     * @param formaPago La nueva formaPago para el alumno.
      */
 	public void setFormaPago(FormaPago formaPago) {
 		this.formaPago.set(formaPago);
@@ -602,6 +412,7 @@ public class Alumno implements Cloneable {
 		return periodo.getYears();
 	}
 
+
 	/**
 	 * Obtine un String con el nombre y apellidos del Alumno.
 	 * 
@@ -611,21 +422,14 @@ public class Alumno implements Cloneable {
 		return getNombre() + " " + getApellido1() + " " + getApellido2();
 	}
 
-	
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((nombre == null) ? 0 : nombre.hashCode());
-		result = prime * result + ((apellido1 == null) ? 0 : apellido1.hashCode());
-		result = prime * result + ((apellido2 == null) ? 0 : apellido2.hashCode());
+		int result = super.hashCode();
 		result = prime * result + ((genero == null) ? 0 : genero.hashCode());
 		result = prime * result + ((fechaNacimiento == null) ? 0 : fechaNacimiento.hashCode());
 		result = prime * result + ((direccion == null) ? 0 : direccion.hashCode());
-		result = prime * result + ((telefono == null) ? 0 : telefono.hashCode());
-		result = prime * result + ((email == null) ? 0 : email.hashCode());
 		result = prime * result + ((estado == null) ? 0 : estado.hashCode());
 		result = prime * result + ((asistenciaSemanal == null) ? 0 : asistenciaSemanal.hashCode());
 		result = prime * result + ((formaPago == null) ? 0 : formaPago.hashCode());
@@ -633,35 +437,16 @@ public class Alumno implements Cloneable {
 		return result;
 	}
 
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		Alumno other = (Alumno) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		if (nombre == null) {
-			if (other.nombre != null)
-				return false;
-		} else if (!nombre.equals(other.nombre))
-			return false;
-		if (apellido1 == null) {
-			if (other.apellido1 != null)
-				return false;
-		} else if (!apellido1.equals(other.apellido1))
-			return false;
-		if (apellido2 == null) {
-			if (other.apellido2 != null)
-				return false;
-		} else if (!apellido2.equals(other.apellido2))
-			return false;
 		if (genero == null) {
 			if (other.genero != null)
 				return false;
@@ -676,16 +461,6 @@ public class Alumno implements Cloneable {
 			if (other.direccion != null)
 				return false;
 		} else if (!direccion.equals(other.direccion))
-			return false;
-		if (telefono == null) {
-			if (other.telefono != null)
-				return false;
-		} else if (!telefono.equals(other.telefono))
-			return false;
-		if (email == null) {
-			if (other.email != null)
-				return false;
-		} else if (!email.equals(other.email))
 			return false;
 		if (estado == null) {
 			if (other.estado != null)
@@ -709,6 +484,7 @@ public class Alumno implements Cloneable {
 			return false;
 		return true;
 	}
+
 
 	@Override
 	public String toString() {
