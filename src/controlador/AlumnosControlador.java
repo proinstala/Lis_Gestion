@@ -176,11 +176,11 @@ public class AlumnosControlador implements Initializable {
         Image notificacion;
         try {
             //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
-            imagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png")); //Forma desde IDE y JAR.
+            imagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_48.png")); //Forma desde IDE y JAR.
             notificacion = new Image(getClass().getResourceAsStream("/recursos/boton_6_64.png"));
         } catch (Exception e) {
             //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
-        	imagenLupa = new Image("/recursos/lupa_lila_2_128.png"); //Forma desde el JAR.
+        	imagenLupa = new Image("/recursos/lupa_lila_2_48.png"); //Forma desde el JAR.
             notificacion = new Image("/recursos/boton_6_64.png");
         }
         //Establecer las imagenes cargadas en el ImageView.

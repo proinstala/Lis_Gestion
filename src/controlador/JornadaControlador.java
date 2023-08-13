@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import baseDatos.ConexionBD;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -168,6 +169,30 @@ public class JornadaControlador implements Initializable {
 
     @FXML
     private Label lbTipoClase8;
+
+	@FXML
+    private Label lbAlumnosClase1;
+
+	@FXML
+    private Label lbAlumnosClase2;
+
+	@FXML
+    private Label lbAlumnosClase3;
+
+	@FXML
+    private Label lbAlumnosClase4;
+
+	@FXML
+    private Label lbAlumnosClase5;
+
+	@FXML
+    private Label lbAlumnosClase6;
+
+	@FXML
+    private Label lbAlumnosClase7;
+
+	@FXML
+    private Label lbAlumnosClase8;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -639,7 +664,8 @@ public class JornadaControlador implements Initializable {
 	 */
 	private void cargaClase(int numeroClase) {
 		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/ClaseVista.fxml"));
+			//FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/ClaseVista.fxml"));
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/claseVista.fxml"));
 			BorderPane ClasePilates;
 			ClasePilates = (BorderPane) loader.load();
 			controladorPincipal.setPane(ClasePilates);
@@ -684,27 +710,35 @@ public class JornadaControlador implements Initializable {
 				//Desvincular las propiedades de texto de las Labels.
 				lbHoraClase1.textProperty().unbind();
 				lbTipoClase1.textProperty().unbind();
+				lbAlumnosClase1.textProperty().unbind();
 				
 				lbHoraClase2.textProperty().unbind();
 				lbTipoClase2.textProperty().unbind();
+				lbAlumnosClase2.textProperty().unbind();
 				
 				lbHoraClase3.textProperty().unbind();
 				lbTipoClase3.textProperty().unbind();
+				lbAlumnosClase3.textProperty().unbind();
 				
 				lbHoraClase4.textProperty().unbind();
 				lbTipoClase4.textProperty().unbind();
+				lbAlumnosClase4.textProperty().unbind();
 				
 				lbHoraClase5.textProperty().unbind();
 				lbTipoClase5.textProperty().unbind();
+				lbAlumnosClase5.textProperty().unbind();
 				
 				lbHoraClase6.textProperty().unbind();
 				lbTipoClase6.textProperty().unbind();
+				lbAlumnosClase6.textProperty().unbind();
 				
 				lbHoraClase7.textProperty().unbind();
 				lbTipoClase7.textProperty().unbind();
+				lbAlumnosClase7.textProperty().unbind();
 				
 				lbHoraClase8.textProperty().unbind();
 				lbTipoClase8.textProperty().unbind();
+				lbAlumnosClase8.textProperty().unbind();
 				
 				//Desvincular el TextArea comentario.
 				taComentarios.textProperty().unbindBidirectional(jornada.comentarioProperty());
@@ -766,11 +800,12 @@ public class JornadaControlador implements Initializable {
 			btnGuardarComentario.setDisable(false); //Habilitar el botón de guardar comentario.
 			this.jornadaOriginal = jorn; //Asigna la jornada pasada como parametro a jornadaOriginal.
 			jornada = new Jornada(jornadaOriginal); //pasar los datos de jornadaOriginal a jornada para que los cambios no afecten directamente a jornadaOriginal
+			
 			dpFecha.setValue(jornada.getFecha());	//Asigna la fecha de la jornada al datePiker.
 			lbDiaSemana.setText(Fechas.obtenerDiaSemana(jornada.getFecha())); //Asigna el dia de la semana de la jornada en el Label lbDiaSemana.
 			
 			//Cambio los alumnos que tiene cada clase por los alumnos de la aplicacion.
-			for(Clase clase : jorn.getClases()) {
+			for(Clase clase : jornada.getClases()) {
 				if(!clase.getListaAlumnos().isEmpty()) {
 					clase.setListaAlumnos(comprobarListaClase(clase.getListaAlumnos()));
 				}
@@ -804,27 +839,35 @@ public class JornadaControlador implements Initializable {
 			//Binding a Labels.
 			lbHoraClase1.textProperty().bind(jornada.getClase(0).horaClaseProperty().asString());
 			lbTipoClase1.textProperty().bind(jornada.getClase(0).tipoProperty().asString());
+			lbAlumnosClase1.textProperty().bind(Bindings.createStringBinding(() -> String.format("%d", listaClase1.size()), listaClase1));
 			
 			lbHoraClase2.textProperty().bind(jornada.getClase(1).horaClaseProperty().asString());
 			lbTipoClase2.textProperty().bind(jornada.getClase(1).tipoProperty().asString());
+			lbAlumnosClase2.textProperty().bind(Bindings.createStringBinding(() -> String.format("%d", listaClase2.size()), listaClase2));
 			
 			lbHoraClase3.textProperty().bind(jornada.getClase(2).horaClaseProperty().asString());
 			lbTipoClase3.textProperty().bind(jornada.getClase(2).tipoProperty().asString());
+			lbAlumnosClase3.textProperty().bind(Bindings.createStringBinding(() -> String.format("%d", listaClase3.size()), listaClase3));
 			
 			lbHoraClase4.textProperty().bind(jornada.getClase(3).horaClaseProperty().asString());
 			lbTipoClase4.textProperty().bind(jornada.getClase(3).tipoProperty().asString());
+			lbAlumnosClase4.textProperty().bind(Bindings.createStringBinding(() -> String.format("%d", listaClase4.size()), listaClase4));
 			
 			lbHoraClase5.textProperty().bind(jornada.getClase(4).horaClaseProperty().asString());
 			lbTipoClase5.textProperty().bind(jornada.getClase(4).tipoProperty().asString());
+			lbAlumnosClase5.textProperty().bind(Bindings.createStringBinding(() -> String.format("%d", listaClase5.size()), listaClase5));
 			
 			lbHoraClase6.textProperty().bind(jornada.getClase(5).horaClaseProperty().asString());
 			lbTipoClase6.textProperty().bind(jornada.getClase(5).tipoProperty().asString());
+			lbAlumnosClase6.textProperty().bind(Bindings.createStringBinding(() -> String.format("%d", listaClase6.size()), listaClase6));
 			
 			lbHoraClase7.textProperty().bind(jornada.getClase(6).horaClaseProperty().asString());
 			lbTipoClase7.textProperty().bind(jornada.getClase(6).tipoProperty().asString());
+			lbAlumnosClase7.textProperty().bind(Bindings.createStringBinding(() -> String.format("%d", listaClase7.size()), listaClase7));
 			
 			lbHoraClase8.textProperty().bind(jornada.getClase(7).horaClaseProperty().asString());
 			lbTipoClase8.textProperty().bind(jornada.getClase(7).tipoProperty().asString());
+			lbAlumnosClase8.textProperty().bind(Bindings.createStringBinding(() -> String.format("%d", listaClase8.size()), listaClase8));
 			
 			//Binding a TextArea comentario.
 			taComentarios.textProperty().bindBidirectional(jornada.comentarioProperty());

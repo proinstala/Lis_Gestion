@@ -10,8 +10,9 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-
 import baseDatos.ConexionBD;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.IntegerBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -45,10 +46,12 @@ import modelo.Toast;
 import utilidades.Constants;
 import utilidades.Fechas;
 
+
 public class ClaseControlador implements Initializable {
 
+	IntegerBinding totalAlumnos;
 	private PrincipalControlador controladorPincipal;
-	private ObservableList<Alumno> listadoAlumnos;
+	private ObservableList<Alumno> listadoAlumnosGeneral;
 	private ObservableList<Alumno> listaClase;
 	private int numeroClase;
 	private DateTimeFormatter formatter;
@@ -127,6 +130,9 @@ public class ClaseControlador implements Initializable {
 
 	@FXML
     private Label lbIdClase;
+
+	@FXML
+    private Label lbNumeroAlumnos;
 	
 	@FXML
     private TextArea taAnotaciones;
@@ -151,14 +157,14 @@ public class ClaseControlador implements Initializable {
         	imagenFlechaAdd = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_1.png"));
         	ImagenVolver = new Image(getClass().getResourceAsStream("/recursos/flceha_recarga_1.png"));
         	ImagenGuardar = new Image(getClass().getResourceAsStream("/recursos/floppy_lila_1_128.png"));
-        	ImagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png"));
+        	ImagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_48.png"));
         } catch (Exception e) {
 			//Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
         	imagenFlecha = new Image("/recursos/flecha_derecha_2.png"); //Forma desde el JAR.
         	imagenFlechaAdd = new Image("/recursos/flecha_derecha_1.png");
         	ImagenVolver = new Image("/recursos/flceha_recarga_1.png");
         	ImagenGuardar = new Image("/recursos/floppy_lila_1_128.png");
-        	ImagenLupa = new Image("/recursos/upa_lila_2_128.png");
+        	ImagenLupa = new Image("/recursos/upa_lila_2_48.png");
         }
 		//Establecer la imagenes cargadas en los ImageView.
         ivFlechaIzquierda.setImage(imagenFlecha);
@@ -244,8 +250,8 @@ public class ClaseControlador implements Initializable {
 	
 	/**
 	 * Maneja el evento de hacer clic en el botón "Add Alumno".
-	 * Se encarga de agregar un alumno a la clase seleccionada si cumple ciertas condiciones.
-	 * Muestra mensajes de aviso en caso de que el alumno ya esté inscrito en la clase, en otra clase de la misma jornada
+	 * Se encarga de llamar al metodo agregarAlumno() para agregar un alumno a la clase seleccionada si cumple ciertas condiciones.
+	 * Muestra mensajes de dialogo en caso de que el alumno ya esté inscrito en la clase, en otra clase de la misma jornada
 	 * o haya alcanzado su máximo de clases semanales.
 	 *
 	 * @param event El evento de clic del mouse.
@@ -256,7 +262,6 @@ public class ClaseControlador implements Initializable {
 		
 		if(i != -1){
 			Alumno alumno = tvAlumnos.getSelectionModel().getSelectedItem(); //Obtengo el alumno seleccionado.
-			
 			int numeroIncripciones = -1;
 			try {
 				numeroIncripciones = conexionBD.numeroClasesInscrito(alumno.getId(), jornada);	 
@@ -271,8 +276,35 @@ public class ClaseControlador implements Initializable {
 
 			if(listaClase.contains(alumno)) {
 				toast.show((Stage) bpClase.getScene().getWindow(), "El alumno ya esta inscrito en esta Clase.");
+			
 			} else if(jornada.alumnoEnJornada(alumno) != -1){
-				toast.show((Stage) bpClase.getScene().getWindow(), "El alumno ya esta inscrito en una Clase de esta Jornada.\n" + "Inscrito en Clase " + jornada.alumnoEnJornada(alumno) + ".");
+				alerta = new Alert(AlertType.CONFIRMATION);
+				alerta.getDialogPane().getStylesheets()
+						.add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
+				alerta.setTitle("Control asistencias");
+
+				if (numeroIncripciones >= alumno.getAsistenciaSemanal()) {
+					alerta.setHeaderText("Este Alumno ya esta inscrito en una o varias clase de esta Jornada\n" +
+							"y ademas supera su número máximo de aisitencia semanal.");
+				} else {
+					alerta.setHeaderText("Este Alumno ya esta inscrito en una clase de esta Jornada.\n" +
+							"Inscrito en Clase " + jornada.alumnoEnJornada(alumno) + ".");
+				}
+
+				alerta.setContentText("¿Quieres añadirlo a esta clase?");
+				alerta.initStyle(StageStyle.DECORATED);
+				alerta.initOwner((Stage) bpClase.getScene().getWindow());
+
+				ButtonType buttonTypeCancel = new ButtonType("No", ButtonData.CANCEL_CLOSE);
+				ButtonType buttonTypeConfirmar = new ButtonType("Si", ButtonData.YES);
+				alerta.getButtonTypes().setAll(buttonTypeConfirmar, buttonTypeCancel);
+				Optional<ButtonType> result = alerta.showAndWait();
+
+				// Si pulsamos el boton confirmar:
+				if (result.get() == buttonTypeConfirmar) {
+					agregarAlumno(alumno);
+				}
+
 			} else if(numeroIncripciones >= alumno.getAsistenciaSemanal()) {
 				alerta = new Alert(AlertType.CONFIRMATION);
 				alerta.getDialogPane().getStylesheets()
@@ -290,14 +322,11 @@ public class ClaseControlador implements Initializable {
 
 				// Si pulsamos el boton confirmar:
 				if (result.get() == buttonTypeConfirmar) {
-					listaClase.add(alumno); // Añado el alumno a la lista de clase
-					toast.show((Stage) bpClase.getScene().getWindow(),
-							"Alumno añadido a Clase " + clase.getNumero() + ".");
+					agregarAlumno(alumno);
 				}
 				
 			} else {
-				listaClase.add(alumno); //Añado el alumno a la lista de clase
-				toast.show((Stage) bpClase.getScene().getWindow(), "Alumno añadido a Clase " + clase.getNumero() + ".");
+				agregarAlumno(alumno);
 			}
 		}
 	}
@@ -376,7 +405,7 @@ public class ClaseControlador implements Initializable {
 
 			JornadaControlador controller = loader.getController(); //cargo el controlador.
 			controller.setControladorPrincipal(controladorPincipal);
-			controller.setListaAlumnos(listadoAlumnos);
+			controller.setListaAlumnos(listadoAlumnosGeneral);
 			controller.inicializacion(jornada);
 			
 		} catch (IOException e) {
@@ -386,6 +415,26 @@ public class ClaseControlador implements Initializable {
 			logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
 		}
+	}
+
+
+	/**
+	 * Agrega un alumno a la lista de alumnos de la clase actual.
+	 * Muestra un mensaje para notificar el exito o fracaso de agregar el alumno a clase.
+	 * 
+	 * @param alumno Alumno que se agrega a la lista de alumnos de la clase actual.
+	 */
+	private void agregarAlumno(Alumno alumno) {
+		// Añade el alumno a la lista de clase.
+		if(listaClase.add(alumno)) {
+			//Muestra una notificación de confirmación de Alumno añadido a clase.
+			toast.show((Stage) bpClase.getScene().getWindow(),
+				"Alumno añadido a Clase " + clase.getNumero() + ".");
+		} else {
+			//Muestra una notificación de error de Alumno añadido a clase.
+			toast.show((Stage) bpClase.getScene().getWindow(),
+				"Fallo al agregar Alumno a Clase " + clase.getNumero() + ".");
+		} 
 	}
 	
 	
@@ -427,6 +476,8 @@ public class ClaseControlador implements Initializable {
 		cbTipo.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
 			this.clase.tipoProperty().set(ov);
 		});
+
+		lbNumeroAlumnos.textProperty().bind(Bindings.createStringBinding(() -> String.format("%d", listaClase.size()), listaClase));
 	}
 
 
@@ -443,7 +494,7 @@ public class ClaseControlador implements Initializable {
 		ArrayList<Alumno> nuevaListaAlumnos = new ArrayList<Alumno>();
 		//listadoAlumnos
 		for(Alumno alumno : listaAlumnos) {
-			for(Alumno alumnoApp : listadoAlumnos) {
+			for(Alumno alumnoApp : listadoAlumnosGeneral) {
 				if(alumno.getId() == alumnoApp.getId()) {
 					nuevaListaAlumnos.add(alumnoApp);
 					break;
@@ -485,10 +536,8 @@ public class ClaseControlador implements Initializable {
 	 * @param lista La lista de donde se obtienen los Alumnos.
 	 */
 	public void setListaAlumnos(ObservableList<Alumno> lista) {
-		listadoAlumnos = FXCollections.observableArrayList(lista); //Guado la lista pasada a la lista de Clasecontrolador.
-		//tvAlumnos.setItems(listadoAlumnos);
-		filtro = new FilteredList<Alumno>(listadoAlumnos); //Inicio el filtro pasandole el listado de alumnos.
+		listadoAlumnosGeneral = lista;
+		filtro = new FilteredList<Alumno>(listadoAlumnosGeneral); //Inicio el filtro pasandole el listado de alumnos.
 		tvAlumnos.setItems(filtro); //Añado la lista de alumnos TextView tvAlumnos.
-		
 	}
 }

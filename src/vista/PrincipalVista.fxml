@@ -57,7 +57,7 @@
                </padding></Label>
             <ImageView fx:id="ivLogo" fitHeight="150.0" fitWidth="134.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.rowIndex="9" GridPane.valignment="CENTER">
                <image>
-                  <Image url="@../recursos/logo_nuevo.png" />
+                  <Image url="@../recursos/logo_nuevo_134_159.png" />
                </image>
                <GridPane.margin>
                   <Insets />

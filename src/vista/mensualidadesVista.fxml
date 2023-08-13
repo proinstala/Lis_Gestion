@@ -314,7 +314,7 @@
             </Label>
             <ImageView fx:id="ivLupa" fitHeight="24.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.hgrow="NEVER" GridPane.rowIndex="4" GridPane.vgrow="NEVER">
                <image>
-                  <Image url="@../recursos/lupa_lila_2_128.png" />
+                  <Image url="@../recursos/lupa_lila_2_48.png" />
                </image>
                <GridPane.margin>
                   <Insets right="160.0" />

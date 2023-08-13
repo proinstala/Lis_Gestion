@@ -35,7 +35,7 @@
          <children>
             <ImageView fx:id="imImagenRegistro" fitHeight="150.0" fitWidth="200.0" layoutX="25.0" layoutY="23.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@../recursos/user_3_512.png" />
+                  <Image url="@../recursos/usuario_add_1_128.png" />
                </image>
             </ImageView>
             <Label fx:id="lbInformacion" alignment="TOP_LEFT" layoutX="18.0" layoutY="198.0" prefHeight="130.0" prefWidth="164.0" styleClass="color_texto_negro" text="Introduce un nombre para tu usuario y un password. Vuelve a introducir el password para confirmarlo y haz clic en registrarse para crear el nuevo usuario y empezar a disfrutar de la aplicacion." textAlignment="JUSTIFY" textFill="WHITE" wrapText="true" />

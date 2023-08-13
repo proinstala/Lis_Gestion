@@ -37,9 +37,9 @@
                         <Cursor fx:constant="HAND" />
                      </cursor></Button>
                   <TextField fx:id="tfUsuario" layoutX="23.0" layoutY="170.0" prefHeight="30.0" promptText="Usuario" AnchorPane.leftAnchor="23.0" AnchorPane.rightAnchor="23.0" />
-                  <ImageView fx:id="ivImagenLogin" fitHeight="103.0" fitWidth="98.0" layoutX="101.0" layoutY="32.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="ivImagenLogin" fitHeight="103.0" fitWidth="128.0" layoutX="101.0" layoutY="32.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../recursos/user_1_512.png" />
+                        <Image url="@../recursos/usuario_2_128.png" />
                      </image>
                   </ImageView>
                   <Label layoutX="214.0" layoutY="357.0" onMouseClicked="#registrarse" styleClass="label_resaltado" text="Registrarse" underline="true">
@@ -53,9 +53,9 @@
                   <PasswordField fx:id="pfPassword" layoutX="75.0" layoutY="220.0" prefHeight="30.0" promptText="Password" AnchorPane.leftAnchor="23.0" AnchorPane.rightAnchor="23.0" />
                </children>
             </AnchorPane>
-            <ImageView fx:id="ivImagenLogo" fitHeight="229.0" fitWidth="225.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+            <ImageView fx:id="ivImagenLogo" fitHeight="225.0" fitWidth="225.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
                <image>
-                  <Image url="@../recursos/logo_nuevo_letras_color.png" />
+                  <Image url="@../recursos/logo_nuevo_letras_color_225.png" />
                </image>
             </ImageView>
          </children>

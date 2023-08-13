@@ -11,7 +11,6 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-
 import baseDatos.ConexionBD;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,6 +36,7 @@ import modelo.Mensualidad;
 import modelo.Toast;
 import modelo.Usuario;
 import utilidades.Constants;
+
 
 public class PrincipalControlador implements Initializable {
 	
@@ -98,10 +98,10 @@ public class PrincipalControlador implements Initializable {
         Image imagenLogo;
         try {
 			//Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
-			imagenLogo = new Image(getClass().getResourceAsStream("/recursos/logo_nuevo.png"));
+			imagenLogo = new Image(getClass().getResourceAsStream("/recursos/logo_nuevo_134_159.png"));
         } catch (Exception e) {
 			//Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
-            imagenLogo = new Image("/recursos/logo_nuevo.png"); //Establecer la imagen cargada en el ImageView.
+            imagenLogo = new Image("/recursos/logo_nuevo_134_159.png"); //Establecer la imagen cargada en el ImageView.
         }
         ivLogo.setImage(imagenLogo);
 
@@ -624,6 +624,7 @@ public class PrincipalControlador implements Initializable {
 		try {
 			listadoAlumnosGeneral = FXCollections.observableArrayList(conexionBD.getListadoAlumnos());
 			listadoMensualidadesGeneral = FXCollections.observableArrayList(conexionBD.getListadoMensualidades());
+			
 			for (Alumno a : listadoAlumnosGeneral) {
 				for (Mensualidad m : listadoMensualidadesGeneral) {
 					if(a.getId() == m.getIdAlumno()) {a.addMensualidad(m);}

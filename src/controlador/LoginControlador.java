@@ -68,12 +68,12 @@ public class LoginControlador implements Initializable {
         Image imagenLogo;
         try {
             //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
-            imagenLogin = new Image(getClass().getResourceAsStream("/recursos/user_1_512.png")); //Forma desde IDE y JAR.
-            imagenLogo = new Image(getClass().getResourceAsStream("/recursos/logo_nuevo_letras_color.png"));
+            imagenLogin = new Image(getClass().getResourceAsStream("/recursos/usuario_2_128.png")); //Forma desde IDE y JAR.
+            imagenLogo = new Image(getClass().getResourceAsStream("/recursos/logo_nuevo_letras_color_225.png"));
         } catch (Exception e) {
             //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
-            imagenLogin = new Image("/recursos/user_1_512.png"); //Forma desde el JAR.
-            imagenLogo = new Image("/recursos/logo_nuevo_letras_color.png");
+            imagenLogin = new Image("/recursos/usuario_2_128.png"); //Forma desde el JAR.
+            imagenLogo = new Image("/recursos/logo_nuevo_letras_color_225.png");
         }
         //Establecer las imagenes cargadas en los ImageView.
         ivImagenLogin.setImage(imagenLogin);

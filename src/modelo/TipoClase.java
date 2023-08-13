@@ -6,8 +6,10 @@ package modelo;
  *
  */
 public enum TipoClase {
-	HIIT_HIPO,
+	PILATES_HIIT,
 	PILATES,
 	AEREO,
+	FUNCIONAL,
+	SUPENSION,
 	OTROS
 }

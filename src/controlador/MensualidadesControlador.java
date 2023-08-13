@@ -198,12 +198,12 @@ public class MensualidadesControlador implements Initializable {
         Image Notificacion;
         try {
             //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
-            lupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_128.png")); //Forma desde IDE y JAR.
+            lupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_48.png")); //Forma desde IDE y JAR.
             GenerarMensualidades = new Image(getClass().getResourceAsStream("/recursos/flceha_recarga_1.png"));
             Notificacion = new Image(getClass().getResourceAsStream("/recursos/circulo_flecha_1.png"));
         } catch (Exception e) {
             //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
-            lupa = new Image("/recursos/lupa_lila_2_128.png"); //Forma desde el JAR.
+            lupa = new Image("/recursos/lupa_lila_2_48.png"); //Forma desde el JAR.
             GenerarMensualidades = new Image("/recursos/flceha_recarga_1.png");
             Notificacion = new Image("/recursos/circulo_flecha_1.png");
         }
