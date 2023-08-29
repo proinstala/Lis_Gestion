@@ -320,20 +320,20 @@
                   <Insets right="160.0" />
                </GridPane.margin>
             </ImageView>
-            <ImageView fx:id="ivGenerarMensualidades" fitHeight="62.0" fitWidth="61.0" onMouseClicked="#abrirCardGenerarMensualidades" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" GridPane.rowSpan="2" GridPane.valignment="CENTER">
+            <ImageView fx:id="ivGenerarMensualidades" fitHeight="42.0" fitWidth="42.0" onMouseClicked="#abrirCardGenerarMensualidades" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" GridPane.rowSpan="2" GridPane.valignment="CENTER">
                <image>
-                  <Image url="@../recursos/flceha_recarga_1.png" />
+                  <Image url="@../recursos/mensualidad_42px.png" />
                </image>
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor>
                <GridPane.margin>
-                  <Insets right="370.0" />
+                  <Insets right="365.0" />
                </GridPane.margin>
             </ImageView>
-            <ImageView fx:id="ivNotificacion" fitHeight="46.0" fitWidth="46.0" onMouseClicked="#abrirNotificaciones" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" GridPane.rowSpan="2" GridPane.valignment="CENTER">
+            <ImageView fx:id="ivNotificacion" fitHeight="42.0" fitWidth="42.0" onMouseClicked="#abrirNotificaciones" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" GridPane.rowSpan="2" GridPane.valignment="CENTER">
                <image>
-                  <Image url="@../recursos/circulo_flecha_1.png" />
+                  <Image url="@../recursos/notificacion_42px.png" />
                </image>
                <cursor>
                   <Cursor fx:constant="HAND" />

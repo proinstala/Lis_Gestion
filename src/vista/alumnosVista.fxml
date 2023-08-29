@@ -162,12 +162,12 @@
                   <Insets right="162.0" />
                </GridPane.margin>
             </Label>
-            <ImageView fx:id="ivNotificacion" fitHeight="46.0" fitWidth="46.0" onMouseClicked="#abrirNotificaciones" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" GridPane.rowSpan="2">
+            <ImageView fx:id="ivNotificacion" fitHeight="42.0" fitWidth="42.0" onMouseClicked="#abrirNotificaciones" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" GridPane.rowSpan="2">
                <GridPane.margin>
                   <Insets right="300.0" />
                </GridPane.margin>
                <image>
-                  <Image url="@../recursos/boton_6_64.png" />
+                  <Image url="@../recursos/notificacion_42px.png" />
                </image>
                <cursor>
                   <Cursor fx:constant="HAND" />

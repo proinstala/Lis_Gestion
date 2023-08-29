@@ -1,5 +1,6 @@
 package controlador;
 
+import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -12,17 +13,22 @@ import baseDatos.ConexionBD;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import modelo.Alumno;
 import modelo.Toast;
 import utilidades.Constants;
@@ -39,6 +45,7 @@ public class AjustesControlador implements Initializable {
     private ConexionBD conexionBD;
     private Logger logUser;
     private Toast toast;
+    private Double tiempoDelay = 0.5;
     
 
     @FXML
@@ -52,6 +59,9 @@ public class AjustesControlador implements Initializable {
 
     @FXML
     private GridPane gpAjustes;
+
+    @FXML
+    private ImageView ivAcercaDe;
 
     @FXML
     private ImageView ivAddLocalidad;
@@ -94,6 +104,25 @@ public class AjustesControlador implements Initializable {
         ivBorrarLocalidad.setImage(imagenBorrar);
         ivEditarPrecio.setImage(imagenEditar);
         ivEditarLocalidad.setImage(imagenEditar); 
+
+        //Crear Tooltip.
+        Tooltip tltAddLocalidad = new Tooltip("Añadir Nueva Localidad");
+		Tooltip tltBorrarLocalidad = new Tooltip("Eliminar Localidad");
+		Tooltip tltEditarPrecio = new Tooltip("Editar Precio");
+		Tooltip tltEditarLocalidad = new Tooltip("Editar Localidad");
+        Tooltip tltAcercaDe = new Tooltip("Acerca De");
+
+        tltAddLocalidad.setShowDelay(Duration.seconds(tiempoDelay)); //Establecer retardo de aparición.
+		tltBorrarLocalidad.setShowDelay(Duration.seconds(tiempoDelay));
+		tltEditarPrecio.setShowDelay(Duration.seconds(tiempoDelay)); 
+		tltEditarLocalidad.setShowDelay(Duration.seconds(tiempoDelay)); 
+        tltAcercaDe.setShowDelay(Duration.seconds(tiempoDelay)); 
+
+		Tooltip.install(ivAddLocalidad, tltAddLocalidad); //Establecer Tooltip a ImageView.
+		Tooltip.install(ivBorrarLocalidad, tltBorrarLocalidad);
+		Tooltip.install(ivEditarPrecio, tltEditarPrecio);
+		Tooltip.install(ivEditarLocalidad, tltEditarLocalidad);
+        Tooltip.install(ivAcercaDe, tltAcercaDe); 
        
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
         conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
@@ -253,6 +282,35 @@ public class AjustesControlador implements Initializable {
                     logUser.severe("Excepción: " + ex.toString());
                     ex.printStackTrace();
                 }
+            }
+        });
+
+        ivAcercaDe.setOnMouseClicked(e -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/acercaDeVista.fxml"));
+                AnchorPane acercaDe;
+                acercaDe = (AnchorPane) loader.load();
+                AcercaDeControlador controller = loader.getController(); // cargo el controlador.
+                
+                Stage ventana= new Stage();
+                ventana.initOwner((Stage) gpAjustes.getScene().getWindow());
+                ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
+                ventana.initStyle(StageStyle.UNDECORATED);
+
+                URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
+                ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
+
+                Scene scene = new Scene(acercaDe);
+                scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
+                ventana.setScene(scene);
+                
+                ventana.showAndWait();
+            } catch (IOException eIo) {
+                logUser.severe("Excepción al intentar cargar la Scene registroUser. " + eIo.toString());
+                eIo.printStackTrace();
+            } catch (Exception ex) {
+                logUser.severe("Excepción: " + ex.toString());
+                ex.printStackTrace();
             }
         });
 

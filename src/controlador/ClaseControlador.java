@@ -30,6 +30,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -37,6 +38,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import modelo.Alumno;
 import modelo.Clase;
 import modelo.HoraClase;
@@ -63,6 +65,7 @@ public class ClaseControlador implements Initializable {
 	private FilteredList<Alumno> filtro;
 	private Toast toast;
 	private Alert alerta;
+	private Double tiempoDelay = 0.5;
 	
 
 	@FXML
@@ -155,16 +158,16 @@ public class ClaseControlador implements Initializable {
 			//Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
 			imagenFlecha = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_2.png")); //Forma desde IDE y JAR.
         	imagenFlechaAdd = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_1.png"));
-        	ImagenVolver = new Image(getClass().getResourceAsStream("/recursos/flceha_recarga_1.png"));
-        	ImagenGuardar = new Image(getClass().getResourceAsStream("/recursos/floppy_lila_1_128.png"));
+        	ImagenVolver = new Image(getClass().getResourceAsStream("/recursos/salir_42px.png"));
+        	ImagenGuardar = new Image(getClass().getResourceAsStream("/recursos/guardar_42px.png"));
         	ImagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_48.png"));
         } catch (Exception e) {
 			//Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
         	imagenFlecha = new Image("/recursos/flecha_derecha_2.png"); //Forma desde el JAR.
         	imagenFlechaAdd = new Image("/recursos/flecha_derecha_1.png");
-        	ImagenVolver = new Image("/recursos/flceha_recarga_1.png");
-        	ImagenGuardar = new Image("/recursos/floppy_lila_1_128.png");
-        	ImagenLupa = new Image("/recursos/upa_lila_2_48.png");
+        	ImagenVolver = new Image("/recursos/salir_42px.png");
+        	ImagenGuardar = new Image("/recursos/guardar_42px.png");
+        	ImagenLupa = new Image("/recursos/lupa_lila_2_48.png");
         }
 		//Establecer la imagenes cargadas en los ImageView.
         ivFlechaIzquierda.setImage(imagenFlecha);
@@ -174,6 +177,28 @@ public class ClaseControlador implements Initializable {
         ivVolver.setImage(ImagenVolver);
         ivGuardar.setImage(ImagenGuardar);
         ivLupa.setImage(ImagenLupa);
+
+		//Crear Tooltip.
+        Tooltip tltFlechaIzquierda = new Tooltip("Clase anterior");
+		Tooltip tltFlechaDerecha = new Tooltip("Siguiente Clase");
+		Tooltip tltFlechaAdd = new Tooltip("Añadir Alumno");
+		Tooltip tltFlechaQuitar = new Tooltip("Quitar Alumno");
+		Tooltip tltVolver = new Tooltip("Volver a Jornada");
+		Tooltip tltGuardar = new Tooltip("Guardar Cambios");
+
+        tltFlechaIzquierda.setShowDelay(Duration.seconds(tiempoDelay)); //Establecer retardo de aparición.
+		tltFlechaDerecha.setShowDelay(Duration.seconds(tiempoDelay));
+		tltFlechaAdd.setShowDelay(Duration.seconds(tiempoDelay)); 
+		tltFlechaQuitar.setShowDelay(Duration.seconds(tiempoDelay)); 
+		tltVolver.setShowDelay(Duration.seconds(tiempoDelay)); 
+		tltGuardar.setShowDelay(Duration.seconds(tiempoDelay));  
+
+		Tooltip.install(ivFlechaIzquierda, tltFlechaIzquierda); //Establecer Tooltip a ImageView.
+		Tooltip.install(ivFlechaDerecha, tltFlechaDerecha);
+		Tooltip.install(ivFlechaAdd, tltFlechaAdd);
+		Tooltip.install(ivFlechaQuitar, tltFlechaQuitar);
+		Tooltip.install(ivVolver, tltVolver);
+		Tooltip.install(ivGuardar, tltGuardar);
 		
 		toast = new Toast();
 		conexionBD = ConexionBD.getInstance();		//Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.

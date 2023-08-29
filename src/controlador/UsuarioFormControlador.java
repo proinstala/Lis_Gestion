@@ -26,6 +26,7 @@ import modelo.Usuario;
 import utilidades.Constants;
 import javafx.fxml.Initializable;
 
+
 public class UsuarioFormControlador implements Initializable {
 
     private ConexionBD conexionBD;
@@ -121,6 +122,7 @@ public class UsuarioFormControlador implements Initializable {
         }
     }
 
+
     /**
      * Establece el objeto Usuario y actualiza los componentes de la interfaz gráfica con sus valores.
      *
@@ -152,10 +154,10 @@ public class UsuarioFormControlador implements Initializable {
     private Boolean comprobarCampos() {
         boolean camposCorrectos = false;
 
-        Pattern nombrePattern = Pattern.compile("[A-Z][a-z]{1,30}([\\s][A-Z][a-z]{1,30})?$"); //Expresion regular para comprobar un nombre simple o compuesto.
+        Pattern nombrePattern = Pattern.compile("[A-ZÑ][a-zñáéíóú]{1,30}([\\s][A-ZÑ][a-zñáéíóú]{1,30}){0,2}$"); //Expresion regular para comprobar un nombre simple o compuesto.
 		Matcher nombreMatch = nombrePattern.matcher((tfNombre.getText() == null) ? "" : tfNombre.getText());
 
-        Pattern apellidoPattern = Pattern.compile("[A-Z][a-z]{1,40}$"); 
+        Pattern apellidoPattern = Pattern.compile("[A-Z][a-zñáéíóú]{1,40}$"); 
         Matcher apellido1Matcher = apellidoPattern.matcher((tfApellido1.getText() == null) ? "" : tfApellido1.getText());
         Matcher apellido2Matcher = apellidoPattern.matcher((tfApellido2.getText() == null) ? "" : tfApellido2.getText());
 
@@ -172,11 +174,11 @@ public class UsuarioFormControlador implements Initializable {
         } else if(!apellido1Matcher.matches()) {
             mensajeAviso("1º Apellido no valido.",
             "El apellido introducido no es valido",
-            "La primera letra del Apellido tien que ser mayúscula.\nMáximo 40 caracteres.\nEjemplo: Sanchez.");
+            "La primera letra del Apellido tiene que ser mayúscula.\nMáximo 40 caracteres.\nEjemplo: Sanchez.");
         } else if(!apellido2Matcher.matches()) {
             mensajeAviso("2º Apellido no valido.",
             "El apellido introducido no es valido",
-            "La primera letra del apellido tien que ser mayúscula.\nMáximo 40 caracteres.\nEjemplo: Sanchez.");
+            "La primera letra del apellido tiene que ser mayúscula.\nMáximo 40 caracteres.\nEjemplo: Sanchez.");
         } else if(!telefonoMatcher.matches()) {
             mensajeAviso("Teléfono no valido",
             "El teléfono introducido no es valido",

@@ -28,6 +28,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -35,6 +36,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javafx.util.converter.LocalDateStringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -159,6 +161,10 @@ public class MensualidadFormControlador implements Initializable {
         ivImagenTipoFormulario.setImage(imagenMensualidad); 
         ivClearFechaPago.setImage(clearFechaPago); 
 
+        Tooltip tltClearFechaPago = new Tooltip("Borrar Fecha"); //Crear Tooltip.
+        tltClearFechaPago.setShowDelay(Duration.seconds(0.5));      //Establecer retardo de aparición.
+        Tooltip.install(ivClearFechaPago, tltClearFechaPago);         //Establecer Tooltip a ImageView.
+
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
         conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
         toast = new Toast();
@@ -233,9 +239,7 @@ public class MensualidadFormControlador implements Initializable {
                         toast.show((Stage) ((Stage) gpFormMensualidad.getScene().getWindow()).getOwner(), "Mensualidad creada!!.");
                         System.out.println("CREA NUEVA MENSUALIDAD");
                         ((Stage) gpFormMensualidad.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
-                    } else {
-                        toast.show(((Stage) gpFormMensualidad.getScene().getWindow()), "No se ha creado la Mensualidad!!.");
-                    }
+                    } 
                 }
             }
         });

@@ -12,7 +12,6 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-
 import baseDatos.ConexionBD;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
@@ -33,6 +32,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -43,6 +43,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import modelo.Alumno;
 import modelo.EstadoPago;
 import modelo.Mensualidad;
@@ -50,6 +51,7 @@ import modelo.Toast;
 import modelo.Usuario;
 import utilidades.Constants;
 import utilidades.Fechas;
+
 
 public class MensualidadesControlador implements Initializable {
 
@@ -66,6 +68,7 @@ public class MensualidadesControlador implements Initializable {
     private ConexionBD conexionBD;
     private Logger logUser;
     private Toast toast;
+    private Double tiempoDelay = 0.5;
 
     @FXML
     private BorderPane bpMensualidad;
@@ -199,18 +202,28 @@ public class MensualidadesControlador implements Initializable {
         try {
             //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
             lupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_48.png")); //Forma desde IDE y JAR.
-            GenerarMensualidades = new Image(getClass().getResourceAsStream("/recursos/flceha_recarga_1.png"));
-            Notificacion = new Image(getClass().getResourceAsStream("/recursos/circulo_flecha_1.png"));
+            GenerarMensualidades = new Image(getClass().getResourceAsStream("/recursos/mensualidad_42px.png"));
+            Notificacion = new Image(getClass().getResourceAsStream("/recursos/notificacion_42px.png"));
         } catch (Exception e) {
             //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
             lupa = new Image("/recursos/lupa_lila_2_48.png"); //Forma desde el JAR.
-            GenerarMensualidades = new Image("/recursos/flceha_recarga_1.png");
-            Notificacion = new Image("/recursos/circulo_flecha_1.png");
+            GenerarMensualidades = new Image("/recursos/mensualidad_42px.png");
+            Notificacion = new Image("/recursos/notificacion_42px.png");
         }
         //Establecer las imagenes cargadas en los ImageView.
         ivLupa.setImage(lupa);
         ivGenerarMensualidades.setImage(GenerarMensualidades);
         ivNotificacion.setImage(Notificacion);
+
+        //Establecer Tooltip.
+        Tooltip tltGenerarMensualidades = new Tooltip("Generar Mensualidades");
+        Tooltip tltNotificacion = new Tooltip("Enviar Notificación");
+
+        tltGenerarMensualidades.setShowDelay(Duration.seconds(tiempoDelay)); //Establecer retardo de aparición.
+        tltNotificacion.setShowDelay(Duration.seconds(tiempoDelay));
+
+        Tooltip.install(ivGenerarMensualidades, tltGenerarMensualidades); //Establecer Tooltip a ImageView.
+        Tooltip.install(ivNotificacion, tltNotificacion);      
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
         conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.

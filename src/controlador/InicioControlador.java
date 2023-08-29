@@ -4,10 +4,12 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.BorderPane;
+import javafx.util.Duration;
 import modelo.Usuario;
 import javafx.scene.control.Button;
 
@@ -62,6 +64,11 @@ public class InicioControlador implements Initializable {
         	imagenCarpetaConfig = new Image("/recursos/carpeta_lila_2_64.png"); //Forma desde el JAR.
         }
         ivCarpetaConfig.setImage(imagenCarpetaConfig); //Establecer las imagenes cargadas en los ImageView.
+
+        //Crear Tooltip.
+        Tooltip tltCarpetaConfig = new Tooltip("Configuración Usuario");
+        tltCarpetaConfig.setShowDelay(Duration.seconds(0.5)); //Establecer retardo de aparición.
+        Tooltip.install(ivCarpetaConfig, tltCarpetaConfig);     //Establecer Tooltip a ImageView.
 
         //Configurar un evento de clic del ratón para la imagen "Configurarcion".
         ivCarpetaConfig.setOnMouseClicked(e -> {

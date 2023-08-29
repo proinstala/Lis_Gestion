@@ -18,6 +18,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -26,6 +27,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import javafx.util.converter.LocalDateStringConverter;
 import modelo.Alumno;
 import modelo.Clase;
@@ -55,6 +57,7 @@ public class JornadaControlador implements Initializable {
 	private Logger logUser;
 	private Alert alerta;
 	private Toast toast;
+	private Double tiempoDelay = 0.5;
 	
 
 	@FXML
@@ -207,18 +210,18 @@ public class JornadaControlador implements Initializable {
 			//Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
 			flechaRetroceder = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_2.png")); //Forma desde IDE y JAR.
 			flechaAvnazar = new Image(getClass().getResourceAsStream("/recursos/flecha_derecha_2.png"));
-			copiaSemana = new Image(getClass().getResourceAsStream("/recursos/bd_add_1_128.png"));
-			copiaJornada = new Image(getClass().getResourceAsStream("/recursos/floppy_lila_1_128.png"));
-			borrarJornada = new Image(getClass().getResourceAsStream("/recursos/boton_2_64.png"));
-			imagenCrearJornada = new Image(getClass().getResourceAsStream("/recursos/circulo_flecha_1.png"));
+			copiaSemana = new Image(getClass().getResourceAsStream("/recursos/semana_42px.png"));
+			copiaJornada = new Image(getClass().getResourceAsStream("/recursos/dia_semana_42px.png"));
+			borrarJornada = new Image(getClass().getResourceAsStream("/recursos/borrar_dia_42px.png"));
+			imagenCrearJornada = new Image(getClass().getResourceAsStream("/recursos/nuevo_dia_42px.png"));
         } catch (Exception e) {
 			//Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
 			flechaRetroceder = new Image("/recursos/flecha_derecha_2.png"); //Forma desde el JAR.
 			flechaAvnazar = new Image("/recursos/flecha_derecha_2.png");
-			copiaSemana = new Image("/recursos/bd_add_1_128.png");
-			copiaJornada = new Image("/recursos/floppy_lila_1_128.png");
-			borrarJornada = new Image("/recursos/boton_2_64.png");
-			imagenCrearJornada = new Image("/recursos/circulo_flecha_1.png");
+			copiaSemana = new Image("/recursos/semana_42px.png");
+			copiaJornada = new Image("/recursos/dia_semana_42px.png");
+			borrarJornada = new Image("/recursos/borrar_dia_42px.png");
+			imagenCrearJornada = new Image("/recursos/nuevo_dia_42px.png");
         }
 		//Establecer las imagenes cargadas en los ImageView.
 		ivAnteriorJornada.setImage(flechaRetroceder);
@@ -227,6 +230,28 @@ public class JornadaControlador implements Initializable {
 		ivBotonCopiarJornada.setImage(copiaJornada);
 		ivBotonBorrarJornada.setImage(borrarJornada);
         ivBotonCrearJornada.setImage(imagenCrearJornada);
+
+		//Crear Tooltip.
+        Tooltip tltAnteriorJornada = new Tooltip("Día Anterior");
+		Tooltip tltSiguienteJornada = new Tooltip("Día Siguiente");
+		Tooltip tltBotonCopiarSemana = new Tooltip("Duplicar Semana");
+		Tooltip tltBotonCopiarJornada = new Tooltip("Duplicar Jornada");
+		Tooltip tltBotonBorrarJornada = new Tooltip("Eliminar Jornada");
+		Tooltip tltBotonCrearJornada = new Tooltip("Crear Jornada");
+
+        tltAnteriorJornada.setShowDelay(Duration.seconds(tiempoDelay)); //Establecer retardo de aparición.
+		tltSiguienteJornada.setShowDelay(Duration.seconds(tiempoDelay));
+		tltBotonCopiarSemana.setShowDelay(Duration.seconds(tiempoDelay)); 
+		tltBotonCopiarJornada.setShowDelay(Duration.seconds(tiempoDelay)); 
+		tltBotonBorrarJornada.setShowDelay(Duration.seconds(tiempoDelay)); 
+		tltBotonCrearJornada.setShowDelay(Duration.seconds(tiempoDelay));  
+
+		Tooltip.install(ivAnteriorJornada, tltAnteriorJornada); //Establecer Tooltip a ImageView.
+		Tooltip.install(ivSiguienteJornada, tltSiguienteJornada);
+		Tooltip.install(ivBotonCopiarSemana, tltBotonCopiarSemana);
+		Tooltip.install(ivBotonCopiarJornada, tltBotonCopiarJornada);
+		Tooltip.install(ivBotonBorrarJornada, tltBotonBorrarJornada);
+		Tooltip.install(ivBotonCrearJornada, tltBotonCrearJornada);
 		
 		logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
 		conexionBD = ConexionBD.getInstance();		//Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
@@ -502,7 +527,7 @@ public class JornadaControlador implements Initializable {
             alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
             alerta.setTitle("Borrar Jornada");
             alerta.setHeaderText("Se va ha borrar los datos de la jornada " + jornada.getFecha().format(formatter) + " y sus clases.");
-            alerta.setContentText("¿Estas seguro que Quieres borrar esta jornada?");
+            alerta.setContentText("¿Estas seguro que quieres borrar esta jornada?");
             alerta.initStyle(StageStyle.DECORATED);
             alerta.initOwner((Stage) bpJornada.getScene().getWindow());
             alerta.initModality(Modality.APPLICATION_MODAL);

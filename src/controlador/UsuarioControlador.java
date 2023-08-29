@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -14,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -22,6 +22,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import modelo.Usuario;
 import utilidades.Constants;
 import javafx.fxml.Initializable;
@@ -109,17 +110,24 @@ public class UsuarioControlador implements Initializable {
         Image imagenBorrarUsuario;
         try {
             //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
-        	imagenBorrarUsuario = new Image(getClass().getResourceAsStream("/recursos/boton_2_64.png")); //Forma desde IDE y JAR.
+        	imagenBorrarUsuario = new Image(getClass().getResourceAsStream("/recursos/eliminar_52px.png")); //Forma desde IDE y JAR.
         } catch (Exception e) {
             //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
-        	imagenBorrarUsuario = new Image("/recursos/circulo_flecha_1.png"); //Forma desde el JAR.
+        	imagenBorrarUsuario = new Image("/recursos/eliminar_52px.png"); //Forma desde el JAR.
         	
         }
         ivBorrarUsuario.setImage(imagenBorrarUsuario); //Establecer la imagen cargada en el ImageView.
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
+        
+        //Crear Tooltip.
+        Tooltip tltBorrarUsuario = new Tooltip("Borrar usuario");
+        tltBorrarUsuario.setShowDelay(Duration.seconds(0.5)); //Establecer retardo de aparición.
+        Tooltip.install(ivBorrarUsuario, tltBorrarUsuario);     //Establecer Tooltip a ImageView.
+        
     }
     
+
 
     /**
 	 * Método que se ejecuta cuando se hace clic en la imagen "borrar usuario".

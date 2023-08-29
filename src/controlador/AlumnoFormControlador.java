@@ -424,11 +424,11 @@ public class AlumnoFormControlador implements Initializable {
         } else if(!apellido1Matcher.matches()) {
             mensajeAviso("1º Apellido no valido.",
             "El apellido introducido no es valido",
-            "La primera letra del Apellido tien que ser mayúscula.\nMáximo 40 caracteres.\nEjemplo: Sanchez.");
+            "La primera letra del Apellido tiene que ser mayúscula.\nMáximo 40 caracteres.\nEjemplo: Sanchez.");
         } else if(!apellido2Matcher.matches()) {
             mensajeAviso("2º Apellido no valido.",
             "El apellido introducido no es valido",
-            "La primera letra del apellido tien que ser mayúscula.\nMáximo 40 caracteres.\nEjemplo: Sanchez.");
+            "La primera letra del apellido tiene que ser mayúscula.\nMáximo 40 caracteres.\nEjemplo: Sanchez.");
         } else if(cbGenero.getValue() == null) {
             mensajeAviso("Género no escogido.",
             "",

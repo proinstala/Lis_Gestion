@@ -174,5 +174,16 @@
             </GridPane>
          </children>
       </AnchorPane>
+      <ImageView fx:id="ivAcercaDe" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="7" GridPane.valignment="BOTTOM">
+         <image>
+            <Image url="@../recursos/info_32.png" />
+         </image>
+         <GridPane.margin>
+            <Insets bottom="20.0" right="20.0" />
+         </GridPane.margin>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </ImageView>
    </children>
 </GridPane>

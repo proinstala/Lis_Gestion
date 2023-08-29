@@ -98,7 +98,7 @@
          </GridPane.margin>
       </Label>
       <TextField fx:id="tfTelefono" promptText="Telefono de contacto" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-      <TextField fx:id="tfEmail" promptText="Correo electrónico" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+      <TextField fx:id="tfEmail" promptText="Correo electrónico. (OPCIONAL)." GridPane.columnIndex="1" GridPane.rowIndex="8" />
       <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="11">
          <children>
             <Button fx:id="btnConfirmacion" mnemonicParsing="false" onMouseClicked="#confirmacion" prefWidth="80.0" text="Guardar" />

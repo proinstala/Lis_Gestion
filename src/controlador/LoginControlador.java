@@ -15,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -23,6 +24,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import modelo.Toast;
 import modelo.Usuario;
 import utilidades.Constants;
@@ -37,16 +39,23 @@ public class LoginControlador implements Initializable {
     private ConexionBD conexionBD;
     private PrincipalControlador controladorPincipal;
     private Toast toast;
+    private Double tiempoDelay = 0.5;
 
     
     @FXML
     private Label lbPasswordLost;
+
+     @FXML
+    private Label lbRegistrarse;
 
     @FXML
     private ImageView ivImagenLogin;
 
     @FXML
     private ImageView ivImagenLogo;
+
+    @FXML
+    private ImageView ivAcercaDe;
 
     @FXML
     private BorderPane bdLogin;
@@ -66,18 +75,35 @@ public class LoginControlador implements Initializable {
         //Cargar imagenes en ImageView.
         Image imagenLogin;
         Image imagenLogo;
+        Image imagenAcercaDe;
         try {
             //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
             imagenLogin = new Image(getClass().getResourceAsStream("/recursos/usuario_2_128.png")); //Forma desde IDE y JAR.
             imagenLogo = new Image(getClass().getResourceAsStream("/recursos/logo_nuevo_letras_color_225.png"));
+            imagenAcercaDe = new Image(getClass().getResourceAsStream("/recursos/info_32.png"));
         } catch (Exception e) {
             //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
             imagenLogin = new Image("/recursos/usuario_2_128.png"); //Forma desde el JAR.
             imagenLogo = new Image("/recursos/logo_nuevo_letras_color_225.png");
+            imagenAcercaDe = new Image("/recursos/info_32.png");
         }
         //Establecer las imagenes cargadas en los ImageView.
         ivImagenLogin.setImage(imagenLogin);
         ivImagenLogo.setImage(imagenLogo);
+        ivAcercaDe.setImage(imagenAcercaDe);
+
+        //Establecer Tooltip.
+        
+        Tooltip tltAcercaDe = new Tooltip("Acerca De");
+        Tooltip tltRegistrarse = new Tooltip("Registrar Nuevo Usuario");
+        
+        //Establecer retardo de aparición.
+        tltAcercaDe.setShowDelay(Duration.seconds(tiempoDelay)); 
+        tltRegistrarse.setShowDelay(Duration.seconds(tiempoDelay));
+
+        //Establecer Tooltip a ImageView.
+        Tooltip.install(ivAcercaDe, tltAcercaDe);      
+        lbRegistrarse.setTooltip(tltRegistrarse);
 
         loggerRoot = Logger.getLogger(Constants.USER_ROOT); //Crea una instancia de la clase Logger asociada al nombre de registro.
         conexionBD = ConexionBD.getInstance();              //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
@@ -144,6 +170,7 @@ public class LoginControlador implements Initializable {
 
     /**
      * Método que se ejecuta cuando se hace clic en el Label registrarse.
+     * Lanza una nueva ventana para registrar un nuevo usuario.
      * 
      * @param event El evento del mouse que desencadena el método.
      */
@@ -156,7 +183,6 @@ public class LoginControlador implements Initializable {
             RegistroUserControlador controller = loader.getController(); // cargo el controlador.
             
             Stage ventana= new Stage();
-            //ventana.initOwner(escenario);
             ventana.initOwner((Stage) bdLogin.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.UNDECORATED);
@@ -173,6 +199,43 @@ public class LoginControlador implements Initializable {
             ventana.showAndWait();
         } catch (IOException e) {
             loggerRoot.severe("Excepción al intentar cargar la Scene registroUser. " + e.toString());
+            e.printStackTrace();
+        } catch (Exception e) {
+            loggerRoot.severe("Excepción: " + e.toString());
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * Método que se ejecuta cuando se hace clic en el ImageView ivAcercaDe.
+     * Lanza una nueva ventana donde se muestra información de la aplicacion.
+     * 
+     * @param event El evento del mouse que desencadena el método.
+     */
+    @FXML
+    void mostrarAcercaDe(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/acercaDeVista.fxml"));
+		    AnchorPane acercaDe;
+            acercaDe = (AnchorPane) loader.load();
+            AcercaDeControlador controller = loader.getController(); // cargo el controlador.
+            
+            Stage ventana= new Stage();
+            ventana.initOwner((Stage) bdLogin.getScene().getWindow());
+            ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
+            ventana.initStyle(StageStyle.UNDECORATED);
+
+            URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
+            ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
+
+            Scene scene = new Scene(acercaDe);
+            scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
+            ventana.setScene(scene);
+            
+            ventana.showAndWait();
+        } catch (IOException e) {
+            loggerRoot.severe("Excepción al intentar cargar la Scene acercaDe. " + e.toString());
             e.printStackTrace();
         } catch (Exception e) {
             loggerRoot.severe("Excepción: " + e.toString());

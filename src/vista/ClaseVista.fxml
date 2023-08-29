@@ -74,7 +74,7 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <ImageView fx:id="ivFlechaIzquierda" fitHeight="44.0" fitWidth="71.0" nodeOrientation="RIGHT_TO_LEFT" onMouseClicked="#anteriorClase" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <ImageView fx:id="ivFlechaIzquierda" fitHeight="51.0" fitWidth="70.0" nodeOrientation="RIGHT_TO_LEFT" onMouseClicked="#anteriorClase" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets left="90.0" top="3.0" />
                </GridPane.margin>
@@ -85,9 +85,9 @@
                   <Cursor fx:constant="HAND" />
                </cursor>
             </ImageView>
-            <ImageView fx:id="ivFlechaDerecha" fitHeight="44.0" fitWidth="71.0" onMouseClicked="#siguienteClase" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <ImageView fx:id="ivFlechaDerecha" fitHeight="51.0" fitWidth="70.0" onMouseClicked="#siguienteClase" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <GridPane.margin>
-                  <Insets left="152.0" top="3.0" />
+                  <Insets left="160.0" top="3.0" />
                </GridPane.margin>
                <image>
                   <Image url="@../recursos/flecha_derecha_2.png" />
@@ -131,30 +131,30 @@
                   <Insets top="10.0" />
                </GridPane.margin>
             </TextArea>
-            <ImageView fx:id="ivGuardar" fitHeight="28.0" fitWidth="30.0" onMouseClicked="#guardar" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+            <ImageView fx:id="ivGuardar" fitHeight="42.0" fitWidth="42.0" onMouseClicked="#guardar" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
                <image>
-                  <Image url="@../recursos/floppy_lila_1_128.png" />
+                  <Image url="@../recursos/guardar_42px.png" />
                </image>
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor>
                <GridPane.margin>
-                  <Insets right="180.0" />
+                  <Insets right="240.0" />
                </GridPane.margin>
             </ImageView>
-            <ImageView fx:id="ivVolver" fitHeight="55.0" fitWidth="44.0" onMouseClicked="#volver" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+            <ImageView fx:id="ivVolver" fitHeight="42.0" fitWidth="42.0" onMouseClicked="#volver" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
                <image>
-                  <Image url="@../recursos/flceha_recarga_1.png" />
+                  <Image url="@../recursos/salir_42px.png" />
                </image>
                <GridPane.margin>
-                  <Insets right="225.0" />
+                  <Insets right="185.0" />
                </GridPane.margin>
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor>
             </ImageView>
             <Label text="Listado Alumnos" GridPane.columnIndex="3" GridPane.rowIndex="5" />
-            <ImageView fx:id="ivFlechaQuitar" fitHeight="60.0" fitWidth="38.0" onMouseClicked="#quitarAlumno" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="6" GridPane.valignment="TOP">
+            <ImageView fx:id="ivFlechaQuitar" fitHeight="65.0" fitWidth="44.0" onMouseClicked="#quitarAlumno" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="6" GridPane.valignment="TOP">
                <image>
                   <Image url="@../recursos/flecha_derecha_1.png" />
                </image>
@@ -165,7 +165,7 @@
                   <Cursor fx:constant="HAND" />
                </cursor>
             </ImageView>
-            <ImageView fx:id="ivFlechaAdd" fitHeight="60.0" fitWidth="38.0" nodeOrientation="RIGHT_TO_LEFT" onMouseClicked="#addAlumno" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="6" GridPane.valignment="TOP">
+            <ImageView fx:id="ivFlechaAdd" fitHeight="65.0" fitWidth="44.0" nodeOrientation="RIGHT_TO_LEFT" onMouseClicked="#addAlumno" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="6" GridPane.valignment="TOP">
                <image>
                   <Image url="@../recursos/flecha_derecha_1.png" />
                </image>

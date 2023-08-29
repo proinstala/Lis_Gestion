@@ -33,6 +33,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
@@ -44,6 +45,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import modelo.Alumno;
 import modelo.EstadoAlumno;
 import modelo.Genero;
@@ -177,15 +179,21 @@ public class AlumnosControlador implements Initializable {
         try {
             //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
             imagenLupa = new Image(getClass().getResourceAsStream("/recursos/lupa_lila_2_48.png")); //Forma desde IDE y JAR.
-            notificacion = new Image(getClass().getResourceAsStream("/recursos/boton_6_64.png"));
+            notificacion = new Image(getClass().getResourceAsStream("/recursos/notificacion_42px.png"));
         } catch (Exception e) {
             //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
         	imagenLupa = new Image("/recursos/lupa_lila_2_48.png"); //Forma desde el JAR.
-            notificacion = new Image("/recursos/boton_6_64.png");
+            notificacion = new Image("/recursos/notificacion_42px.png");
         }
         //Establecer las imagenes cargadas en el ImageView.
         ivLupa.setImage(imagenLupa); 
         ivNotificacion.setImage(notificacion);
+
+        //Establecer Tooltip.
+        Tooltip tltNotificacion = new Tooltip("Enviar Notificación");
+        tltNotificacion.setShowDelay(Duration.seconds(0.5)); //Establecer retardo de aparición.
+        Tooltip.install(ivNotificacion, tltNotificacion);      //Establecer Tooltip a ImageView.
+        
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
         conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
