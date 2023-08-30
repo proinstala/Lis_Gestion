@@ -125,6 +125,9 @@ public class InformeFormAlumnosClaseControlador implements Initializable {
     private CheckBox chekbMetadatos;
 
     @FXML
+    private CheckBox checkbFormatoAlumno;
+
+    @FXML
     private GridPane gpFormInformeAlumnoClase;
 
     @FXML
@@ -237,6 +240,7 @@ public class InformeFormAlumnosClaseControlador implements Initializable {
         cbLocalidad.disableProperty().bind(checkbAlumnos.selectedProperty().not());
         cbGenero.disableProperty().bind(checkbAlumnos.selectedProperty().not());
         cbEstado.disableProperty().bind(checkbAlumnos.selectedProperty().not());
+        checkbFormatoAlumno.disableProperty().bind(checkbAlumnos.selectedProperty());
 
         //Inicializa y configura el ComboBox cbEmail con los tipos de correo electrónico disponibles.
         tipoEmail = FXCollections.observableArrayList();
@@ -299,7 +303,7 @@ public class InformeFormAlumnosClaseControlador implements Initializable {
 
         rbPdf.setSelected(true); //Selecciona el RadioButton rbPdf como seleccionado por defecto.
 
-        taTexto.setText(textoInforme()); //Establece el texto predefinido en el TextArea taTexto.
+        taTexto.setText(textoInformeGenerico()); //Establece el texto predefinido en el TextArea taTexto.
         nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime); //Nombre predefinido para el informe. "informe_dd_MM_yyyy-HH_mm_ss".
         tfNombreInforme.setText(nombreInforme); //Establece el texto predefinido para el nombre del informe en el TextField tfNombreInforme.
 
@@ -410,6 +414,14 @@ public class InformeFormAlumnosClaseControlador implements Initializable {
         });
 
         checkbAlumnos.setSelected(true); //Seleccionado por defecto "Todos los Alumnos"
+
+        checkbFormatoAlumno.setOnMouseClicked(e -> {
+            if(checkbFormatoAlumno.isSelected()) {
+                taTexto.setText(textoInformePersonalizado());
+            } else {
+                taTexto.setText(textoInformeGenerico());
+            }
+        });
     }
 
 
@@ -475,6 +487,7 @@ public class InformeFormAlumnosClaseControlador implements Initializable {
         //Establece un listener para que cuando se seleccione un elemento del ComboBox cbAlumnos.
         cbAlumnos.getSelectionModel().selectedItemProperty().addListener((o, nv, ov) -> {
             configurarFiltro(ov.getNombreCompleto());
+            if(checkbFormatoAlumno.isSelected()) {taTexto.setText(textoInformePersonalizado());}
         });
     }//FIN configurarCbAlumnos.
 
@@ -484,9 +497,21 @@ public class InformeFormAlumnosClaseControlador implements Initializable {
      * 
      * @return String con el texto predefinido.
      */
-    private String textoInforme() {
+    private String textoInformeGenerico() {
         String texto;
-        texto = "Informe de Alumnos y clases en las que esta inscrito filtrando los datos segun la configuración establecida.";
+        texto = "Informe de Alumnos y clases en las que esta inscrito filtrando los datos según la configuración establecida.";
+        return texto;
+    }
+
+
+    /**
+     * Devuelve un String con un texto predefinido con datos de un alumno.
+     * 
+     * @return String con el texto predefinido.
+     */
+    private String textoInformePersonalizado() {
+        String texto;
+        texto = "Clases en las que esta inscrito el alumn@ " + cbAlumnos.getValue().getNombre()  + " filtrando los datos según la configuración establecida.";
         return texto;
     }
 
@@ -649,7 +674,13 @@ public class InformeFormAlumnosClaseControlador implements Initializable {
         JasperReport jasperReport;
     	JasperPrint print;
         InputStream jasperStream;
-        jasperStream = getClass().getResourceAsStream("/reports/report_alumno_clase.jasper");
+
+        if(checkbFormatoAlumno.isSelected()) {
+            jasperStream = getClass().getResourceAsStream("/reports/report_alumno_clase_formateado.jasper");
+        } else {
+            jasperStream = getClass().getResourceAsStream("/reports/report_alumno_clase.jasper");
+        }
+        
         
         //Configurar los parámetros necesarios para el informe.
         HashMap<String, Object> parameters = configuracionParametrosInforme();

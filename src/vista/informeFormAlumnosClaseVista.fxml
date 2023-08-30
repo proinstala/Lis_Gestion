@@ -281,5 +281,6 @@
             <Insets left="280.0" />
          </GridPane.margin>
       </Separator>
+      <CheckBox fx:id="checkbFormatoAlumno" mnemonicParsing="false" text="Formato para Alumno" GridPane.columnIndex="1" GridPane.rowIndex="18" />
    </children>
 </GridPane>

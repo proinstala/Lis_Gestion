@@ -477,7 +477,7 @@ public class InformeFormAlumnosMensualidadControlador implements Initializable {
      */
     private String textoInforme() {
         String texto;
-        texto = "Informe de Alumnos y sus mensualidades filtrando los datos segun la configuración establecida.";
+        texto = "Informe de Alumnos y sus mensualidades filtrando los datos según la configuración establecida.";
         return texto;
     }
 

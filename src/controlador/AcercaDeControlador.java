@@ -49,6 +49,9 @@ public class AcercaDeControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //Añadir clases de estilo CSS a elementos.
+        btnCancelar.getStyleClass().add("boton_rojo");
+
         //Cargar imagenes en ImageView.
         Image imagenFlor;
         Image imagenLogo;
