@@ -1,20 +1,27 @@
 package controlador;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.awt.Desktop;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import modelo.Toast;
 
 
 public class AcercaDeControlador implements Initializable {
 
     private double x, y;
+    private Toast toast;
 
     @FXML
     private AnchorPane apAcercaDe;
@@ -45,6 +52,12 @@ public class AcercaDeControlador implements Initializable {
 
     @FXML
     private ImageView ivSqlLite;
+
+    @FXML
+    private Label lbGitHub;
+
+    @FXML
+    private Label lbCorreo;
 
 
     @Override
@@ -88,6 +101,8 @@ public class AcercaDeControlador implements Initializable {
         ivSqlCipher.setImage(imagenSqlCipher);
         ivJasper.setImage(imagenJasper);
 
+        toast = new Toast();
+
         //Configurar el evento cuando se presiona el ratón en el panel apCardAlumno.
         apAcercaDe.setOnMousePressed(mouseEvent -> {
             //Obtener las coordenadas X e Y del ratón en relación con la escena.
@@ -105,6 +120,39 @@ public class AcercaDeControlador implements Initializable {
         //Configurar un evento de clic del ratón para el botón "Cerrar".
         btnCancelar.setOnMouseClicked(e -> {
             ((Stage) apAcercaDe.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
+        });
+
+        //Abre la el navegador web predeterminado con la pagina de GitHub del proyecto.
+        lbGitHub.setOnMouseClicked(e -> {
+            String direccion = "https://github.com/proinstala/Lis_Gestion";
+            
+            try {
+                Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + direccion);
+            } catch (IOException ex) {
+                toast.show((Stage) apAcercaDe.getScene().getWindow(), "Fallo al intentar abrir el navegador predeterminado.");
+            }
+        });
+
+        //Abre el cliente de correo electronico predeterminado poniendo como destinatario el email de contacto del autor del proyecto.
+        lbCorreo.setOnMouseClicked(e -> {
+            // Verifica si el sistema admite Desktop API
+            if (Desktop.isDesktopSupported()) {
+                Desktop desktop = Desktop.getDesktop();
+
+                // Verifica si la acción de correo electrónico es compatible
+                if (desktop.isSupported(Desktop.Action.MAIL)) {
+                    try {
+                        URI mailtoUri = new URI("mailto:david.alonso.murcia@gmail.com"); // Crea un objeto URI con el formato "mailto:"
+                        desktop.mail(mailtoUri); // Abre el cliente de correo predeterminado
+                    } catch (IOException | URISyntaxException ex) {
+                        toast.show((Stage) apAcercaDe.getScene().getWindow(),"Fallo al inentar abrir el cliente de correo predeterminado.");
+                    }
+                } else {
+                    toast.show((Stage) apAcercaDe.getScene().getWindow(), "La acción de correo electrónico no es compatible en este sistema.");
+                }
+            } else {
+                toast.show((Stage) apAcercaDe.getScene().getWindow(),"La API Desktop no está disponible en este sistema.");
+            }
         });
 
     }

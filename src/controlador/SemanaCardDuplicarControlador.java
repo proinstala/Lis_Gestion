@@ -139,6 +139,11 @@ public class SemanaCardDuplicarControlador implements Initializable {
             lbAnioDestino.setText(Integer.toString(anioDestino));       //Establecer el año en la etiqueta correspondiente.
         });
 
+        //Muestra el calendario emergente al hacer clic en el TextField del DatePiker.
+		dpFechaDestino.getEditor().setOnMouseClicked(event -> {
+            dpFechaDestino.show();
+        });
+
         //Establezco los CheckBox de copia de datos como seleccionados.
         chbComentarioJornada.setSelected(true);
         chbAnotacionesClases.setSelected(true);

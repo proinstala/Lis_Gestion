@@ -1,19 +1,6 @@
 
+/* Hoja de estilos para notificaciones tipo Alert. */
 
-/* Hoja de estilos principal*/
-
-/*
- 
-#COLOR LILA FLOJO = #f8e7ff
-#COLOR LILA MEDIO = #78637C
-#COLOR LILA FUERTE = #80488F
-#COLOR GRIS-FONDO = #5E595F
-#COLOR AZUL FLOJO = #00a8f3
-#COLOR AMARILLO FLOJO = #fff79a
-#COLOR AMARILLO FUERTE = #FFCD48
-#COLOR VERDE ON = #33f537
-#COLOR VERDE PARA LETRAS BOTONES TTK = #26d113
- */
 
 /*
 :hover: representa un control cuando el cursor está sobre él.
@@ -27,8 +14,6 @@
 :even: representa un elemento en una lista par.
 :visited: representa un hipervínculo visitado.
  */
-
-
 
 
 /*-- Button --------------------- */

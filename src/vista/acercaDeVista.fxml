@@ -17,7 +17,7 @@
                   <Image url="@../recursos/logo_nuevo_134_159.png" />
                </image>
             </ImageView>
-            <Label layoutX="21.0" layoutY="180.0" text="LIS_Gestión">
+            <Label layoutX="21.0" layoutY="177.0" text="LIS_Gestión">
                <font>
                   <Font size="30.0" />
                </font>
@@ -52,7 +52,7 @@
                </font>
             </Label>
             <Label layoutX="140.0" layoutY="166.0" text="openjdk 17.0.4.1 2022-08-12" />
-            <Label layoutX="95.0" layoutY="313.0" text="david.alonso.murcia@gmail.com" />
+            <Label fx:id="lbCorreo" layoutX="95.0" layoutY="312.0" styleClass="label_resaltado" text="david.alonso.murcia@gmail.com" underline="true" />
             <Label layoutX="40.0" layoutY="313.0" text="Email:" AnchorPane.leftAnchor="40.0">
                <font>
                   <Font name="System Bold" size="12.0" />
@@ -63,7 +63,7 @@
                   <Font name="System Bold" size="12.0" />
                </font>
             </Label>
-            <Label layoutX="95.0" layoutY="337.0" text="https://github.com/proinstala/Lis_Gestion" />
+            <Label fx:id="lbGitHub" layoutX="95.0" layoutY="336.0" styleClass="label_resaltado" text="https://github.com/proinstala/Lis_Gestion" underline="true" />
             <ImageView fx:id="ivJava" fitHeight="50.0" fitWidth="200.0" layoutX="40.0" layoutY="212.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../recursos/java_50.png" />

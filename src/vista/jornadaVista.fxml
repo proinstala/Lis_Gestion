@@ -283,7 +283,7 @@
                   <Image url="@../recursos/nuevo_dia_42px.png" />
                </image>
                <GridPane.margin>
-                  <Insets right="200.0" />
+                  <Insets right="210.0" />
                </GridPane.margin>
                <cursor>
                   <Cursor fx:constant="HAND" />
@@ -297,7 +297,7 @@
                   <Cursor fx:constant="HAND" />
                </cursor>
                <GridPane.margin>
-                  <Insets right="310.0" />
+                  <Insets right="320.0" />
                </GridPane.margin>
             </ImageView>
             <ImageView fx:id="ivBotonCopiarSemana" fitHeight="42.0" fitWidth="42.0" layoutX="737.0" layoutY="29.0" onMouseClicked="#copiarSemana" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
@@ -308,7 +308,7 @@
                   <Cursor fx:constant="HAND" />
                </cursor>
                <GridPane.margin>
-                  <Insets right="365.0" />
+                  <Insets right="375.0" />
                </GridPane.margin>
             </ImageView>
             <ImageView fx:id="ivBotonBorrarJornada" fitHeight="42.0" fitWidth="42.0" layoutX="737.0" layoutY="29.0" onMouseClicked="#borrarJornadaBD" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
@@ -319,7 +319,7 @@
                   <Cursor fx:constant="HAND" />
                </cursor>
                <GridPane.margin>
-                  <Insets right="255.0" />
+                  <Insets right="265.0" />
                </GridPane.margin>
             </ImageView>
             <ImageView fx:id="ivAnteriorJornada" fitHeight="51.0" fitWidth="70.0" nodeOrientation="RIGHT_TO_LEFT" onMouseClicked="#anteriorJornada" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="1">

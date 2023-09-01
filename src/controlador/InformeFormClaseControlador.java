@@ -187,6 +187,13 @@ public class InformeFormClaseControlador implements Initializable {
 			}
         });
 
+        //Muestra el calendario emergente al hacer clic en el TextField del DatePiker.
+		dpJornada.getEditor().setOnMouseClicked(event -> {
+            dpJornada.show();
+        });
+
+        dpJornada.setEditable(false); //Deshabilita la edicion de la fehca a traves del TextField.
+
         //Configurar un evento de clic del ratón para el botón "Cancelar".
         btnCancelar.setOnMouseClicked(e -> {
             ((Stage) gpFormInformeClase.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.

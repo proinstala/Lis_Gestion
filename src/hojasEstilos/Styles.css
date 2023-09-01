@@ -1,12 +1,11 @@
 
-
 /* Hoja de estilos principal*/
 
 /*
- 
 #COLOR LILA FLOJO = #f8e7ff
 #COLOR LILA MEDIO = #78637C -> MAS FLOJO: #B5A6B8 -> #DDD6DE
 #COLOR LILA FUERTE = #80488F
+#COLOR LILA FUERTE-ROSADO = derive( #80488F,90%);
 #COLOR GRIS-FONDO = #5E595F
 #COLOR AZUL FLOJO = #00a8f3
 #COLOR AMARILLO FLOJO = #fff79a
@@ -26,8 +25,7 @@ OTRO TONO DE LILA.
 
 UN ROJO CHILLON PARA BOTON CANCELAR o BORRAR
 #D42153
-
- */
+*/
 
 /*
 :hover: representa un control cuando el cursor está sobre él.
@@ -44,18 +42,46 @@ UN ROJO CHILLON PARA BOTON CANCELAR o BORRAR
 
 
 .root {
+	/** COLORES **/
+	COLOR_LILA_FLOJO: #f8e7ff;
+	COLOR_LILA_MEDIO: #78637C;
+	COLOR_LILA_MEDIO_MEDIO: #B5A6B8;
+	COLOR_LILA_MEDIO_FLOJO: #DDD6DE;
+	COLOR_LILA_MEDIO_FLOJO-FLOJO: #e0dee0; /*DatePiker(zona TextField)*/
+	COLOR_LILA_FUERTE: #80488F;
+	COLOR_LILA_FUERTE-ROSADO: derive( #80488F,90%);
+	COLOR_GRIS_FONDO: #5E595F;
+	COLOR_AZUL_FLOJO: #00a8f3;
+	COLOR_AMARILLO_FLOJO: #fff79a;
+	COLOR_AMARILLO_FUERTE: #FFCD48;
+	COLOR_VERDE_ON: #33f537;
+	COLOR_VERDE_PARA_LETRAS_BOTONES: #26d113;
+
+	/** OTROS LILAS FLOJOS **/
+	COLOR_VARIANTE1_LILA: #EFE4F2;
+	COLOR_VARIANTE2_LILA: #DEC7E4;
+	COLOR_VARIANTE3_LILA: #CDAAD6;
+
+	/** OTRO TONO DE LILA **/
+	COLOR_VARIANTE4_LILA: #E8E4F2; /*puesto en report(sub report)*/
+	COLOR_VARIANTE5_LILA: #CFC7E4;
+	COLOR_VARIANTE6_LILA: #B7AAD6;
+
+	/** UN ROJO CHILLON PARA BOTON CANCELAR o BORRAR **/
+	COLOR_ROJO_CANCELAR: #D42153;
+
+
 	-fx-base: #ececec;
 	-fx-focus-color: #80488F;
 	-fx-accent: #80488F;
 	-fx-faint-focus-color: #80488F;
 }
 
-/*-- BorderPane --------------------- */
 
+/*-- BorderPane --------------------- */
 BorderPane {
 	-fx-background-color: white;
 }
-
 .fondo_border_pane {
 	-fx-background-image: url("/recursos/fondo_circulos_lila_1.png");/*FORMA PARA EXPORTAR */
 	/*-fx-background-image: url("../recursos/fondo_circulos_lila_1.png"); */
@@ -66,23 +92,21 @@ BorderPane {
 	-fx-background-color: linear-gradient(to right bottom, white, #f5f2f7 , #f5f2f7 , #f8e7ff);
 }
 
+
 /*-- Menu principal --------------------- */
 .gridPaneMenu {
 	-fx-background-color: #FFCD48;
 }
-
 .menu {
 	-fx-background-color: #FFCD48;
 	-fx-text-fill: black;
 }
-
 .menuSeleccionado {
 	-fx-background-color: #78637C;
 	-fx-font-weight: bold; 
 	-fx-font-size: 1.5em;
 	-fx-text-fill: white;
 }
-
 .menu:hover {
 	-fx-background-color: #80488F;
 	-fx-text-fill: white;
@@ -90,65 +114,174 @@ BorderPane {
 
 
 /*-- TextField --------------------- */
+.text-field {
+	-fx-border-color: #CFC7E4;
+	-fx-padding: 3px 0px 3px 6px; /*padding para anular el padding por defecto*/
+}
 .text-field:hover {
 	-fx-border-color: #80488F;
+	-fx-padding: 3px 0px 3px 6px; /*padding para anular el padding por defecto*/
+}
+.text-field:focused {
+    -fx-faint-focus-color: transparent;
+	-fx-border-width: 2px;
+	-fx-border-color: #80488F;
+	-fx-padding: 3px 0px 3px 5px; /*padding para anular el padding por defecto*/	
 }
 
 
 /*-- TextArea --------------------- */
+.text-area {
+	-fx-border-color: #CFC7E4;
+	-fx-padding: 0px 0px 0px 0px; /*padding para anular el padding por defecto*/
+}
 .text-area:hover {
+	-fx-border-color: #80488F;
+	-fx-padding: 0px 0px 0px 0px; /*padding para anular el padding por defecto*/
+}
+.text-area:focused {
+	-fx-faint-focus-color: transparent;
+	-fx-border-width: 2px;
+	-fx-border-color: #80488F;
+	-fx-padding: 0px 0px 0px 0px; /*padding para anular el padding por defecto*/
+}
+
+
+/*-- ComboBox --------------------- */
+.combo-box-base .list-cell:disabled { /*Combobox desavilitado */
+	-fx-text-fill: black;
+	-fx-opacity: 1;
+}
+.combo-box-base {
+	-fx-background-color: #DDD6DE;
+	-fx-border-color: #CFC7E4;
+	-fx-font-weight: bold;
+}
+.combo-box-base:hover {
+	-fx-background-color: #B5A6B8;
+	-fx-border-color: #B5A6B8;
+	-fx-text-fill: white;
+	-fx-cursor: hand;
+}
+.combo-box-base:showing { /*item de cabecera al mostrar la lista */
+	-fx-background-color: #B5A6B8;
+}
+.combo-box-popup .list-view .list-cell:filled:hover { /*lista, item con raton encima*/
+    -fx-background-color: #DDD6DE;
+    -fx-text-fill: black;
+    -fx-cursor: hand;
+}
+.combo-box-popup .list-view .list-cell:filled:selected, .combo-box-popup .list-view .list-cell:filled:selected:hover { /*lista, item seleccionado de la lista con raton encima*/
+    -fx-background-color: #80488F;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+.combo-box-base:focused {
+	-fx-border-width: 2px;
 	-fx-border-color: #80488F;
 }
 
 
-/*-- ListView --------------------- */
-.list-view:hover {
+/*-- CheckBox --------------------- */
+.check-box > .box {
+	-fx-background-color: #DDD6DE;
+	-fx-border-color: #CFC7E4;
+}
+.check-box:hover > .box { /*Cursor sobre caja */
+	-fx-background-color: #B5A6B8;
+	-fx-border-color: #B5A6B8;
+	-fx-cursor: hand;
+}
+.check-box:hover .text { /*Cursor sobre texto */
+	-fx-cursor: hand;
+}
+.check-box:selected > .box > .mark { /*Marca en estado seleccionado */
+	-fx-background-color: black;
+}
+.check-box:focused > .box {
 	-fx-border-color: #80488F;
-	-fx-padding: 0px;
+}
+
+
+/*-- RadioButton --------------------- */
+.radio-button > .radio {
+	-fx-background-color: #DDD6DE;
+	-fx-border-width: 1px;
+	-fx-border-radius: 15px;
+	-fx-border-color: #CFC7E4;
+}
+.radio-button:hover > .radio { /*Cursor sobre caja */
+	-fx-background-color: #B5A6B8;
+	-fx-border-color: #B5A6B8;
+	-fx-cursor: hand;
+}
+.radio-button:hover .text { /*Cursor sobre texto */
+	-fx-cursor: hand;
+}
+.radio-button:focused > .radio > {
+	-fx-border-color: #80488F;
 }
 
 
 /*-- DatePiker --------------------- */
+.date-picker {
+	-fx-border-color: #CFC7E4;
+}
+.date-picker .arrow-button {
+	-fx-background-color: #DDD6DE;
+	-fx-border-color: #DDD6DE;
+	-fx-prompt-text-fill: black;
+}
+.date-picker .text-field {
+	-fx-background-color: #e0dee0;
+	-fx-border-color: #CFC7E4;
+	-fx-prompt-text-fill: black;
+}
+.date-picker .arrow-button .arrow { /*icono de calendario */
+	-fx-background-color: black;
+}
+.date-picker:showing { /*datepiker cuando se esta mostrando el calendario*/
+	-fx-border-color: #80488F;
+	-fx-background-color: #B5A6B8;
+}
+.date-picker:showing .arrow-button {
+	-fx-background-color: #B5A6B8;
+	-fx-border-color: #B5A6B8;
+}
+.date-picker:showing .text-field {
+	-fx-border-color: #B5A6B8;
+	-fx-background-color: #DDD6DE;
+}
 .date-picker:hover {
+	-fx-background-color: #B5A6B8;
+	-fx-border-color: #B5A6B8;
+	-fx-cursor: hand;
+}
+.date-picker:hover .arrow-button {
+	-fx-background-color: #B5A6B8;
+	-fx-border-color: #B5A6B8;
+	-fx-cursor: hand;
+}
+.date-picker:hover .text-field {
+	-fx-border-color: #B5A6B8;
+	-fx-background-color: #DDD6DE;
+	-fx-cursor: hand;
+}
+.date-picker:focused {
 	-fx-border-color: #80488F;
 }
 
-.panelSeparador {
-	-fx-background-color: #78637C;
-}
 
-/* borde y fondo de los paneles -----------------------------------------------------------------------------------------*/
-.panel_border {
-	-fx-border-color: #80488F;
-	-fx-border-width: 2px;
-	-fx-border-radius: 8px;
-	/*-fx-background-color: rgba(240, 233, 248, 0.4);*/
-	-fx-background-color: rgba(232, 228, 242, 0.4);/* #E8E4F2 1*/
-	/*-fx-background-color: rgba(207, 199, 228, 0.3); #CFC7E4 2*/
-	/*-fx-background-color: rgba(245, 242, 247, 0.3); #f5f2f7 */
-}
-/*
-OTROS LILAS FLOJOS.
-#EFE4F2 1
-#DEC7E4 2
-#CDAAD6 3
-
-OTRO TONO DE LILA.
-#E8E4F2 1
-#CFC7E4 2
-#B7AAD6 3
-	*/
+/*-- Button --------------------- */
 .button {
 	-fx-background-color: #78637C;
 	-fx-text-fill: white;
 }
-
 .button:hover {
 	-fx-background-color: #80488F;
 	-fx-font-weight: bold;
 	-fx-cursor: hand;
 }
-
 .boton_rojo:hover  {
 	-fx-background-color: #D42153;
 	-fx-font-weight: bold;
@@ -156,39 +289,150 @@ OTRO TONO DE LILA.
 }
 
 
+/*-- ListView --------------------- */
+.list-view {
+	-fx-border-color: #CFC7E4;
+	-fx-padding: 0px;
+}
+.list-view:hover {
+	-fx-border-color: #80488F;
+	-fx-padding: 0px;
+}
+.mi_list-view .cell:hover { /*Estilos de celda al pasar el raton por encima*/
+    -fx-background-color: #DDD6DE;
+    -fx-font-weight: bold;
+}
+.list-view .cell:selected { /*Estilos de celda en celda seleccionada*/
+    -fx-background-color: #80488F;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+
+/*-- TableView --------------------- */
+.table-view{
+	-fx-padding: 0px;
+	-fx-background-color: transparent;
+	-fx-border-color: #78637C;
+	-fx-border-radius: 8px;
+	-fx-border-width: 2px;
+}
+.table-view .column-header {
+
+}
+.table-view .column-header-background {
+	-fx-background-color: linear-gradient(to bottom, #80488F, #f8e7ff);
+	-fx-background-radius: 8px, 8px 0 0;
+	-fx-background-inset: 0 0 0 0;
+}
+.table-view .column-header, .filter {
+	-fx-background-color: transparent;
+	-fx-size: 50px;
+}
+.table-view .column-header .label {
+	-fx-text-fill:black
+}
+.table-view:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color:  #80488F;
+    -fx-text-fill: white;
+}
+.table-view .table-row-cell:hover { /* Estilos letras de la celda cuando se le pasa el ratón */
+    -fx-background-color:  #DDD6DE;
+    -fx-text-fill: black;
+    -fx-text-background-color: black;
+    -fx-font-weight: bold; 
+}
+.table-view .table-row-cell:selected { /*Estilos de letra en fila seleccionada cuando pierde el foco*/
+    -fx-background-color: #80488F;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-text-background-color: white; 
+}
+.table-view .filler{ /*Estilo del la parte de la barra de desplazamiento que esta en la cabecera*/
+	-fx-background-color: transparent;
+}
+
+
+/* scroll bar */
+
+/* The increment and decrement button CSS class of scrollbar */
+.table-view .increment-button ,.table-view .decrement-button {
+    -fx-background-color:transparent;
+	-fx-background-radius: 2em;
+}
+
+/* The main scrollbar **track** CSS class  */
+.table-view .scroll-bar:horizontal .track,
+.table-view .scroll-bar:vertical .track{
+	-fx-background-color: transparent;
+	/*-fx-border-color:derive( #6622CC,80%);*/
+	-fx-border-color:derive( #80488F,80%);
+	/*-fx-border-color: #B5A6B8;*/
+
+	-fx-background-radius: 2em;
+	-fx-border-radius:2em;
+}
+
+/* The main scrollbar **thumb** CSS class which we drag every time (movable) */
+.table-view .scroll-bar:horizontal .thumb,
+.table-view .scroll-bar:vertical .thumb {
+    /*-fx-background-color:derive( #6622CC,90%);*/
+	-fx-background-color:derive( #80488F,90%);
+	/*-fx-background-color: #B5A6B8;*/
+	
+	-fx-background-insets: 2, 0, 0;
+	-fx-background-radius: 2em;
+}
+
+/*Flechas de scroolbar*/
+.table-view .virtual-flow .scroll-bar .increment-button,
+.table-view .virtual-flow .scroll-bar .decrement-button {
+    -fx-opacity: 0;
+    -fx-padding: 2;
+}
+
+
+
+/*-- Fondo de linea separador entre barra superior y formulario -------------- */
+.panelSeparador {
+	-fx-background-color: #78637C;
+}
+
+/** -- Fondo de los paneles informativos de los paneles principales -----*/
+.panel_border {
+	-fx-border-color: #80488F;
+	-fx-border-width: 2px;
+	-fx-border-radius: 8px;
+	-fx-background-color: rgba(232, 228, 242, 0.4);/* #E8E4F2 1*/
+}
+
+/** -- Clase para los textos tipo hipervinculo --------*/
 .label_resaltado:hover {
 	-fx-text-fill: #80488F;
 	-fx-font-weight: bold; 
 	-fx-cursor: hand;
 }
 
+/** -- Fondo para las vistas principales del menu ------------------ */
 .fondo_ventana_degradaddo {
 	-fx-background-color: linear-gradient(to right bottom, white, #f5f2f7 , #f5f2f7 , #f8e7ff);
 	
 }
 
-.fondo_ventana_formulario {
-	-fx-background-color: linear-gradient(to bottom, white, #f5f2f7 , #f5f2f7 , #f8e7ff);
-	-fx-border-width: 2px;
-	-fx-border-radius: 8px;
-}
-
-.barra_ventana_formulario {
-	-fx-background-color: #FFCD48;
-	-fx-background-color: linear-gradient(to top, white, #FFCD48);
-}
-
+/** -- Fondo para las vistas tipo Card ------------------------------------------- */
 .fondo_ventana_degradado_masBorde {
 	-fx-background-color: linear-gradient(to right, white, #f5f2f7 , #f5f2f7 , #f8e7ff);
 	-fx-border-width: 2px;
 	-fx-border-color: #80488F;
 }
 
+/** -- Fondo para los formularios ------------------------------------------- */
 .fondo_ventana_degradado_toRight {
 	-fx-background-color: linear-gradient(to right, white, #f5f2f7 , #f5f2f7 , #f8e7ff);
 	
 }
 
+/*-- Fondo del lado izquierdo de las vistas tipo Card -------------------------*/
 .fondo_panel_izquierda {
 	-fx-background-color: #5E595F;
 	
@@ -198,52 +442,5 @@ OTRO TONO DE LILA.
 	-fx-text-fill: black;
 }
 
-.table-view{
-	-fx-padding: 0px;
-	-fx-background-color: transparent;
-	-fx-border-color: #78637C;
-	-fx-border-radius: 8px;
-	-fx-border-width: 2px;
-	/*#78637C*/
-}
 
-.table-view .column-header {
-
-}
-
-.table-view .column-header-background {
-	-fx-background-color: linear-gradient(to bottom, #80488F, #f8e7ff);
-	-fx-background-radius: 8px, 8px 0 0;
-	-fx-background-inset: 0 0 0 0;
-}
-
-.table-view .column-header, .filter {
-	-fx-background-color: transparent;
-	-fx-size: 50px;
-}
-
-.table-view .column-header .label {
-	-fx-text-fill:black
-}
-
-.table-view:focused .table-row-cell:filled:focused:selected {
-    -fx-background-color:  #80488F;
-    -fx-text-fill: white;
-}
-
-/*•	Estilos letras de la celda cuando se le pasa el ratón */
-.table-view .table-row-cell:hover {
-    -fx-background-color: #DDD6DE;
-    -fx-text-fill: black;
-    -fx-text-background-color: black;
-    -fx-font-weight: bold; 
-}
-
-/*Estilos de letra en fila seleccionada cuando pierde el foco*/
-.table-view .table-row-cell:selected {
-    -fx-background-color: #80488F;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-text-background-color: white; 
-}
 

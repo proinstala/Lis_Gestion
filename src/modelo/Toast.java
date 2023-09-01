@@ -2,25 +2,30 @@ package modelo;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
+
+/**
+ * Clase que representa un Toast (mensaje emergente) en una aplicación JavaFX.
+ * El Toast muestra un mensaje en la pantalla y se desvanece después de un tiempo especificado.
+ */
 public class Toast {
 	private static final int TOAST_WIDTH = 200;
     private static final int TOAST_HEIGHT = 50;
-    private static final int TOAST_DURATION = 4000;
+    private static final int TOAST_DURATION = 1;
+    private static final int TOAST_PAUSA = 2;
     
     public Toast() {}
     
-
     public void show(Stage ownerStage, String message) {
         Label texto = new Label(message); //Instancio la etiqueta pasandole el texto que contiene.
         texto.getStyleClass().add("toast-label"); //Asignamos el estilo al Label.
@@ -48,11 +53,16 @@ public class Toast {
 
         toastStage.show(); //Muestra el escenario.
 
-        Timeline timeline = new Timeline();
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(TOAST_DURATION),
-                new KeyValue(toastStage.opacityProperty(), 0)));
-        timeline.setOnFinished(event -> toastStage.hide());
-        timeline.play();
+        //PauseTransition para esperar un tiempo antes de iniciar el desvanecimiento
+        PauseTransition pause = new PauseTransition(Duration.seconds(TOAST_PAUSA));
+        pause.setOnFinished(event -> {
+            Timeline timeline = new Timeline();
+            timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(TOAST_DURATION),
+                    new KeyValue(toastStage.opacityProperty(), 0)));
+            timeline.setOnFinished(animationEvent -> toastStage.hide());
+            timeline.play();
+        });
+        pause.play();
     }
 
 }

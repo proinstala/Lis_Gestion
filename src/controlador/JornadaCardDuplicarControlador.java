@@ -142,6 +142,11 @@ public class JornadaCardDuplicarControlador implements Initializable {
             lbSemanaDestino.setText(Integer.toString(fechaSeleccionada.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR))); //Obtener el número de semana correspondiente a la fecha seleccionada.
         });
 
+        //Muestra el calendario emergente al hacer clic en el TextField del DatePiker.
+		dpFechaDestino.getEditor().setOnMouseClicked(event -> {
+            dpFechaDestino.show();
+        });
+
         //Establezco los CheckBox de copia de datos como seleccionados.
         chbComentarioJornada.setSelected(true);
         chbAnotacionesClases.setSelected(true);

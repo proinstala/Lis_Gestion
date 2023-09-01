@@ -315,6 +315,11 @@ public class JornadaControlador implements Initializable {
 				e.printStackTrace();
 			}
         });
+
+		//Muestra el calendario emergente al hacer clic en el TextField del DatePiker.
+		dpFecha.getEditor().setOnMouseClicked(event -> {
+            dpFecha.show();
+        });
 	}
 
 

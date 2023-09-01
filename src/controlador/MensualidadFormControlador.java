@@ -214,6 +214,11 @@ public class MensualidadFormControlador implements Initializable {
 
         dpFechaPago.setEditable(false);
 
+        //Muestra el calendario emergente al hacer clic en el TextField del DatePiker.
+		dpFechaPago.getEditor().setOnMouseClicked(event -> {
+            dpFechaPago.show();
+        });
+
         ivClearFechaPago.setOnMouseClicked(e -> {
             dpFechaPago.setValue(null);
         });

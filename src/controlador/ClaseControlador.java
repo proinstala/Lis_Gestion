@@ -148,6 +148,9 @@ public class ClaseControlador implements Initializable {
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		//Añadir clases de estilo CSS a elementos.
+        lvClase.getStyleClass().add("mi_list-view");
+
 		//Cargar imagenes en ImageView.
         Image imagenFlecha;
         Image imagenFlechaAdd;

@@ -159,6 +159,11 @@ public class AlumnoFormControlador implements Initializable {
         formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Crear un formateador de fecha con el patrón "dd/MM/yyyy".
         dpFechaNacimiento.setConverter(new LocalDateStringConverter(formatter, null)); //Establecer un convertidor de cadena de fecha para el control DatePicker dpFechaNacimiento.
 
+        //Muestra el calendario emergente al hacer clic en el TextField del DatePiker.
+		dpFechaNacimiento.getEditor().setOnMouseClicked(event -> {
+            dpFechaNacimiento.show();
+        });
+
         cbGenero.setItems(FXCollections.observableArrayList(Genero.values()));
         cbEstado.setItems(FXCollections.observableArrayList(EstadoAlumno.values()));
         cbFormaPago.setItems(FXCollections.observableArrayList(FormaPago.values()));
