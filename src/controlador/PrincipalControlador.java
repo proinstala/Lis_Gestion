@@ -33,9 +33,9 @@ import javafx.stage.StageStyle;
 import modelo.Alumno;
 import modelo.Jornada;
 import modelo.Mensualidad;
-import modelo.Toast;
 import modelo.Usuario;
 import utilidades.Constants;
+import utilidades.Toast;
 
 
 public class PrincipalControlador implements Initializable {

@@ -43,7 +43,6 @@ import modelo.Alumno;
 import modelo.EstadoPago;
 import modelo.Mensualidad;
 import modelo.MensualidadReport;
-import modelo.Toast;
 import modelo.Usuario;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -56,6 +55,7 @@ import net.sf.jasperreports.swing.JRViewer;
 import net.sf.jasperreports.view.JasperViewer;
 import utilidades.Constants;
 import utilidades.Fechas;
+import utilidades.Toast;
 
 
 public class InformeFormMensualidadesControlador implements Initializable {

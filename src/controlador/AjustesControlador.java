@@ -30,8 +30,8 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import modelo.Alumno;
-import modelo.Toast;
 import utilidades.Constants;
+import utilidades.Toast;
 
 
 public class AjustesControlador implements Initializable {

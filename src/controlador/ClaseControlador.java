@@ -44,9 +44,9 @@ import modelo.Clase;
 import modelo.HoraClase;
 import modelo.Jornada;
 import modelo.TipoClase;
-import modelo.Toast;
 import utilidades.Constants;
 import utilidades.Fechas;
+import utilidades.Toast;
 
 
 public class ClaseControlador implements Initializable {

@@ -33,8 +33,8 @@ import javafx.util.converter.LocalDateStringConverter;
 import modelo.Alumno;
 import modelo.Clase;
 import modelo.Jornada;
-import modelo.Toast;
 import utilidades.Constants;
+import utilidades.Toast;
 import javafx.fxml.Initializable;
 
 public class JornadaCardDuplicarControlador implements Initializable {

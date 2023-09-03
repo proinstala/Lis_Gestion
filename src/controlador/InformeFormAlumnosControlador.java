@@ -43,7 +43,6 @@ import javafx.util.converter.NumberStringConverter;
 import modelo.Alumno;
 import modelo.EstadoAlumno;
 import modelo.Genero;
-import modelo.Toast;
 import modelo.Usuario;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -56,6 +55,7 @@ import net.sf.jasperreports.swing.JRViewer;
 import net.sf.jasperreports.view.JasperViewer;
 import utilidades.CadenaUtil;
 import utilidades.Constants;
+import utilidades.Toast;
 
 
 public class InformeFormAlumnosControlador implements Initializable {

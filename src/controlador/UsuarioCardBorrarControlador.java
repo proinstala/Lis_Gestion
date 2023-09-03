@@ -27,9 +27,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import modelo.Toast;
 import modelo.Usuario;
 import utilidades.Constants;
+import utilidades.Toast;
 import javafx.fxml.Initializable;
 
 public class UsuarioCardBorrarControlador implements Initializable {

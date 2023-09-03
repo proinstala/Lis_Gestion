@@ -49,9 +49,9 @@ import javafx.util.Duration;
 import modelo.Alumno;
 import modelo.EstadoAlumno;
 import modelo.Genero;
-import modelo.Toast;
 import modelo.Usuario;
 import utilidades.Constants;
+import utilidades.Toast;
 import javafx.fxml.Initializable;
 
 public class AlumnosControlador implements Initializable {

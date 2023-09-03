@@ -15,7 +15,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import modelo.Toast;
+import utilidades.Toast;
 
 
 public class AcercaDeControlador implements Initializable {

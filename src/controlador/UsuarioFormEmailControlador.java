@@ -28,9 +28,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import modelo.Toast;
 import modelo.Usuario;
 import utilidades.Constants;
+import utilidades.Toast;
 
 
 public class UsuarioFormEmailControlador implements Initializable {

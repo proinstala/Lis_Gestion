@@ -34,8 +34,8 @@ import modelo.Direccion;
 import modelo.EstadoAlumno;
 import modelo.FormaPago;
 import modelo.Genero;
-import modelo.Toast;
 import utilidades.Constants;
+import utilidades.Toast;
 import javafx.fxml.Initializable;
 
 public class AlumnoFormControlador implements Initializable {

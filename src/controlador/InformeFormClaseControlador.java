@@ -42,7 +42,6 @@ import javafx.util.converter.LocalDateStringConverter;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Clase;
 import modelo.Jornada;
-import modelo.Toast;
 import modelo.Usuario;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -54,6 +53,7 @@ import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.swing.JRViewer;
 import net.sf.jasperreports.view.JasperViewer;
 import utilidades.Constants;
+import utilidades.Toast;
 
 
 public class InformeFormClaseControlador implements Initializable {

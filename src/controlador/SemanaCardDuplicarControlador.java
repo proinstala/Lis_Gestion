@@ -29,8 +29,8 @@ import javafx.stage.StageStyle;
 import javafx.util.converter.LocalDateStringConverter;
 import modelo.Clase;
 import modelo.Jornada;
-import modelo.Toast;
 import utilidades.Constants;
+import utilidades.Toast;
 
 public class SemanaCardDuplicarControlador implements Initializable {
     

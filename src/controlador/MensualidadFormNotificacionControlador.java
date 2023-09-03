@@ -32,10 +32,10 @@ import javafx.stage.StageStyle;
 import modelo.Alumno;
 import modelo.EstadoPago;
 import modelo.Mensualidad;
-import modelo.Toast;
 import modelo.Usuario;
 import utilidades.Constants;
 import utilidades.Correo;
+import utilidades.Toast;
 
 
 /**
