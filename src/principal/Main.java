@@ -10,7 +10,11 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-
+/**
+ * @author David Jimenez Alonso.
+ * @version 1.0.1
+ * 
+ */
 public class Main extends Application {
 	
 	ResourceBundle resourceBundle;
