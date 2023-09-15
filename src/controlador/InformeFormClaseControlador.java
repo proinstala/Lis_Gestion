@@ -14,6 +14,8 @@ import java.io.InputStream;
 import baseDatos.ConexionBD;
 import colecciones.ColeccionAlumnos;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -29,6 +31,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -38,6 +41,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
+import javafx.util.converter.IntegerStringConverter;
 import javafx.util.converter.LocalDateStringConverter;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Clase;
@@ -229,9 +233,9 @@ public class InformeFormClaseControlador implements Initializable {
     private void configurarControles() {
         lbInfoJornada.setVisible(false);  //Oculta el label informativo de la jornada.
         tfNombreInforme.setDisable(true); //Deshabilita el campo de texto para el nombre del informe.
+        tfNombreUsuario.setDisable(true); //Deshabilita el campo de texto para el nombre de autor de informe.
 
         //Habilita o deshabilita diferentes controles dependiendo del estado del CheckBox chekbMetadatos.
-        tfNombreUsuario.disableProperty().bind(chekbMetadatos.selectedProperty().not());
         tfTelefono.disableProperty().bind(chekbMetadatos.selectedProperty().not());
         cbEmail.disableProperty().bind(chekbMetadatos.selectedProperty().not());
         taTexto.disableProperty().bind(chekbMetadatos.selectedProperty().not());
@@ -318,7 +322,7 @@ public class InformeFormClaseControlador implements Initializable {
         rbPdf.setSelected(true); //Selecciona el RadioButton rbPdf como seleccionado por defecto.
 
         taTexto.setText(textoInforme()); //Establece el texto predefinido en el TextArea taTexto.
-        nombreInforme = "informe_" + LocalDateTime.now().format(formatterTime); //Nombre predefinido para el informe. "informe_dd_MM_yyyy-HH_mm_ss".
+        nombreInforme = "informe_clase_" + LocalDateTime.now().format(formatterTime); //Nombre predefinido para el informe. "informe_clase__dd_MM_yyyy-HH_mm_ss".
         tfNombreInforme.setText(nombreInforme); //Establece el texto predefinido para el nombre del informe en el TextField tfNombreInforme.
     }
 
@@ -382,10 +386,10 @@ public class InformeFormClaseControlador implements Initializable {
     	//Crea el mapa de parametros con los datos del formulario.
     	HashMap<String, Object> parameters = new HashMap<String, Object>();
     	parameters.put("autor", (tfNombreUsuario.getText()));
-    	parameters.put("telefono", (tfTelefono.getText() == null) ? "" : tfTelefono.getText());
+        parameters.put("telefono", (Integer.toString(newUsuario.getTelefono()) == null) ? "" : Integer.toString(newUsuario.getTelefono()));
     	parameters.put("email", tfEmail.getText());
     	parameters.put("fechaInforme", LocalDate.now().format(formatter));
-    	parameters.put("textoInforme",  (taTexto.getText() == null) ? "" : taTexto.getText());
+    	parameters.put("textoInforme", (taTexto.getText() == null) ? "" : taTexto.getText());
         parameters.put("idClase", clase.getId());
         parameters.put("jornada", jornada.getFecha().format(formatter));
         parameters.put("numeroClase", clase.getNumero());
@@ -549,7 +553,6 @@ public class InformeFormClaseControlador implements Initializable {
 
         //Configura los enlaces de datos entre los campos de texto y las propiedades de newUsuario.
         tfNombreUsuario.textProperty().bind(Bindings.concat(newUsuario.nombreProperty(), " ", newUsuario.apellido1Property(), " ", newUsuario.apellido2Property()));
-        tfTelefono.textProperty().bindBidirectional(newUsuario.telefonoProperty(), new NumberStringConverter("0"));
 
         //Si el objeto newUsuario tiene una dirección de correo electrónico de la aplicación no vacía,
         //se agrega la constante EMAIL_APP a la lista de tipos de correo electrónico y se establece como valor predeterminado en el ComboBox cbEmail.
@@ -563,6 +566,27 @@ public class InformeFormClaseControlador implements Initializable {
         if (newUsuario.getEmail() != null || !newUsuario.getEmail().isBlank()) {
              tipoEmail.add(Constants.EMAIL_USER); //Añadir elemento a ObservableList de cbEmail
         } 
+
+        //Utilizamos un TextFormatter para filtrar las entradas no numéricas del teclado.
+        //Crea un convertidor de String a Number con un formato de "0".
+        StringConverter<Number> converter = new NumberStringConverter("0"); 
+        //Crea un TextFormatter que utiliza el convertidor y una función de cambio personalizada.
+        TextFormatter<Number> textFormatter = new TextFormatter<>(converter, 0,
+            change -> {
+                if (change.isContentChange()) {
+                    String newText = change.getControlNewText();
+                    // Verifica si el nuevo texto contiene solo dígitos.
+                    if (newText.matches("\\d*")) {
+                        return change; //Acepta el cambio.
+                    }
+                }
+                return null; //Rechaza el cambio.
+            });
+        
+            //Configura el TextFormatter en el campo de texto tfTelefono.
+        tfTelefono.setTextFormatter(textFormatter); 
+        //Vincula bidireccionalmente la propiedad 'telefonoProperty' de 'newUsuario' con el campo de texto tfTelefono utilizando el convertidor.
+        tfTelefono.textProperty().bindBidirectional(newUsuario.telefonoProperty(), converter); 
     }
     
 }

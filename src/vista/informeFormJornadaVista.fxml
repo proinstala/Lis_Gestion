@@ -146,7 +146,7 @@
             <Cursor fx:constant="HAND" />
          </cursor>
       </CheckBox>
-      <DatePicker fx:id="dpJornada" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+      <DatePicker fx:id="dpJornada" prefWidth="200.0" promptText="Selecciona una fecha..." GridPane.columnIndex="1" GridPane.rowIndex="10" />
       <Label fx:id="lbInfoJornada" text="Jornada no validad!." textFill="RED" GridPane.columnIndex="1" GridPane.rowIndex="10">
          <GridPane.margin>
             <Insets left="220.0" />
