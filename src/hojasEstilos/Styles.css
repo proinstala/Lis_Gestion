@@ -367,8 +367,6 @@ BorderPane {
 	-fx-background-color: transparent;
 	/*-fx-border-color:derive( #6622CC,80%);*/
 	-fx-border-color:derive( #80488F,80%);
-	/*-fx-border-color: #B5A6B8;*/
-
 	-fx-background-radius: 2em;
 	-fx-border-radius:2em;
 }
@@ -378,8 +376,6 @@ BorderPane {
 .table-view .scroll-bar:vertical .thumb {
     /*-fx-background-color:derive( #6622CC,90%);*/
 	-fx-background-color:derive( #80488F,90%);
-	/*-fx-background-color: #B5A6B8;*/
-	
 	-fx-background-insets: 2, 0, 0;
 	-fx-background-radius: 2em;
 }
@@ -391,6 +387,37 @@ BorderPane {
     -fx-padding: 2;
 }
 
+
+/*-- Barras de Scroll de todos los controles --------------------- */
+/* The increment and decrement button CSS class of scrollbar */
+.increment-button, .decrement-button {
+    -fx-background-color:transparent;
+	-fx-background-radius: 2em;
+}
+
+/* The main scrollbar **track** CSS class  */
+.scroll-bar:horizontal .track,
+.scroll-bar:vertical .track{
+	-fx-background-color: transparent;
+	-fx-border-color:derive( #80488F,80%);
+	-fx-background-radius: 2em;
+	-fx-border-radius:2em;
+}
+
+/* The main scrollbar **thumb** CSS class which we drag every time (movable) */
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb {
+	-fx-background-color:derive( #80488F,90%);
+	-fx-background-insets: 2, 0, 0;
+	-fx-background-radius: 2em;
+}
+
+/*Flechas de scroolbar*/
+.virtual-flow .scroll-bar .increment-button,
+.virtual-flow .scroll-bar .decrement-button {
+    -fx-opacity: 0;
+    -fx-padding: 2;
+}
 
 
 /*-- Fondo de linea separador entre barra superior y formulario -------------- */

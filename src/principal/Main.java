@@ -9,10 +9,11 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import utilidades.Constants;
 
 /**
  * @author David Jimenez Alonso.
- * @version 1.0.1
+ * @version 1.0.2
  * 
  */
 public class Main extends Application {
@@ -45,7 +46,7 @@ public class Main extends Application {
 		URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); //guardar ruta de recurso imagen.
 		this.primaryStage.getIcons().add(new Image(rutaIcono.toString())); //poner imagen icono a la ventana.	
 
-		this.primaryStage.setTitle("Lis Gestión");
+		this.primaryStage.setTitle("LIS_Gestión " + Constants.VERSION_LIS_GESTION);
 		this.primaryStage.setScene(scene);
 		this.primaryStage.setMinHeight(800);
 		this.primaryStage.setMinWidth(1200);

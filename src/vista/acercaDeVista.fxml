@@ -45,7 +45,7 @@
             <Button fx:id="btnCancelar" layoutX="266.0" layoutY="370.0" mnemonicParsing="false" prefWidth="100.0" text="Cerrar" AnchorPane.topAnchor="370.0" />
             <Label layoutX="40.0" layoutY="70.0" prefHeight="43.0" prefWidth="336.0" text="Lis_Gestion es un programa para la gestión de clases y alumnos del centro Lis Pilates." wrapText="true" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0" />
             <Label layoutX="40.0" layoutY="107.0" prefHeight="36.0" prefWidth="307.0" text="Diseñado y desarrollado por David Jimenez Alonso." wrapText="true" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0" />
-            <Label layoutX="97.0" layoutY="144.0" text="1.0.1" AnchorPane.leftAnchor="97.0" />
+            <Label fx:id="lbVersion" layoutX="97.0" layoutY="144.0" text="1.0.1" AnchorPane.leftAnchor="97.0" />
             <Label layoutX="40.0" layoutY="166.0" text="Version de java:" AnchorPane.leftAnchor="40.0">
                <font>
                   <Font name="System Bold" size="12.0" />

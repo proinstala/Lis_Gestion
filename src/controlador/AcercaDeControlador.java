@@ -15,6 +15,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import utilidades.Constants;
 import utilidades.Toast;
 
 
@@ -58,6 +59,9 @@ public class AcercaDeControlador implements Initializable {
 
     @FXML
     private Label lbCorreo;
+
+    @FXML
+    private Label lbVersion;
 
 
     @Override
@@ -103,6 +107,8 @@ public class AcercaDeControlador implements Initializable {
 
         toast = new Toast();
 
+        configurarTextos();
+
         //Configurar el evento cuando se presiona el ratón en el panel apCardAlumno.
         apAcercaDe.setOnMousePressed(mouseEvent -> {
             //Obtener las coordenadas X e Y del ratón en relación con la escena.
@@ -124,10 +130,8 @@ public class AcercaDeControlador implements Initializable {
 
         //Abre la el navegador web predeterminado con la pagina de GitHub del proyecto.
         lbGitHub.setOnMouseClicked(e -> {
-            String direccion = "https://github.com/proinstala/Lis_Gestion";
-            
             try {
-                Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + direccion);
+                Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + Constants.URL_REPOSITORIO);
             } catch (IOException ex) {
                 toast.show((Stage) apAcercaDe.getScene().getWindow(), "Fallo al intentar abrir el navegador predeterminado.");
             }
@@ -142,7 +146,7 @@ public class AcercaDeControlador implements Initializable {
                 // Verifica si la acción de correo electrónico es compatible
                 if (desktop.isSupported(Desktop.Action.MAIL)) {
                     try {
-                        URI mailtoUri = new URI("mailto:david.alonso.murcia@gmail.com"); // Crea un objeto URI con el formato "mailto:"
+                        URI mailtoUri = new URI("mailto:" + Constants.CORREO_AUTOR); // Crea un objeto URI con el formato "mailto:"
                         desktop.mail(mailtoUri); // Abre el cliente de correo predeterminado
                     } catch (IOException | URISyntaxException ex) {
                         toast.show((Stage) apAcercaDe.getScene().getWindow(),"Fallo al inentar abrir el cliente de correo predeterminado.");
@@ -155,5 +159,14 @@ public class AcercaDeControlador implements Initializable {
             }
         });
 
+    }
+
+    /**
+     * Configura los textos de los labels con la informacion de la aplicación.
+     */
+    private void configurarTextos() {
+        lbCorreo.setText(Constants.CORREO_AUTOR);
+        lbGitHub.setText(Constants.URL_REPOSITORIO);
+        lbVersion.setText(Constants.VERSION_LIS_GESTION);
     }
 }
