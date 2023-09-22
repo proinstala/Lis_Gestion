@@ -14,8 +14,6 @@ import java.io.InputStream;
 import baseDatos.ConexionBD;
 import colecciones.ColeccionAlumnos;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -31,17 +29,16 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
-import javafx.util.converter.IntegerStringConverter;
 import javafx.util.converter.LocalDateStringConverter;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Clase;
@@ -386,7 +383,7 @@ public class InformeFormClaseControlador implements Initializable {
     	//Crea el mapa de parametros con los datos del formulario.
     	HashMap<String, Object> parameters = new HashMap<String, Object>();
     	parameters.put("autor", (tfNombreUsuario.getText()));
-        parameters.put("telefono", (Integer.toString(newUsuario.getTelefono()) == null) ? "" : Integer.toString(newUsuario.getTelefono()));
+        parameters.put("telefono", (tfTelefono.getText().isBlank()) ? " " : Integer.toString(newUsuario.getTelefono()));
     	parameters.put("email", tfEmail.getText());
     	parameters.put("fechaInforme", LocalDate.now().format(formatter));
     	parameters.put("textoInforme", (taTexto.getText() == null) ? "" : taTexto.getText());
@@ -553,6 +550,14 @@ public class InformeFormClaseControlador implements Initializable {
 
         //Configura los enlaces de datos entre los campos de texto y las propiedades de newUsuario.
         tfNombreUsuario.textProperty().bind(Bindings.concat(newUsuario.nombreProperty(), " ", newUsuario.apellido1Property(), " ", newUsuario.apellido2Property()));
+        tfTelefono.textProperty().bindBidirectional(newUsuario.telefonoProperty(), new NumberStringConverter("0"));
+
+        //Filtra la entrada de texto para permitir solo números y 9 digitos como máximo.
+        tfTelefono.addEventFilter(KeyEvent.KEY_TYPED, event -> {
+            if (!event.getCharacter().matches("[0-9]") || Integer.toString(newUsuario.getTelefono()).length() > 8) {
+                event.consume();
+            }
+        });
 
         //Si el objeto newUsuario tiene una dirección de correo electrónico de la aplicación no vacía,
         //se agrega la constante EMAIL_APP a la lista de tipos de correo electrónico y se establece como valor predeterminado en el ComboBox cbEmail.
@@ -566,27 +571,6 @@ public class InformeFormClaseControlador implements Initializable {
         if (newUsuario.getEmail() != null || !newUsuario.getEmail().isBlank()) {
              tipoEmail.add(Constants.EMAIL_USER); //Añadir elemento a ObservableList de cbEmail
         } 
-
-        //Utilizamos un TextFormatter para filtrar las entradas no numéricas del teclado.
-        //Crea un convertidor de String a Number con un formato de "0".
-        StringConverter<Number> converter = new NumberStringConverter("0"); 
-        //Crea un TextFormatter que utiliza el convertidor y una función de cambio personalizada.
-        TextFormatter<Number> textFormatter = new TextFormatter<>(converter, 0,
-            change -> {
-                if (change.isContentChange()) {
-                    String newText = change.getControlNewText();
-                    // Verifica si el nuevo texto contiene solo dígitos.
-                    if (newText.matches("\\d*")) {
-                        return change; //Acepta el cambio.
-                    }
-                }
-                return null; //Rechaza el cambio.
-            });
-        
-            //Configura el TextFormatter en el campo de texto tfTelefono.
-        tfTelefono.setTextFormatter(textFormatter); 
-        //Vincula bidireccionalmente la propiedad 'telefonoProperty' de 'newUsuario' con el campo de texto tfTelefono utilizando el convertidor.
-        tfTelefono.textProperty().bindBidirectional(newUsuario.telefonoProperty(), converter); 
     }
     
 }

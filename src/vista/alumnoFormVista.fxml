@@ -97,7 +97,7 @@
       </Label>
       <TextField fx:id="tfApellido1" promptText="Primer apellido" GridPane.columnIndex="1" GridPane.rowIndex="5" />
       <TextField fx:id="tfApellido2" promptText="Segundo apellido" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-      <ComboBox fx:id="cbGenero" maxWidth="-Infinity" prefWidth="200.0" promptText="Género" GridPane.columnIndex="1" GridPane.rowIndex="7">
+      <ComboBox fx:id="cbGenero" maxWidth="-Infinity" prefWidth="200.0" promptText="Selecciona género..." GridPane.columnIndex="1" GridPane.rowIndex="7">
          <GridPane.margin>
             <Insets left="280.0" />
          </GridPane.margin></ComboBox>
@@ -106,7 +106,7 @@
             <Insets right="10.0" />
          </GridPane.margin>
       </Label>
-      <DatePicker fx:id="dpFechaNacimiento" maxWidth="-Infinity" prefWidth="200.0" promptText="Fecha" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+      <DatePicker fx:id="dpFechaNacimiento" maxWidth="-Infinity" prefWidth="200.0" promptText="Selecciona fecha..." GridPane.columnIndex="1" GridPane.rowIndex="7" />
       <HBox alignment="CENTER_LEFT" layoutX="30.0" layoutY="50.0" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.rowIndex="8">
          <children>
             <Label text="Contacto" />
@@ -171,8 +171,8 @@
             <Insets left="225.0" />
          </GridPane.margin>
       </Label>
-      <ComboBox fx:id="cbLocalidad" layoutX="140.0" layoutY="225.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Localidad" GridPane.columnIndex="1" GridPane.rowIndex="15" />
-      <ComboBox fx:id="cbProvincia" layoutX="140.0" layoutY="540.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Provincia" GridPane.columnIndex="1" GridPane.rowIndex="15">
+      <ComboBox fx:id="cbLocalidad" layoutX="140.0" layoutY="225.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Selecciona localidad..." GridPane.columnIndex="1" GridPane.rowIndex="15" />
+      <ComboBox fx:id="cbProvincia" layoutX="140.0" layoutY="540.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Selecciona provincia..." GridPane.columnIndex="1" GridPane.rowIndex="15">
          <GridPane.margin>
             <Insets left="280.0" />
          </GridPane.margin></ComboBox>
@@ -204,13 +204,13 @@
             <Insets right="10.0" />
          </GridPane.margin>
       </Label>
-      <ComboBox fx:id="cbEstado" maxWidth="-Infinity" prefWidth="200.0" promptText="Estado" GridPane.columnIndex="1" GridPane.rowIndex="18" />
+      <ComboBox fx:id="cbEstado" maxWidth="-Infinity" prefWidth="200.0" promptText="Selecciona estado.." GridPane.columnIndex="1" GridPane.rowIndex="18" />
       <Label text="Asitencia Semanal" GridPane.rowIndex="20">
          <GridPane.margin>
             <Insets right="10.0" />
          </GridPane.margin>
       </Label>
-      <ComboBox fx:id="cbAsistencia" prefWidth="200.0" promptText="Número de asisitencias" GridPane.columnIndex="1" GridPane.rowIndex="20" />
+      <ComboBox fx:id="cbAsistencia" prefWidth="200.0" promptText="Selecciona nº asistencias..." GridPane.columnIndex="1" GridPane.rowIndex="20" />
       <Pane fx:id="pSeparador" prefHeight="200.0" prefWidth="200.0" styleClass="panelSeparador" GridPane.columnSpan="2">
          <GridPane.margin>
             <Insets left="-20.0" right="-20.0" />
@@ -221,6 +221,11 @@
             <Insets right="10.0" />
          </GridPane.margin>
       </Label>
-      <ComboBox fx:id="cbFormaPago" prefWidth="200.0" promptText="Forma de pago" GridPane.columnIndex="1" GridPane.rowIndex="19" />
+      <ComboBox fx:id="cbFormaPago" prefWidth="200.0" promptText="Selecciona forma de pago..." GridPane.columnIndex="1" GridPane.rowIndex="19" />
+      <Label text="(* Campo Opcional)" GridPane.columnIndex="1" GridPane.rowIndex="21" GridPane.valignment="TOP">
+         <GridPane.margin>
+            <Insets top="20.0" />
+         </GridPane.margin>
+      </Label>
    </children>
 </GridPane>

@@ -337,7 +337,7 @@ public class MensualidadFormControlador implements Initializable {
             mensajeAviso(AlertType.WARNING, 
             "Año no escogido", 
             "",
-            "Selecciona un Año para fecha de esta Mensualidad.");
+            "Selecciona un año para fecha de esta Mensualidad.");
         } else if (cbFormaPago.getValue() == null) {
             mensajeAviso(AlertType.WARNING, 
             "Forma de pago.", 
@@ -368,7 +368,7 @@ public class MensualidadFormControlador implements Initializable {
             mensajeAviso(AlertType.WARNING, 
             "Importe de mensualidad.", 
             "Introduce un importe para esta mensualidad.",
-                "Formato: de uno a 3 digitos, depues una coma seguido de 1 a 2 digitos."
+                "Formato: de 1 a 3 digitos, despues una coma seguido de 1 a 2 digitos."
                 +"\nEjemplo: 45.50");
         } else if (oldAlumno == null) {
             mensajeAviso(AlertType.WARNING, 

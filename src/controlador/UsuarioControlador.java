@@ -128,7 +128,6 @@ public class UsuarioControlador implements Initializable {
     }
     
 
-
     /**
 	 * Método que se ejecuta cuando se hace clic en la imagen "borrar usuario".
 	 * Crea y muestra una nueva ventana donde se puede borrar al usuario que este loguedao en la aplicacion
@@ -268,6 +267,8 @@ public class UsuarioControlador implements Initializable {
             ventana.initOwner((Stage) gpUsuario.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.DECORATED);
+            ventana.setMinWidth(390);   //Ancho mínimo de ventana.
+            ventana.setMinHeight(400);  //Alto máximo de venta.
 
             URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
             ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.

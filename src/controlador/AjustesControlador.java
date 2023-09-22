@@ -88,22 +88,26 @@ public class AjustesControlador implements Initializable {
         Image imagenAdd;
         Image imagenBorrar;
         Image imagenEditar;
+        Image imagenAcercaDe;
         try {
             //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
             imagenAdd = new Image(getClass().getResourceAsStream("/recursos/add-circle-linear_30.png")); //Forma desde IDE y JAR.
             imagenBorrar = new Image(getClass().getResourceAsStream("/recursos/close-circle-linear_30.png"));
             imagenEditar = new Image(getClass().getResourceAsStream("/recursos/pen-new-round-linear_30.png"));
+            imagenAcercaDe = new Image(getClass().getResourceAsStream("/recursos/info_32.png"));
         } catch (Exception e) {
             //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
         	imagenAdd = new Image("/recursos/add-circle-linear_30.png"); //Forma desde el JAR.
             imagenBorrar = new Image("/recursos/close-circle-linear_30.png");
             imagenEditar = new Image("/recursos/pen-new-round-linear_30.png");
+            imagenAcercaDe = new Image("/recursos/info_32.png");
         }
         //Establecer las imagenes cargadas en el ImageView.
         ivAddLocalidad.setImage(imagenAdd);
         ivBorrarLocalidad.setImage(imagenBorrar);
         ivEditarPrecio.setImage(imagenEditar);
-        ivEditarLocalidad.setImage(imagenEditar); 
+        ivEditarLocalidad.setImage(imagenEditar);
+        ivAcercaDe.setImage(imagenAcercaDe); 
 
         //Crear Tooltip.
         Tooltip tltAddLocalidad = new Tooltip("Añadir Nueva Localidad");

@@ -87,7 +87,7 @@
             <Insets top="10.0" />
          </GridPane.margin>
       </HBox>
-      <Label text="Teléfono" GridPane.rowIndex="7">
+      <Label text="Teléfono *" GridPane.rowIndex="7">
          <GridPane.margin>
             <Insets right="10.0" />
          </GridPane.margin>
@@ -113,5 +113,6 @@
             <Insets top="10.0" />
          </GridPane.margin>
       </ImageView>
+      <Label text="(* Campo Opcional)" GridPane.halignment="LEFT" GridPane.rowIndex="9" GridPane.valignment="BOTTOM" />
    </children>
 </GridPane>

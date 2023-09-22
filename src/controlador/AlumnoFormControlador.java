@@ -19,14 +19,17 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.StringConverter;
 import javafx.util.converter.LocalDateStringConverter;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Alumno;
@@ -53,6 +56,9 @@ public class AlumnoFormControlador implements Initializable {
     private ObservableList<Alumno> listadoAlumnos;
     private Alumno oldAlumno;
     private Alumno newAlumno;
+    private StringConverter<Number> converterTelefono;
+    private StringConverter<Number> converterNumero;
+    private StringConverter<Number> converterCodigoPostal;
 
     private String nombre;
     private String apellido1;
@@ -157,8 +163,20 @@ public class AlumnoFormControlador implements Initializable {
 
         //Modifica el formato en el que se muestra la fecha en el DatePicker.
         formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Crear un formateador de fecha con el patrón "dd/MM/yyyy".
-        dpFechaNacimiento.setConverter(new LocalDateStringConverter(formatter, null)); //Establecer un convertidor de cadena de fecha para el control DatePicker dpFechaNacimiento.
+        
+        configurarControles();
+        
+        //Configurar un evento de clic del ratón para el botón "Cerrar".
+        btnCancelar.setOnMouseClicked(e -> {
+            ((Stage) gpFormAlumno.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
+        });
+    }
 
+
+    private void configurarControles() {
+        //Establecer un convertidor de cadena de fecha para el control DatePicker dpFechaNacimiento.
+        dpFechaNacimiento.setConverter(new LocalDateStringConverter(formatter, null));
+        
         //Muestra el calendario emergente al hacer clic en el TextField del DatePiker.
 		dpFechaNacimiento.getEditor().setOnMouseClicked(event -> {
             dpFechaNacimiento.show();
@@ -182,9 +200,23 @@ public class AlumnoFormControlador implements Initializable {
         cbAsistencia.getItems().addAll(1,2,3,4);
         cbAsistencia.setValue(1);
 
-        //Configurar un evento de clic del ratón para el botón "Cerrar".
-        btnCancelar.setOnMouseClicked(e -> {
-            ((Stage) gpFormAlumno.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
+        //Filtra la entrada en el TextField para permitir solo números.
+        tfTelefono.addEventFilter(KeyEvent.KEY_TYPED, event -> {
+            if (!event.getCharacter().matches("[0-9]")) {
+                event.consume();
+            }
+        });
+
+        tfNumeroVivienda.addEventFilter(KeyEvent.KEY_TYPED, event -> {
+            if (!event.getCharacter().matches("[0-9]")) {
+                event.consume();
+            }
+        });
+
+        tfCodigoPostal.addEventFilter(KeyEvent.KEY_TYPED, event -> {
+            if (!event.getCharacter().matches("[0-9]")) {
+                event.consume();
+            }
         });
     }
 
@@ -323,6 +355,15 @@ public class AlumnoFormControlador implements Initializable {
         cbAsistencia.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
             newAlumno.asistenciaSemanalProperty().set(ov);
         });
+
+        //(tfNumeroVivienda.getText() == '0') ? tfNumeroVivienda.setText("") : tfNumeroVivienda.setText(""); 
+        if(tfNumeroVivienda.getText().equals("0")) {
+            tfNumeroVivienda.clear();
+        }
+
+        if(tfCodigoPostal.getText().equals("0")) {
+            tfCodigoPostal.clear();
+        }
     }
 
     
@@ -407,7 +448,7 @@ public class AlumnoFormControlador implements Initializable {
         Matcher apellido1Matcher = apellidoPattern.matcher(tfApellido1.getText());
         Matcher apellido2Matcher = apellidoPattern.matcher(tfApellido2.getText());
 
-        Pattern telefonoPattern = Pattern.compile("[0-9]{9,10}");
+        Pattern telefonoPattern = Pattern.compile("[0-9]{1,9}");
         Matcher telefonoMatcher = telefonoPattern.matcher(tfTelefono.getText());
 
         Pattern emailPattern = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$|^$");
@@ -445,7 +486,7 @@ public class AlumnoFormControlador implements Initializable {
         } else if(!telefonoMatcher.matches()) {
             mensajeAviso("Teléfono no valido",
             "El teléfono introducido no es valido",
-            "Debes introducir un número de 9 a 10 dígitos.");
+            "Debes introducir un numero de máximo 9 dígitos.");
         } else if(!emaiMatcher.matches()) {
             mensajeAviso("Email no valido.",
             "",

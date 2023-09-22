@@ -309,6 +309,8 @@ public class AlumnosControlador implements Initializable {
                 ventana.initOwner((Stage) bpAlumnos.getScene().getWindow());
                 ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
                 ventana.initStyle(StageStyle.DECORATED);
+                ventana.setMinWidth(500);   //Ancho mínimo de ventana.
+                ventana.setMinHeight(550);  //Alto máximo de venta.
 
                 URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
                 ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
@@ -467,6 +469,8 @@ public class AlumnosControlador implements Initializable {
                 ventana.initOwner((Stage) bpAlumnos.getScene().getWindow());
                 ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
                 ventana.initStyle(StageStyle.DECORATED);
+                ventana.setMinWidth(550);   //Ancho mínimo de ventana.
+                ventana.setMinHeight(600);  //Alto máximo de venta.
                  
                 URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
                 ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
@@ -510,6 +514,8 @@ public class AlumnosControlador implements Initializable {
             ventana.initOwner((Stage) bpAlumnos.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.DECORATED);
+            ventana.setMinWidth(550);   //Ancho mínimo de ventana.
+            ventana.setMinHeight(600);  //Alto máximo de venta.
 
             URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
             ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.

@@ -15,6 +15,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
@@ -97,6 +98,13 @@ public class UsuarioFormControlador implements Initializable {
 
         tfIdUsuario.setDisable(true);
 
+        //Filtra la entrada de texto para permitir solo números y 9 digitos como máximo.
+        tfTelefono.addEventFilter(KeyEvent.KEY_TYPED, event -> {
+            if (!event.getCharacter().matches("[0-9]") || Integer.toString(newUsuario.getTelefono()).length() > 8) {
+                event.consume();
+            }
+        });
+
         //Configurar un evento de clic del ratón para el botón "Cancelar".
         btnCancelar.setOnMouseClicked(e -> {
             ((Stage) gpFormUsuario.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
@@ -161,7 +169,7 @@ public class UsuarioFormControlador implements Initializable {
         Matcher apellido1Matcher = apellidoPattern.matcher((tfApellido1.getText() == null) ? "" : tfApellido1.getText());
         Matcher apellido2Matcher = apellidoPattern.matcher((tfApellido2.getText() == null) ? "" : tfApellido2.getText());
 
-        Pattern telefonoPattern = Pattern.compile("[0-9]{9,10}|^[0]?$");
+        Pattern telefonoPattern = Pattern.compile("[0-9]{1,9}|^[0]?$");
         Matcher telefonoMatcher = telefonoPattern.matcher(tfTelefono.getText());
 
         Pattern emailPattern = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$|^$");
@@ -182,7 +190,7 @@ public class UsuarioFormControlador implements Initializable {
         } else if(!telefonoMatcher.matches()) {
             mensajeAviso("Teléfono no valido",
             "El teléfono introducido no es valido",
-            "Debes introducir un número de 9 a 10 dígitos.\nEste campo es opcional.");
+            "Debes introducir un número de 1 a 9 dígitos.\nEste campo es opcional.");
         } else if(!emaiMatcher.matches()) {
             mensajeAviso("Email no valido.",
             "",
@@ -193,7 +201,7 @@ public class UsuarioFormControlador implements Initializable {
 
         //Si no hay errores en los campos, guarda la informacion en las variables.
         if (camposCorrectos) {
-            telefono = (tfTelefono.getText() == null) ? 0 : Integer.parseInt(tfTelefono.getText());
+            telefono = (tfTelefono.getText().isBlank()) ? 0 : Integer.parseInt(tfTelefono.getText());
             email = (tfEmail.getText() == null) ? "" : tfEmail.getText();
             
             tfTelefono.setText(Integer.toString(telefono));
