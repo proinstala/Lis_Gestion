@@ -11,7 +11,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-
 import baseDatos.ConexionBD;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -36,6 +35,7 @@ import modelo.Jornada;
 import utilidades.Constants;
 import utilidades.Toast;
 import javafx.fxml.Initializable;
+
 
 public class JornadaCardDuplicarControlador implements Initializable {
 

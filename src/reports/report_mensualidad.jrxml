@@ -598,7 +598,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{id}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField textAdjust="ScaleFont">
 				<reportElement mode="Opaque" x="55" y="0" width="155" height="15" backcolor="#DDD6DE" uuid="b3fb1a07-dadc-45af-ae8b-cf9ba0225cec">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d08db62f-116d-4ed2-83c8-a9781b2841ee"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -652,7 +652,7 @@
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA[$F{estadoPago}.toString().toLowerCase()]]></textFieldExpression>
 			</textField>
-			<textField evaluationTime="Report" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+			<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 				<reportElement mode="Opaque" x="420" y="0" width="75" height="15" backcolor="#DDD6DE" uuid="fa8488f5-4c80-43d3-9f64-6db66ef16126">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1422983c-4b60-431a-b013-439ef6312d10"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>

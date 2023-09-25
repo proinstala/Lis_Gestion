@@ -383,6 +383,10 @@ public class InformeFormMensualidadesControlador implements Initializable {
             	listaMensualidadReport.add(mReport); //Agregar el MensualidadReport a la lista listaMensualidadReport.
             }
             
+            for (Mensualidad mensualidad : listaMensualidadReport) {
+				System.out.println(mensualidad.toString());
+			}
+            
             //Crear el comparador para ordenar por fecha ascendente
             Comparator<Mensualidad> comparadorFechaAscendente = Comparator.comparing(Mensualidad::getFecha);
 

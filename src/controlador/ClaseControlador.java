@@ -55,6 +55,7 @@ public class ClaseControlador implements Initializable {
 	private PrincipalControlador controladorPincipal;
 	private ObservableList<Alumno> listadoAlumnosGeneral;
 	private ObservableList<Alumno> listaClase;
+	private ArrayList<Alumno> listaClaseOriginal;
 	private int numeroClase;
 	private DateTimeFormatter formatter;
 	private Clase claseOriginal;
@@ -66,6 +67,7 @@ public class ClaseControlador implements Initializable {
 	private Toast toast;
 	private Alert alerta;
 	private Double tiempoDelay = 0.5;
+	private boolean checkChanges = false;
 	
 
 	@FXML
@@ -234,7 +236,6 @@ public class ClaseControlador implements Initializable {
         		else {return false;}
         	});
         });
-
 	}
 
 
@@ -248,6 +249,15 @@ public class ClaseControlador implements Initializable {
 	@FXML
 	void anteriorClase(MouseEvent event) {
 		if(numeroClase > 0) {
+			//Comprueba si hay cambios en la clase actual si guardar para preguntar si se quiere guardar los cambios.
+			if(checkChanges && (cambiosConfigClase() || cambiosListaClase())) {
+				ButtonData typeAnswer = saveForgottenChanges();
+				//Si la respuesta es cancelar, no se carga la clase anterior.
+				if(typeAnswer == ButtonData.CANCEL_CLOSE) {
+					return; //termina la ejecucion de este metodo.
+				}
+			} 
+
 			numeroClase --;
 			cargarClase(numeroClase); //llama a la funcion cargarClase pasandole el numero de la clase que tiene que cargar.
 			
@@ -267,6 +277,15 @@ public class ClaseControlador implements Initializable {
 	@FXML
 	void siguienteClase(MouseEvent event) {
 		if(numeroClase < 7) {
+			//Comprueba si hay cambios en la clase actual si guardar para preguntar si se quiere guardar los cambios.
+			if(checkChanges && (cambiosConfigClase() || cambiosListaClase())) {
+				ButtonData typeAnswer = saveForgottenChanges();
+				//Si la respuesta es cancelar, no se carga la siguiente clase.
+				if(typeAnswer == ButtonData.CANCEL_CLOSE) {
+					return; //termina la ejecucion de este metodo.
+				}
+			} 
+
 			numeroClase ++;
 			cargarClase(numeroClase); //llama a la funcion cargarClase pasandole el numero de la clase que tiene que cargar.
 			
@@ -300,7 +319,6 @@ public class ClaseControlador implements Initializable {
 				logUser.severe("Excepción: " + e.toString());
 				e.printStackTrace();
 			}
-
 
 			if(listaClase.contains(alumno)) {
 				toast.show((Stage) bpClase.getScene().getWindow(), "El alumno ya esta inscrito en esta Clase.");
@@ -372,6 +390,7 @@ public class ClaseControlador implements Initializable {
 		int i = lvClase.getSelectionModel().getSelectedIndex();
 		
 		if(i != -1) {
+			checkChanges = true; //Establece a true la comprobación de cambios sin guardar.
 			Alumno alumno = lvClase.getSelectionModel().getSelectedItem();
 			listaClase.remove(alumno);
 			toast.show((Stage) bpClase.getScene().getWindow(), "Alumno eliminado de Clase " + clase.getNumero() + ".");
@@ -390,21 +409,19 @@ public class ClaseControlador implements Initializable {
 	@FXML
 	void guardar(MouseEvent event) {
 		try {
-			boolean actualizar = false;
-			if(claseOriginal.getHoraClase() != clase.getHoraClase() || claseOriginal.getTipo() != clase.getTipo() || claseOriginal.getAnotaciones() != clase.getAnotaciones()) {
-				actualizar = true;
-			}
-
-			if(actualizar) {
+			if(cambiosConfigClase()) {
 				conexionBD.actualizarClase(clase);
+				claseOriginal.setHoraClase(clase.getHoraClase());
+				claseOriginal.setTipo(clase.getTipo());
+				claseOriginal.setAnotaciones(clase.getAnotaciones());
 			}
-			
-			conexionBD.actualizarAlumnosEnClase(new ArrayList<Alumno>(listaClase), clase.getId());
 
-			claseOriginal.setHoraClase(clase.getHoraClase());
-			claseOriginal.setTipo(clase.getTipo());
-			claseOriginal.setAnotaciones(clase.getAnotaciones());
-			claseOriginal.setListaAlumnos(new ArrayList<Alumno>(listaClase));
+			if(cambiosListaClase()) {
+				conexionBD.actualizarAlumnosEnClase(new ArrayList<Alumno>(listaClase), clase.getId());
+				claseOriginal.setListaAlumnos(new ArrayList<Alumno>(listaClase));
+			}
+
+			checkChanges = false; //Establece a false la comprobación de cambios sin guardar.
 			toast.show((Stage) bpClase.getScene().getWindow(), "Cambios guardados en Clase " + clase.getNumero());
 		} catch (SQLException e) {
 			logUser.severe("Excepción: " + e.toString());
@@ -425,6 +442,15 @@ public class ClaseControlador implements Initializable {
 	 */
 	@FXML
 	void volver(MouseEvent event) {
+		//Comprueba si hay cambios en la clase actual sin guardar para preguntar si se quiere guardar los cambios.
+		if (checkChanges && (cambiosConfigClase() || cambiosListaClase())) {
+			ButtonData typeAnswer = saveForgottenChanges();
+			//Si la respuesta es cancelar, se mantiene la vista de clase.
+			if (typeAnswer == ButtonData.CANCEL_CLOSE) {
+				return; //Termina la ejecución de este metodo.
+			}
+		}
+
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/jornadaVista.fxml"));
 			BorderPane jornadaPilates;
@@ -447,6 +473,87 @@ public class ClaseControlador implements Initializable {
 
 
 	/**
+	 * Comprueba si ha habido cambios en la configuración de la clase en comparación con la configuración original.
+	 *
+	 * @return true si ha habido cambios, false si no ha habido cambios.
+	 */
+	private boolean cambiosConfigClase() {
+		//Comprueba si la hora de la clase ha cambiado o si el tipo de clase ha cambiado o si las anotaciones de la clase han cambiado.
+		if (claseOriginal.getHoraClase() != clase.getHoraClase() 
+				|| claseOriginal.getTipo() != clase.getTipo()
+				|| claseOriginal.getAnotaciones() != clase.getAnotaciones()) {
+			return true; //Si alguno de los atributos ha cambiado, devuelve true.
+		}
+
+		//Si no ha habido cambios en ninguno de los atributos, devuelve false.
+		return false;
+	}
+
+
+	/**
+	 * Comprueba si ha habido cambios en la lista de alumnos inscritos en la clase en comparación con la lista original.
+	 *
+	 * @return true si ha habido cambios, false si no ha habido cambios.
+	 */
+	private boolean cambiosListaClase() {
+		//Comprueba que los alumnos de la lista de clase actual esten en la lista de clase original.
+		for(Alumno alumno : listaClase) {
+			if(!claseOriginal.estaInscrito(alumno)) {
+				return true; //Si un alumno de la lista actual no está inscrito en la lista original, devuelve true.
+			}
+		}
+
+		//Comprueba que los alumnos de la lista de clase original esten en la lista de clase actual.
+		for(Alumno alumno : claseOriginal.getListaAlumnos()) {
+			if(!listaClase.contains(alumno)) {
+				return true; //Si un alumno de la lista original no está en la lista actual, devuelve true.
+			}
+		}
+
+		//Si no ha habido cambios en la lista de alumnos, devuelve false.
+		return false;
+	}
+
+
+	/**
+	 * Muestra una alerta para confirmar si se desean guardar los cambios sin guardar.
+	 *
+	 * @return El tipo de respuesta del usuario (Si, No o Cancelar).
+	 */
+	private ButtonData saveForgottenChanges() {
+		alerta = new Alert(AlertType.CONFIRMATION);
+		alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de// estilos.
+		alerta.setTitle("Cambios sin guardar");
+		alerta.setHeaderText("Hay cambios sin guardar en esta clase.");
+		alerta.setContentText("¿Quieres guardar los cambios?");
+		alerta.initStyle(StageStyle.DECORATED);
+		alerta.initOwner((Stage) bpClase.getScene().getWindow()); //Establece la ventana propietaria de la alerta.
+
+		//Define los botones de la alerta.
+		ButtonType buttonTypeConfirmar  = new ButtonType("Si", ButtonData.YES);
+		ButtonType buttonTypeDescartar   = new ButtonType("No", ButtonData.NO);
+		ButtonType buttonTypeCancel = new ButtonType("Cancelar", ButtonData.CANCEL_CLOSE);
+		alerta.getButtonTypes().setAll(buttonTypeConfirmar, buttonTypeDescartar , buttonTypeCancel);
+		
+		//Muestra la alerta y espera la respuesta del usuario.
+		Optional<ButtonType> result = alerta.showAndWait();
+		ButtonData typeAnswer = result.get().getButtonData();
+
+		if (typeAnswer == ButtonData.YES) {
+			//Si el usuario selecciona "Si", guarda los cambios y devuelve la respuesta.
+			guardar(null);
+			return typeAnswer;
+		} else if(typeAnswer == ButtonData.NO) {
+			//Si el usuario selecciona "No", devuelve la respuesta.
+			return typeAnswer;
+		} else {
+			//Si el usuario selecciona "Cancelar", devuelve la respuesta.
+			return typeAnswer;
+		}
+	}
+
+
+	/**
 	 * Agrega un alumno a la lista de alumnos de la clase actual.
 	 * Muestra un mensaje para notificar el exito o fracaso de agregar el alumno a clase.
 	 * 
@@ -455,6 +562,8 @@ public class ClaseControlador implements Initializable {
 	private void agregarAlumno(Alumno alumno) {
 		// Añade el alumno a la lista de clase.
 		if(listaClase.add(alumno)) {
+			checkChanges = true; //Establece a true la comprobación de cambios sin guardar.
+
 			//Muestra una notificación de confirmación de Alumno añadido a clase.
 			toast.show((Stage) bpClase.getScene().getWindow(),
 				"Alumno añadido a Clase " + clase.getNumero() + ".");
@@ -485,8 +594,8 @@ public class ClaseControlador implements Initializable {
 	private void cargarClase(int numeroClase) {
 		claseOriginal = jornada.getClase(numeroClase);
 		clase = new Clase(claseOriginal);
-		clase.setListaAlumnos(comprobarListaClase(clase.getListaAlumnos()));
 
+		clase.setListaAlumnos(comprobarListaClase(clase.getListaAlumnos()));
 		listaClase = FXCollections.observableArrayList(clase.getListaAlumnos());
 		lvClase.setItems(listaClase);
 		
@@ -497,13 +606,21 @@ public class ClaseControlador implements Initializable {
 		
 		taAnotaciones.textProperty().bindBidirectional(clase.anotacionesProperty());
 		
-		cbHora.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
-			this.clase.horaClaseProperty().set(ov);
+		clase.anotacionesProperty().addListener( (observable, oldValue, newValue) -> {
+			checkChanges = !newValue.equals(claseOriginal.getAnotaciones()); //Establece si hay cambios en las anotaciones respecto a la clase original.
 		});
 		
-		cbTipo.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
-			this.clase.tipoProperty().set(ov);
+		cbHora.getSelectionModel().selectedItemProperty().addListener( (o, ov, nv) -> {
+			this.clase.horaClaseProperty().set(nv);
+			checkChanges = !nv.equals(claseOriginal.getHoraClase()); //Establece si hay cambios en la hora de clase respecto a la clase original.
 		});
+		
+		cbTipo.getSelectionModel().selectedItemProperty().addListener( (o, ov, nv) -> {
+			this.clase.tipoProperty().set(nv);
+			checkChanges = !nv.equals(claseOriginal.getTipo()); //Establece si hay cambios en el tipo de clase respecto a la clase original.
+		});
+
+		checkChanges = false; //Establece a false la comprobación de cambios sin guardar.
 
 		lbNumeroAlumnos.textProperty().bind(Bindings.createStringBinding(() -> String.format("%d", listaClase.size()), listaClase));
 	}
