@@ -13,7 +13,7 @@ import utilidades.Constants;
 
 /**
  * @author David Jimenez Alonso.
- * @version 1.0.3
+ * @version 1.0.4
  * 
  */
 public class Main extends Application {

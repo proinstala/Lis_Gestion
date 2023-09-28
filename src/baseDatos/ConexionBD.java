@@ -70,7 +70,7 @@ public class ConexionBD implements Cloneable{
      * @param user El usuario para la conexión.
      */
     public void setUsuario(Usuario user) {
-        URLConexion = cadenaConexionParte1 + user.getDirectorio().getName() + "\\" + user.getNombreUsuario() + cadenaConexionParte2 + user.getPassword();
+        URLConexion = cadenaConexionParte1 + user.getDirectorio().getName() + "\\" + user.getNombreUsuario().toLowerCase() + cadenaConexionParte2 + user.getPassword();
         setLog(user);
     }
     
@@ -462,6 +462,7 @@ public class ConexionBD implements Cloneable{
 
     /**
      * Comprueba si existe un usuario con el nombre especificado en la base de datos.
+     * En la comprobación, ignora mayúsculas y minúsculas.
      * 
      * @param nombre El nombre de usuario a comprobar.
      * @return true si existe un usuario con el nombre especificado, false en caso contrario.
@@ -474,10 +475,12 @@ public class ConexionBD implements Cloneable{
         
         try {  
             st = conn.createStatement();
-            res = st.executeQuery("SELECT nombre FROM usuario WHERE nombre = '" + nombre + "';"); //consulta sql a tabla USUARIO.
+            res = st.executeQuery("SELECT nombre FROM usuario;"); //consulta sql a tabla USUARIO.
 
             while (res.next()) {
-                result = true;
+                if(res.getString(1).equalsIgnoreCase(nombre)) {
+                    result = true;
+                }
             }
         } catch (SQLException e) {
             logger.severe("Excepción SQL: " + e.toString());
@@ -529,7 +532,7 @@ public class ConexionBD implements Cloneable{
             logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) {st.close();}
+            if(ps != null) {ps.close();}
             if(res != null) {res.close();} 
         }
         
@@ -863,7 +866,6 @@ public class ConexionBD implements Cloneable{
         } finally {
             if(ps != null) {ps.close();}
             if(st != null) {st.close();} 
-            if(res != null) {res.close();}
             conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
         }
         
@@ -1218,8 +1220,6 @@ public class ConexionBD implements Cloneable{
             e.printStackTrace();
         } finally { 
             if(ps != null) {ps.close();}
-            if(st != null) {st.close();}
-            if(res != null) {res.close();}
         }
         
         cn.desconectar(conn);
@@ -1338,8 +1338,6 @@ public class ConexionBD implements Cloneable{
             e.printStackTrace();
         } finally { 
             if(ps != null) {ps.close();} 
-            if(res != null) {res.close();}
-            if(st != null) {st.close();}
         }
         
         cn.desconectar(conn);
@@ -1376,8 +1374,6 @@ public class ConexionBD implements Cloneable{
             e.printStackTrace();
         } finally { 
             if(ps != null) {ps.close();} 
-            if(res != null) {res.close();}
-            if(st != null) {st.close();}
         }
         
         cn.desconectar(conn);
@@ -1934,7 +1930,6 @@ public class ConexionBD implements Cloneable{
                     }
                 }
                 jornada.setClases(listaClases); //añado la lista de clases a la Jornada
-                System.out.println("BD: Obtencion de Jornada " + jornada.getFecha().toString() + " de base de datos."); //Esto es temporal para pruebas.
             } 
         } catch (SQLException e) {
             logger.severe("Excepción SQL: " + e.toString());
@@ -2753,7 +2748,7 @@ public class ConexionBD implements Cloneable{
             logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
         } finally { 
-            if(ps != null) {st.close();}
+            if(ps != null) {ps.close();}
             if(res != null) {res.close();} 
         }
         
@@ -2771,10 +2766,12 @@ public class ConexionBD implements Cloneable{
     public ArrayList<Alumno> controlCopiaJornada(Jornada jornada ) throws SQLException {
         ConexionBD cn = INSTANCE;
         conn = cn.conectar();
-        ArrayList<Alumno> alunosMacht = null;
+        ArrayList<Alumno> alumnosMacht = null;
+        ArrayList<Alumno> alumnosJornada = null;
 
         try {  
-            alunosMacht = new ArrayList<Alumno>();
+            alumnosMacht = new ArrayList<Alumno>();
+            alumnosJornada = new ArrayList<Alumno>();
 
             //Consulta a base de datos.
             //strftime('%W', fecha) -> devuelve el numero de semana.
@@ -2785,28 +2782,57 @@ public class ConexionBD implements Cloneable{
             ps = conn.prepareStatement(sql);
             ps.setString(2, Integer.toString(jornada.getFecha().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)));
             ps.setString(3, Integer.toString(jornada.getFecha().getYear()));
+
+            //Itera a través de las clases de la jornada.
             for (Clase clase : jornada.getClases()) {
+                //Itera a través de los alumnos en la lista de cada clase.
                 for (Alumno alumno : clase.getListaAlumnos()) {
+                    alumnosJornada.add(alumno);
+                    boolean presenteEnLista = false;
+
+                    // Comprueba si el alumno ya está en la lista de alumnosMacht.
+                    for (Alumno alum : alumnosMacht) {
+                        if(alum.getId() == alumno.getId()) {
+                            presenteEnLista = true;
+                            break;
+                        }
+                    }
+                    
+                    if(presenteEnLista) {
+                        continue; // Si el alumno ya está en la lista, pasa al siguiente.
+                    }
+
                     ps.setInt(1, alumno.getId());
                     res = ps.executeQuery();
-
                     int result = res.getInt(1);
-                    if(result >= alumno.getAsistenciaSemanal()) {
-                        alunosMacht.add(alumno);
+                    int compensacionAsistencias = -1; //Entero que representa el numero de veces que el alumno repite en la jornada.
+
+                    //Iteramos sobre la lista alumnos de jornada para ver cuantas veces asiste en esta jornada.
+                    for (Alumno alumJornada : alumnosJornada) {
+                        if(alumJornada.getId() == alumno.getId()) {
+                            compensacionAsistencias++;
+                        }
+                    }
+
+                    //compensacionAsistencias = 1 asistencia en la jornada = 0 (por defecto 0).
+                   
+                    //Comprueba si el alumno cumple con los criterios de asistencia.
+                    if(result >= alumno.getAsistenciaSemanal() - compensacionAsistencias) {
+                        alumnosMacht.add(alumno); 
                     }
                 }
             }
         } catch (SQLException e) {
             logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
-            alunosMacht = null;
+            alumnosMacht = null;
         } finally { 
-            if(ps != null) {st.close();}
+            if(ps != null) {ps.close();}
             if(res != null) {res.close();} 
         }
         
         cn.desconectar(conn);
-        return alunosMacht;
+        return alumnosMacht;
     }
 
 

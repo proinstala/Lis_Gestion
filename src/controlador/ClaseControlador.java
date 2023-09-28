@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import baseDatos.ConexionBD;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -51,11 +52,10 @@ import utilidades.Toast;
 
 public class ClaseControlador implements Initializable {
 
-	IntegerBinding totalAlumnos;
+	private IntegerBinding totalAlumnos;
 	private PrincipalControlador controladorPincipal;
 	private ObservableList<Alumno> listadoAlumnosGeneral;
 	private ObservableList<Alumno> listaClase;
-	private ArrayList<Alumno> listaClaseOriginal;
 	private int numeroClase;
 	private DateTimeFormatter formatter;
 	private Clase claseOriginal;
@@ -210,7 +210,7 @@ public class ClaseControlador implements Initializable {
 		logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
 
 		//Cargo en los comboBox los dataos.
-		cbHora.setItems(FXCollections.observableArrayList(HoraClase.values()));
+		//cbHora.setItems(FXCollections.observableArrayList(HoraClase.values()));
 		cbTipo.setItems(FXCollections.observableArrayList(TipoClase.values()));
 		
 		//Asigno a cada columna de la tabla los campos del modelo.
@@ -583,6 +583,44 @@ public class ClaseControlador implements Initializable {
 	public void setJornada(Jornada jornada) {
 		this.jornada = jornada;
 	}
+
+
+	/**
+	 * Establece en el ComboBox cbHora las horas que puede ser seleccionadas.
+	 * 
+	 * @param numClase numero de clase para la que se van a establecer las horas posibles.
+	 */
+	private void configurarComboBoxHoras(int numClase) {
+		HoraClase minHora; 
+		HoraClase maxHora;
+		int posHoraMin;
+		int posHoraMax;
+
+		if(numeroClase > 0) {
+			minHora = jornada.getClase(numeroClase - 1).getHoraClase();
+			posHoraMin = minHora.ordinal() +1;
+
+		} else {
+			minHora = jornada.getClase(numeroClase).getHoraClase();
+			posHoraMin = 0;
+		}
+
+		if(numeroClase < 7) {
+			maxHora = jornada.getClase(numeroClase +1).getHoraClase();
+			posHoraMax = maxHora.ordinal() -1;
+		} else {
+			maxHora = jornada.getClase(numeroClase).getHoraClase();
+			posHoraMax = HoraClase.values().length -1;
+		}
+
+		ArrayList<HoraClase> listHoras = new ArrayList<HoraClase>();
+		for(HoraClase hora : HoraClase.values()) {
+			if(hora.ordinal() >= posHoraMin && hora.ordinal() <= posHoraMax) {
+				listHoras.add(hora);
+			}
+		}
+		cbHora.setItems(FXCollections.observableArrayList(listHoras));
+	}
 	
 	
 	/**
@@ -599,11 +637,12 @@ public class ClaseControlador implements Initializable {
 		listaClase = FXCollections.observableArrayList(clase.getListaAlumnos());
 		lvClase.setItems(listaClase);
 		
+		configurarComboBoxHoras(clase.getNumero()); //Configura las horas que puede escoger en la clase actual.
 		lbNumeroClase.setText(Integer.toString(clase.getNumero()));
 		lbIdClase.setText(Integer.toString(clase.getId()));
 		cbHora.setValue(clase.getHoraClase());
 		cbTipo.setValue(clase.getTipo());
-		
+
 		taAnotaciones.textProperty().bindBidirectional(clase.anotacionesProperty());
 		
 		clase.anotacionesProperty().addListener( (observable, oldValue, newValue) -> {
@@ -611,8 +650,10 @@ public class ClaseControlador implements Initializable {
 		});
 		
 		cbHora.getSelectionModel().selectedItemProperty().addListener( (o, ov, nv) -> {
-			this.clase.horaClaseProperty().set(nv);
-			checkChanges = !nv.equals(claseOriginal.getHoraClase()); //Establece si hay cambios en la hora de clase respecto a la clase original.
+			if(nv != null) {
+				this.clase.horaClaseProperty().set(nv);
+				checkChanges = !nv.equals(claseOriginal.getHoraClase()); // Establece si hay cambios en la hora de clase respecto a la clase original.
+			}
 		});
 		
 		cbTipo.getSelectionModel().selectedItemProperty().addListener( (o, ov, nv) -> {

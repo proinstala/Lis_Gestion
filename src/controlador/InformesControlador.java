@@ -9,6 +9,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -209,7 +211,17 @@ public class InformesControlador implements Initializable {
 
 
     private void abrirFormMensualidades() {
-        try {
+        if(listadoMensualidadesGeneral.size() == 0) {
+            mensajeAviso(Alert.AlertType.INFORMATION,
+            "Informes Mensualidades.",
+            "No hay mensualidades en la aplicación.",
+            "Introduce almenos 1 mensualidad para poder generar\ninformes de este tipo.");
+
+            logUser.warning("Intento de generar informes Alumnos Mensualidad sin tener mensualidades en aplicación.\n" +
+                    "listadoMensualidadesGeneral.size = " + listadoMensualidadesGeneral.size());
+            
+        } else {
+            try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/informeFormMensualidadesVista.fxml"));
             GridPane formInforme;
             formInforme = (GridPane) loader.load();
@@ -235,18 +247,29 @@ public class InformesControlador implements Initializable {
             ventana.setTitle("Nuevo Informe");
             ventana.showAndWait();
 
-        } catch (IOException e) {
-            logUser.severe("Excepción: " + e.toString());
-            e.printStackTrace();
-        } catch (Exception e) {
-            logUser.severe("Excepción: " + e.toString());
-            e.printStackTrace();
+            } catch (IOException e) {
+                logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
+            } catch (Exception e) {
+                logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
+            }
         }
     }
 
 
     private void abrirFormAlumnos() {
-        try {
+         if(listadoAlumnosGeneral.size() == 0) {
+            mensajeAviso(Alert.AlertType.INFORMATION,
+            "Informes Alumnos.",
+            "No hay alumnos en la aplicación.",
+            "Introduce almenos 1 alumno para poder generar\ninformes de este tipo.");
+
+            logUser.warning("Intento de generar informes Alumnos Mensualidad sin tener alumnos en aplicación.\n" +
+                    "listadoAlumnosGeneral.size = " + listadoAlumnosGeneral.size());
+    
+        } else {
+            try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/informeFormAlumnosVista.fxml"));
             GridPane formInforme;
             formInforme = (GridPane) loader.load();
@@ -271,18 +294,38 @@ public class InformesControlador implements Initializable {
             ventana.setTitle("Nuevo Informe");
             ventana.showAndWait();
 
-        } catch (IOException e) {
-            logUser.severe("Excepción: " + e.toString());
-            e.printStackTrace();
-        } catch (Exception e) {
-            logUser.severe("Excepción: " + e.toString());
-            e.printStackTrace();
+            } catch (IOException e) {
+                logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
+            } catch (Exception e) {
+                logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
+            }
         }
     }
 
 
     private void abrirFormAlumnosMensualidad() {
-        try {
+        if(listadoAlumnosGeneral.size() == 0) {
+            mensajeAviso(Alert.AlertType.INFORMATION,
+            "Informes Alumnos.",
+            "No hay alumnos en la aplicación.",
+            "Introduce almenos 1 alumno para poder generar\ninformes de este tipo.");
+
+            logUser.warning("Intento de generar informes Alumnos Mensualidad sin tener alumnos en aplicación.\n" +
+                    "listadoAlumnosGeneral.size = " + listadoAlumnosGeneral.size());
+    
+        } else if(listadoMensualidadesGeneral.size() == 0) {
+            mensajeAviso(Alert.AlertType.INFORMATION,
+            "Informes Alumnos Mensualidad.",
+            "No hay mensualidades en la aplicación.",
+            "Introduce almenos 1 mensualidad para poder generar\ninformes de este tipo.");
+
+            logUser.warning("Intento de generar informes Alumnos Mensualidad sin tener mensualidades en aplicación.\n" +
+                    "listadoMensualidadesGeneral.size = " + listadoMensualidadesGeneral.size());
+            
+        } else {
+            try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/informeFormAlumnosMensualidadVista.fxml"));
             GridPane formInforme;
             formInforme = (GridPane) loader.load();
@@ -307,18 +350,29 @@ public class InformesControlador implements Initializable {
             ventana.setTitle("Nuevo Informe");
             ventana.showAndWait();
 
-        } catch (IOException e) {
-            logUser.severe("Excepción: " + e.toString());
-            e.printStackTrace();
-        } catch (Exception e) {
-            logUser.severe("Excepción: " + e.toString());
-            e.printStackTrace();
-        }
+            } catch (IOException e) {
+                logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
+            } catch (Exception e) {
+                logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
+            }
+        }        
     }
 
 
-     private void abrirFormAlumnosClase() {
-         try {
+    private void abrirFormAlumnosClase() {
+        if(listadoAlumnosGeneral.size() == 0) {
+            mensajeAviso(Alert.AlertType.INFORMATION,
+            "Informes Alumnos.",
+            "No hay alumnos en la aplicación.",
+            "Introduce almenos 1 alumno para poder generar\ninformes de este tipo.");
+
+            logUser.warning("Intento de generar informes Alumnos Mensualidad sin tener alumnos en aplicación.\n" +
+                    "listadoAlumnosGeneral.size = " + listadoAlumnosGeneral.size());
+        
+        } else {
+            try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/informeFormAlumnosClaseVista.fxml"));
             GridPane formInforme;
             formInforme = (GridPane) loader.load();
@@ -328,8 +382,8 @@ public class InformesControlador implements Initializable {
             ventana.initOwner((Stage) gpInformes.getScene().getWindow());
             ventana.initModality(Modality.APPLICATION_MODAL); // modalida para bloquear las ventanas de detras.
             ventana.initStyle(StageStyle.DECORATED);
-            ventana.setMinWidth(550);   //Ancho mínimo de ventana.
-            ventana.setMinHeight(550);  //Alto máximo de venta.
+            ventana.setMinWidth(550); // Ancho mínimo de ventana.
+            ventana.setMinHeight(550); // Alto máximo de venta.
 
             URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
             ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
@@ -343,13 +397,35 @@ public class InformesControlador implements Initializable {
             ventana.setTitle("Nuevo Informe");
             ventana.showAndWait();
 
-        } catch (IOException e) {
-            logUser.severe("Excepción: " + e.toString());
-            e.printStackTrace();
-        } catch (Exception e) {
-            logUser.severe("Excepción: " + e.toString());
-            e.printStackTrace();
+            } catch (IOException e) {
+                logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
+            } catch (Exception e) {
+                logUser.severe("Excepción: " + e.toString());
+                e.printStackTrace();
+            }
         }
+    }
+
+
+    /**
+     * Muestra una ventana de dialogo con la informacion pasada como parametros.
+     * 
+     * @param tipo Tipo de alerta.
+     * @param tiutlo Titulo de la ventana.
+     * @param cabecera Cabecera del mensaje.
+     * @param cuerpo Cuerpo del menesaje.
+     */
+    private void mensajeAviso(AlertType tipo, String tiutlo, String cabecera, String cuerpo) {
+        Alert alerta = new Alert(tipo);
+        alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
+        alerta.setTitle(tiutlo);
+        alerta.initOwner((Stage) gpInformes.getScene().getWindow());
+        alerta.setHeaderText(cabecera);
+        alerta.setContentText(cuerpo);
+        alerta.initStyle(StageStyle.DECORATED);
+        alerta.initModality(Modality.APPLICATION_MODAL);
+        alerta.showAndWait();
     }
 
 

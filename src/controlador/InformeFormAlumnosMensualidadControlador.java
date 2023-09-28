@@ -228,11 +228,13 @@ public class InformeFormAlumnosMensualidadControlador implements Initializable {
     private void configurarControles() {
         tfNombreInforme.setDisable(true); //Deshabilita el campo de texto para el nombre del informe.
         tfNombreUsuario.setDisable(true); //Deshabilita el campo de texto para el nombre de autor de informe.
+        tfEmail.setDisable(true);
 
         //Habilita o deshabilita diferentes controles dependiendo del estado del CheckBox chekbMetadatos.
         tfTelefono.disableProperty().bind(chekbMetadatos.selectedProperty().not());
         cbEmail.disableProperty().bind(chekbMetadatos.selectedProperty().not());
         taTexto.disableProperty().bind(chekbMetadatos.selectedProperty().not());
+        tfNombreUsuario.disableProperty().bind(chekbMetadatos.selectedProperty().not());
 
         //Habilita o deshabilita diferentes controles dependiendo del estado del CheckBox checkbAlumnos.
         cbAlumnos.disableProperty().bind(checkbAlumnos.selectedProperty());
@@ -244,13 +246,14 @@ public class InformeFormAlumnosMensualidadControlador implements Initializable {
         tipoEmail = FXCollections.observableArrayList();
         tipoEmail.addAll(Constants.EMAIL_OTHER);
         cbEmail.setItems(tipoEmail);
+        cbEmail.setValue(Constants.EMAIL_OTHER);
 
         //Establece un listener para detectar cambios en la selección del ComboBox cbEmail.
-        cbEmail.getSelectionModel().selectedItemProperty().addListener((o, nv, ov) -> {
-            if (ov.equals(Constants.EMAIL_APP)) {
+        cbEmail.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
+            if (nv.equals(Constants.EMAIL_APP)) {
                 tfEmail.setDisable(true);
                 tfEmail.setText(newUsuario.getEmailApp());
-            } else if(ov.equals(Constants.EMAIL_OTHER)) {
+            } else if(nv.equals(Constants.EMAIL_OTHER)) {
                 tfEmail.setDisable(false);
                 tfEmail.setText("");;
             } else {
@@ -261,10 +264,10 @@ public class InformeFormAlumnosMensualidadControlador implements Initializable {
         });
 
         //Establece un listener para detectar cambios en la selección del CheckBox chekbMetadatos.
-        chekbMetadatos.selectedProperty().addListener((o, nv, ov) -> {
-            if(!ov.booleanValue() && cbEmail.getValue().equals(Constants.EMAIL_OTHER)) {
+        chekbMetadatos.selectedProperty().addListener((o, ov, nv) -> {
+            if(!nv.booleanValue() && cbEmail.getValue().equals(Constants.EMAIL_OTHER)) {
                 tfEmail.setDisable(true);
-            } else if(ov.booleanValue() && cbEmail.getValue().equals(Constants.EMAIL_OTHER)) {
+            } else if(nv.booleanValue() && cbEmail.getValue().equals(Constants.EMAIL_OTHER)) {
                 tfEmail.setDisable(false);
             }
         });
@@ -723,9 +726,9 @@ public class InformeFormAlumnosMensualidadControlador implements Initializable {
     	Double importe_total = importe_pagadas + importe_pendientes + importe_resto;
     	
         //Establecer los parámetros en el HashMap.
-    	parameters.put("autor", (tfNombreUsuario.getText()));
+    	parameters.put("autor", (tfNombreUsuario.getText().isBlank()) ? " " : tfNombreUsuario.getText());
     	parameters.put("telefono", (tfTelefono.getText().isBlank()) ? " " : Integer.toString(newUsuario.getTelefono()));
-    	parameters.put("email", tfEmail.getText());
+    	parameters.put("email", (tfEmail.getText().isBlank()) ? " " : tfEmail.getText());
     	parameters.put("fecha_informe", LocalDate.now().format(formatter));
     	parameters.put("texto_informe",  (taTexto.getText() == null) ? "" : taTexto.getText());
 
@@ -763,7 +766,7 @@ public class InformeFormAlumnosMensualidadControlador implements Initializable {
         boolean camposCorrectos = false;
 
         //Patrón para validar el formato del email.
-        Pattern emailPattern = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+        Pattern emailPattern = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$|^$");
         Matcher emailMatcher = emailPattern.matcher((tfEmail.getText() == null) ? "" : tfEmail.getText());
 
         Pattern nombreInformePattern = Pattern.compile("^[^\\\\/:*?\"<>|]+$");
@@ -771,14 +774,10 @@ public class InformeFormAlumnosMensualidadControlador implements Initializable {
 
         //Expresion para comprobar formato nombre.extension -> "^[^\\\\/:*?\"<>|]+\\.[^\\\\/:*?\"<>|]+$"
 
-        if(cbEmail.getValue().equals(Constants.EMAIL_OTHER) && !emailMatcher.matches()) {
+        if(cbEmail.getValue() != null && cbEmail.getValue().equals(Constants.EMAIL_OTHER) && !emailMatcher.matches()) {
             mensajeAviso(Alert.AlertType.ERROR,"Email No valido.",
             "",
             "El Email introducido en el campo Email no es valido.");
-        } else if (tfNombreUsuario.getText().isBlank()) {
-            mensajeAviso(Alert.AlertType.ERROR,"Nombre No valido.",
-            "",
-            "El campo nombre esta vacío.");
         } else if (rbGuardar.isSelected() && !nombreInformeMatcher.matches()) {
             mensajeAviso(Alert.AlertType.ERROR,"Nombre archivo No valido.",
             "El nombre introduciodo no es valido.",
@@ -821,7 +820,12 @@ public class InformeFormAlumnosMensualidadControlador implements Initializable {
         this.newUsuario = new Usuario(usuario); //Se crea una nueva instancia de Usuario para evitar modificar el original.
 
         //Configura los enlaces de datos entre los campos de texto y las propiedades de newUsuario.
-        tfNombreUsuario.textProperty().bind(Bindings.concat(newUsuario.nombreProperty(), " ", newUsuario.apellido1Property(), " ", newUsuario.apellido2Property()));
+        if(!newUsuario.getNombre().isBlank()) {
+            tfNombreUsuario.textProperty().bind(Bindings.concat(newUsuario.nombreProperty(), " ", newUsuario.apellido1Property(), " ", newUsuario.apellido2Property()));
+            tfNombreUsuario.disableProperty().unbind();
+            tfNombreUsuario.setDisable(true);  
+        } 
+
         tfTelefono.textProperty().bindBidirectional(newUsuario.telefonoProperty(), new NumberStringConverter("0"));
 
         //Filtra la entrada de texto para permitir solo números y 9 digitos como máximo.
@@ -840,7 +844,7 @@ public class InformeFormAlumnosMensualidadControlador implements Initializable {
 
         //Si el objeto newUsuario tiene una dirección de correo electrónico no vacía,
         //se agrega la constante EMAIL_USER a la lista de tipos de correo electrónico.
-        if (newUsuario.getEmail() != null || !newUsuario.getEmail().isBlank()) {
+        if (newUsuario.getEmail() != null && !newUsuario.getEmail().isBlank()) {
              tipoEmail.add(Constants.EMAIL_USER); //Añadir elemento a ObservableList de cbEmail
         } 
     }

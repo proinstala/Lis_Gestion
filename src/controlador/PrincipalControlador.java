@@ -591,7 +591,7 @@ public class PrincipalControlador implements Initializable {
 		
 		Boolean logCorrecto = false;
 		try {
-			fhUser = new FileHandler(usuarioActual.getDirectorio().getName() + "\\" + Constants.FOLDER_LOG  + "\\" + usuarioActual.getNombreUsuario() + "_log_" + LocalDate.now().getYear() + ".log", true);
+			fhUser = new FileHandler(usuarioActual.getDirectorio().getName() + "\\" + Constants.FOLDER_LOG  + "\\" + usuarioActual.getNombreUsuario().toLowerCase() + "_log_" + LocalDate.now().getYear() + ".log", true);
 			
             logUser.addHandler(fhUser); 							//Asociar el log a un fichero log. 
             logUser.setUseParentHandlers(true);	//Establecer si queremos visualizar los mensajes de log por pantalla.

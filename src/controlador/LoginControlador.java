@@ -164,7 +164,10 @@ public class LoginControlador implements Initializable {
 
     @FXML
     void recuperarPassword(MouseEvent event) {
-        //El label para acceder a esta parte esta deshabilitado y no visible en el metodo initialize.
+        /* 
+         * El label para acceder a esta parte esta deshabilitado y no visible en el metodo initialize.
+         * Esta funcion no esta implementada.
+         */
     }
 
 
@@ -219,7 +222,6 @@ public class LoginControlador implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/acercaDeVista.fxml"));
 		    AnchorPane acercaDe;
             acercaDe = (AnchorPane) loader.load();
-            AcercaDeControlador controller = loader.getController(); // cargo el controlador.
             
             Stage ventana= new Stage();
             ventana.initOwner((Stage) bdLogin.getScene().getWindow());
@@ -279,15 +281,9 @@ public class LoginControlador implements Initializable {
     private boolean comprobarUsuario() {
         conexionBD.setUsuario(usuarioRoot);
         try {
-            //Comprobar si no hay ningún usuario registrado con ese nombre.
-            if(!conexionBD.comprobarNombreUsuario(camposLogin[0])) {
-                toast.show((Stage) bdLogin.getScene().getWindow(), "No hay ningun usuario registrado\ncon ese nombre!!.");
-                return false;
-            }
-            
             //Comprobar si el password es incorrecto.
             if(!conexionBD.comprobarUsuario(camposLogin)) {
-                toast.show((Stage) bdLogin.getScene().getWindow(), "El password es incorrecto!!.");
+                toast.show((Stage) bdLogin.getScene().getWindow(), "Nombre de usuario o password incorrecto!!.");
                 loggerRoot.info("Intento de acceso a usuario " + camposLogin[0] + " con password incorrecto.");
                 return false;
             }

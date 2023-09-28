@@ -72,7 +72,7 @@
             <Insets right="10.0" />
          </GridPane.margin>
       </Label>
-      <TextField fx:id="tfNombreUsuario" editable="false" promptText="Nombre completo" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+      <TextField fx:id="tfNombreUsuario" promptText="Nombre completo" GridPane.columnIndex="1" GridPane.rowIndex="4" />
       <Label text="Teléfono" GridPane.rowIndex="5">
          <GridPane.margin>
             <Insets right="10.0" />

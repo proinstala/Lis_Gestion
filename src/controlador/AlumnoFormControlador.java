@@ -19,7 +19,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
@@ -29,7 +28,6 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.StringConverter;
 import javafx.util.converter.LocalDateStringConverter;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Alumno;
@@ -48,6 +46,7 @@ public class AlumnoFormControlador implements Initializable {
 
     private String modoControlador;
     private DateTimeFormatter formatter;
+    private boolean firstClickDatePiker = true;
     private ConexionBD conexionBD;
     private Logger logUser;
     private Toast toast;
@@ -56,9 +55,6 @@ public class AlumnoFormControlador implements Initializable {
     private ObservableList<Alumno> listadoAlumnos;
     private Alumno oldAlumno;
     private Alumno newAlumno;
-    private StringConverter<Number> converterTelefono;
-    private StringConverter<Number> converterNumero;
-    private StringConverter<Number> converterCodigoPostal;
 
     private String nombre;
     private String apellido1;
@@ -78,6 +74,8 @@ public class AlumnoFormControlador implements Initializable {
     private EstadoAlumno estado;
     private FormaPago formaPago;
     private int asistenciaSemanal;
+
+    
 
 
     @FXML
@@ -321,8 +319,8 @@ public class AlumnoFormControlador implements Initializable {
         tfApellido1.textProperty().bindBidirectional(newAlumno.apellido1Property());
         tfApellido2.textProperty().bindBidirectional(newAlumno.apellido2Property());
 
-        cbGenero.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
-            newAlumno.generoProperty().set(ov);
+        cbGenero.getSelectionModel().selectedItemProperty().addListener( (o, ov, nv) -> {
+            newAlumno.generoProperty().set(nv);
         });
 
         dpFechaNacimiento.valueProperty().bindBidirectional(newAlumno.fechaNacimientoProperty());
@@ -333,27 +331,27 @@ public class AlumnoFormControlador implements Initializable {
         tfCalle.textProperty().bindBidirectional(newAlumno.getDireccion().calleProperty());
         tfNumeroVivienda.textProperty().bindBidirectional(newAlumno.getDireccion().numeroProperty(), new NumberStringConverter("0"));
 
-        cbLocalidad.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
-            newAlumno.getDireccion().localidadProperty().set(ov);
+        cbLocalidad.getSelectionModel().selectedItemProperty().addListener( (o, ov, nv) -> {
+            newAlumno.getDireccion().localidadProperty().set(nv);
         });
 
-        cbProvincia.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
-            newAlumno.getDireccion().provinciaProperty().set(ov);
+        cbProvincia.getSelectionModel().selectedItemProperty().addListener( (o, ov, nv) -> {
+            newAlumno.getDireccion().provinciaProperty().set(nv);
             cbLocalidadSetup(newAlumno.getDireccion().getProvincia().toString());
         });
 
         tfCodigoPostal.textProperty().bindBidirectional(newAlumno.getDireccion().codigoPostalProperty(), new NumberStringConverter("0"));
 
-        cbEstado.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
-            newAlumno.estadoProperty().set(ov);
+        cbEstado.getSelectionModel().selectedItemProperty().addListener( (o, ov, nv) -> {
+            newAlumno.estadoProperty().set(nv);
         });
 
-        cbFormaPago.getSelectionModel().selectedItemProperty().addListener((o,nv, ov) -> {
-            newAlumno.formaPagoProperty().set(ov);
+        cbFormaPago.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
+            newAlumno.formaPagoProperty().set(nv);
         });
 
-        cbAsistencia.getSelectionModel().selectedItemProperty().addListener( (o, nv, ov) -> {
-            newAlumno.asistenciaSemanalProperty().set(ov);
+        cbAsistencia.getSelectionModel().selectedItemProperty().addListener( (o, ov, nv) -> {
+            newAlumno.asistenciaSemanalProperty().set(nv);
         });
 
         //(tfNumeroVivienda.getText() == '0') ? tfNumeroVivienda.setText("") : tfNumeroVivienda.setText(""); 
@@ -405,6 +403,14 @@ public class AlumnoFormControlador implements Initializable {
             imagen = new Image("/recursos/usuario_add_1_128.png");
         }
         ivImagenTipoFormulario.setImage(imagen); //Establecer la imagen cargada en el ImageView.
+        
+        //Establece la fecha actual menos 25 años en el datePiker al hacer click la primera vez.
+        dpFechaNacimiento.setOnMouseClicked(e -> {
+            if(firstClickDatePiker) {
+                dpFechaNacimiento.setValue(LocalDate.now().minusYears(25));
+            }
+            firstClickDatePiker = false;
+        });
     }
 
 

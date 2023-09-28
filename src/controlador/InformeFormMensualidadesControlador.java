@@ -42,6 +42,7 @@ import javafx.stage.StageStyle;
 import javafx.util.converter.NumberStringConverter;
 import modelo.Alumno;
 import modelo.EstadoPago;
+import modelo.FormaPago;
 import modelo.Mensualidad;
 import modelo.MensualidadReport;
 import modelo.Usuario;
@@ -87,10 +88,13 @@ public class InformeFormMensualidadesControlador implements Initializable {
     private ComboBox<String> cbEmail;
 
     @FXML
-    private ComboBox<String> cbEstado;
+    private ComboBox<String> cbEstadoPago;
 
     @FXML
     private ComboBox<String> cbMes;
+
+    @FXML
+    private ComboBox<String> cbFormaPago;
 
     @FXML
     private CheckBox chekbMetadatos;
@@ -190,23 +194,26 @@ public class InformeFormMensualidadesControlador implements Initializable {
     private void configurarControles() {
         tfNombreInforme.setDisable(true); //Deshabilita el campo de texto para el nombre del informe.
         tfNombreUsuario.setDisable(true); //Deshabilita el campo de texto para el nombre de autor de informe.
+        tfEmail.setDisable(true);
 
         //Habilita o deshabilita diferentes controles dependiendo del estado del CheckBox chekbMetadatos.
         tfTelefono.disableProperty().bind(chekbMetadatos.selectedProperty().not());
         cbEmail.disableProperty().bind(chekbMetadatos.selectedProperty().not());
         taTexto.disableProperty().bind(chekbMetadatos.selectedProperty().not());
+        tfNombreUsuario.disableProperty().bind(chekbMetadatos.selectedProperty().not());
 
         //Inicializa y configura el ComboBox cbEmail con los tipos de correo electrónico disponibles.
         tipoEmail = FXCollections.observableArrayList();
         tipoEmail.addAll(Constants.EMAIL_OTHER);
         cbEmail.setItems(tipoEmail);
+        cbEmail.setValue(Constants.EMAIL_OTHER);
 
         //Establece un listener para detectar cambios en la selección del ComboBox cbEmail.
-        cbEmail.getSelectionModel().selectedItemProperty().addListener((o, nv, ov) -> {
-            if (ov.equals(Constants.EMAIL_APP)) {
+        cbEmail.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
+            if (nv.equals(Constants.EMAIL_APP)) {
                 tfEmail.setDisable(true);
                 tfEmail.setText(newUsuario.getEmailApp());
-            } else if(ov.equals(Constants.EMAIL_OTHER)) {
+            } else if(nv.equals(Constants.EMAIL_OTHER)) {
                 tfEmail.setDisable(false);
                 tfEmail.setText("");;
             } else {
@@ -217,10 +224,10 @@ public class InformeFormMensualidadesControlador implements Initializable {
         });
 
         //Establece un listener para detectar cambios en la selección del CheckBox chekbMetadatos.
-        chekbMetadatos.selectedProperty().addListener((o, nv, ov) -> {
-            if(!ov.booleanValue() && cbEmail.getValue().equals(Constants.EMAIL_OTHER)) {
+        chekbMetadatos.selectedProperty().addListener((o, ov, nv) -> {
+            if(!nv.booleanValue() && cbEmail.getValue().equals(Constants.EMAIL_OTHER)) {
                 tfEmail.setDisable(true);
-            } else if(ov.booleanValue() && cbEmail.getValue().equals(Constants.EMAIL_OTHER)) {
+            } else if(nv.booleanValue() && cbEmail.getValue().equals(Constants.EMAIL_OTHER)) {
                 tfEmail.setDisable(false);
             }
         });
@@ -273,18 +280,26 @@ public class InformeFormMensualidadesControlador implements Initializable {
         }
         cbAnio.setItems(FXCollections.observableArrayList(listaYears));
 
-        //Crea un ObservableList<String> con el nombre de los meses del año. Cargo la lista en el ComboBox cbMes.
+        //Crea un ObservableList<String> con el nombre de los meses del año. 
         ObservableList<String> listMeses = FXCollections.observableArrayList(Fechas.obtenerMesesDelAnio().values());
-        listMeses.add("TODOS"); //Añado a listMeses el valor TODOS.
-        cbMes.setItems(listMeses);
+        listMeses.add("TODOS");  //Añade a listMeses el valor TODOS.
+        cbMes.setItems(listMeses); //Carga listMeses en el ComboBox cbMes.
 
-        //Conviete los valores de EstadoPago a String y los añadao a listaEstados. Cargo la lista en el ComboBox cbEstado.
-        ArrayList<String> listaEstados = new ArrayList<String>();
+        //Conviete los valores de EstadoPago a String y los añadao a listaEstados.
+        ArrayList<String> listaEstadosPago = new ArrayList<String>();
         for (EstadoPago e : EstadoPago.values()) {
-            listaEstados.add(e.toString());
+            listaEstadosPago.add(e.toString());
         }
-        listaEstados.add("TODOS"); //Añado a listaEstados el valor TODOS.
-        cbEstado.setItems(FXCollections.observableArrayList(listaEstados));
+        listaEstadosPago.add("TODOS"); //Añade a listaEstados el valor TODOS.
+        cbEstadoPago.setItems(FXCollections.observableArrayList(listaEstadosPago)); //Carga listaEstados en el ComboBox cbEstadoPago.
+
+        //Convierte los calores de FormaPago a String y los añade a listaFormasPago.
+        ArrayList<String> listaFormasPago = new ArrayList<String>();
+        for (FormaPago fPago : FormaPago.values()) {
+            listaFormasPago.add(fPago.toString());
+        }
+        listaFormasPago.add("TODAS"); //Añade a la listaFormasPago el valor TODAS.
+        cbFormaPago.setItems(FXCollections.observableArrayList(listaFormasPago)); //Carga listaFormasPago en el ComboBox cbFormaPago.
 
         //Valor inicial del ComboBox cbAnio.
         try{
@@ -299,24 +314,27 @@ public class InformeFormMensualidadesControlador implements Initializable {
         }
 
         cbMes.setValue(Fechas.obtenerNombreMes(LocalDate.now().getMonthValue())); //Valor inicial del ComboBox cbMes.
-        cbEstado.setValue("TODOS"); //Valor inicial del ComboBox cbEstado.
+        cbEstadoPago.setValue("TODOS"); //Valor inicial del ComboBox cbEstadoPago.
+        cbFormaPago.setValue("TODAS"); //Valor inicial del ComboBox cbFormaPago.
 
         //Configurar Listener para el ComboBox cbMes.
         cbMes.setOnAction(e -> {
             configurarFiltro("");
-            System.out.println("Filtro Tam: " + filtro.size());
         });
 
-        //Configurar Listener para el ComboBox cbEstado.
-        cbEstado.setOnAction(e -> {
+        //Configurar Listener para el ComboBox cbEstadoPago.
+        cbEstadoPago.setOnAction(e -> {
             configurarFiltro("");
-            System.out.println("Filtro Tam: " + filtro.size());
+        });
+
+        //Configurar Listener para el ComboBox cbFormaPago.
+        cbFormaPago.setOnAction(e -> {
+            configurarFiltro("");
         });
 
         //Configurar Listener para el ComboBox cbAnio.
         cbAnio.setOnAction(e -> {
             configurarFiltro("");
-            System.out.println("Filtro Tam: " + filtro.size());
         });
     }
 
@@ -342,17 +360,15 @@ public class InformeFormMensualidadesControlador implements Initializable {
         filtro.setPredicate(obj -> {
             if (obj.fechaProperty().getValue().getYear() != cbAnio.getValue()) {
                 return false;
-            }
-
-            if (!(cbMes.getValue().equals("TODOS")) && !(Fechas.obtenerNombreMes(obj.fechaProperty().getValue().getMonthValue()).equals(cbMes.getValue()))) {
+            } else if (!(cbMes.getValue().equals("TODOS")) && !(Fechas.obtenerNombreMes(obj.fechaProperty().getValue().getMonthValue()).equals(cbMes.getValue()))) {
                 return false;
-            }
-
-            if (!(cbEstado.getValue().equals("TODOS")) && !(obj.estadoPagoProperty().getValue().toString().equals(cbEstado.getValue()))) {
+            } else if (!(cbEstadoPago.getValue().equals("TODOS")) && !(obj.estadoPagoProperty().getValue().toString().equals(cbEstadoPago.getValue()))) {
                 return false;
+            } else if (!(cbFormaPago.getValue().equals("TODAS")) && !(obj.formaPagoProperty().getValue().toString().equals(cbFormaPago.getValue()))) {
+                return false;
+            } else {
+                return true;
             }
-
-            return true;
         });
     }
 
@@ -382,10 +398,6 @@ public class InformeFormMensualidadesControlador implements Initializable {
 
             	listaMensualidadReport.add(mReport); //Agregar el MensualidadReport a la lista listaMensualidadReport.
             }
-            
-            for (Mensualidad mensualidad : listaMensualidadReport) {
-				System.out.println(mensualidad.toString());
-			}
             
             //Crear el comparador para ordenar por fecha ascendente
             Comparator<Mensualidad> comparadorFechaAscendente = Comparator.comparing(Mensualidad::getFecha);
@@ -512,15 +524,16 @@ public class InformeFormMensualidadesControlador implements Initializable {
     	importe_total = importe_pagadas + importe_pendientes + importe_resto;
     	
         //Establecer los parámetros en el HashMap.
-    	parameters.put("autor", (tfNombreUsuario.getText()));
+    	parameters.put("autor", (tfNombreUsuario.getText().isBlank()) ? " " : tfNombreUsuario.getText());
     	parameters.put("telefono", (tfTelefono.getText().isBlank()) ? " " : Integer.toString(newUsuario.getTelefono()));
-    	parameters.put("email", tfEmail.getText());
+    	parameters.put("email", (tfEmail.getText().isBlank()) ? " " : tfEmail.getText());
     	parameters.put("fecha_informe", LocalDate.now().format(formatter));
     	parameters.put("texto_informe",  (taTexto.getText() == null) ? "" : taTexto.getText());
         parameters.put("total_mensualidades", lbNumeroMensualidades.getText());
         parameters.put("filtro_anio", cbAnio.getValue().toString());
         parameters.put("filtro_mes", cbMes.getValue().toString());
-        parameters.put("filtro_estado", cbEstado.getValue().toString());
+        parameters.put("filtro_estado", cbEstadoPago.getValue().toString());
+        parameters.put("filtro_forma", cbFormaPago.getValue().toString());
         parameters.put("importe_total", importe_total + " €");
         parameters.put("importe_pagadas", importe_pagadas + " €");
         parameters.put("importe_pendientes", importe_pendientes + " €");
@@ -542,7 +555,7 @@ public class InformeFormMensualidadesControlador implements Initializable {
         boolean camposCorrectos = false;
 
         //Patrón para validar el formato del email.
-        Pattern emailPattern = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+        Pattern emailPattern = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$|^$");
         Matcher emailMatcher = emailPattern.matcher((tfEmail.getText() == null) ? "" : tfEmail.getText());
 
         Pattern nombreInformePattern = Pattern.compile("^[^\\\\/:*?\"<>|]+$");
@@ -550,14 +563,10 @@ public class InformeFormMensualidadesControlador implements Initializable {
 
         //Expresion para comprobar formato nombre.extension -> "^[^\\\\/:*?\"<>|]+\\.[^\\\\/:*?\"<>|]+$"
 
-        if(cbEmail.getValue().equals(Constants.EMAIL_OTHER) && !emailMatcher.matches()) {
+        if(cbEmail.getValue() != null && cbEmail.getValue().equals(Constants.EMAIL_OTHER) && !emailMatcher.matches()) {
             mensajeAviso(Alert.AlertType.ERROR,"Email No valido.",
             "",
             "El Email introducido en el campo Email no es valido.");
-        } else if (tfNombreUsuario.getText().isBlank()) {
-            mensajeAviso(Alert.AlertType.ERROR,"Nombre No valido.",
-            "",
-            "El campo nombre esta vacío.");
         } else if (rbGuardar.isSelected() && !nombreInformeMatcher.matches()) {
             mensajeAviso(Alert.AlertType.ERROR,"Nombre archivo No valido.",
             "El nombre introduciodo no es valido.",
@@ -600,7 +609,12 @@ public class InformeFormMensualidadesControlador implements Initializable {
         this.newUsuario = new Usuario(usuario); //Se crea una nueva instancia de Usuario para evitar modificar el original.
 
         //Configura los enlaces de datos entre los campos de texto y las propiedades de newUsuario.
-        tfNombreUsuario.textProperty().bind(Bindings.concat(newUsuario.nombreProperty(), " ", newUsuario.apellido1Property(), " ", newUsuario.apellido2Property()));
+        if(!newUsuario.getNombre().isBlank()) {
+            tfNombreUsuario.textProperty().bind(Bindings.concat(newUsuario.nombreProperty(), " ", newUsuario.apellido1Property(), " ", newUsuario.apellido2Property()));
+            tfNombreUsuario.disableProperty().unbind();
+            tfNombreUsuario.setDisable(true);  
+        } 
+        
         tfTelefono.textProperty().bindBidirectional(newUsuario.telefonoProperty(), new NumberStringConverter("0"));
 
         //Filtra la entrada de texto para permitir solo números y 9 digitos como máximo.
@@ -619,7 +633,7 @@ public class InformeFormMensualidadesControlador implements Initializable {
 
         //Si el objeto newUsuario tiene una dirección de correo electrónico no vacía,
         //se agrega la constante EMAIL_USER a la lista de tipos de correo electrónico.
-        if (newUsuario.getEmail() != null || !newUsuario.getEmail().isBlank()) {
+        if (newUsuario.getEmail() != null && !newUsuario.getEmail().isBlank()) {
              tipoEmail.add(Constants.EMAIL_USER); //Añadir elemento a ObservableList de cbEmail
         } 
     }

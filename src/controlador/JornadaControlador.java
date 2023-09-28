@@ -305,8 +305,11 @@ public class JornadaControlador implements Initializable {
             
             //LLamar a base de datos para rescatar la jornada
 			try {
-				//inicializacion(conexionBD.getJornada(fechaSeleccionada.toString()));
-				inicializacion(conexionBD.getJornadaCompleta(fechaSeleccionada.toString()));
+				//Se comprueba que se ha seleccionado la fecha a traves del DatePiker y no se ha diparado el evento por el cambio de jornada a traves de las flechas.
+				if(!((jornada == null)? "null" : jornada.getFecha().toString()).equals(fechaSeleccionada.toString())) {
+					inicializacion(conexionBD.getJornadaCompleta(fechaSeleccionada.toString()));
+				}
+				//inicializacion(conexionBD.getJornadaCompleta(fechaSeleccionada.toString()));
 			} catch (SQLException e) {
 				logUser.severe("Excepción: " + e.toString());
 				e.printStackTrace();

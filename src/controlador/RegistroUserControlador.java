@@ -168,7 +168,7 @@ public class RegistroUserControlador implements Initializable {
             usuario = new Usuario();
             usuario.setNombreUsuario(tfNombre.getText());
             usuario.setPassword(password.get());
-            usuario.setDirectorio(new File(tfNombre.getText()));
+            usuario.setDirectorio(new File(tfNombre.getText().toLowerCase()));
             
             //Crear los ficheros del usuario.
             if(crearFicherosUsuario(usuario)) {
@@ -242,8 +242,8 @@ public class RegistroUserControlador implements Initializable {
                         AlertType.WARNING,
                         "Error nombre usuario",
                         "",
-                        "El nombre de usuario \"" + nombre + "\" ya existe.\n" + 
-                                        "Introduce un nuevo nombre para usuario.");
+                        "El nombre de usuario \"" + nombre + "\" no está disponible.\n" + 
+                                        "Introduce un nuevo nombre de usuario.");
 
                     return false;
                 }
@@ -320,7 +320,7 @@ public class RegistroUserControlador implements Initializable {
         }
 
 		conexionBD.setUsuario(user);
-		File ficheroBD = new File(user.getDirectorio().getName() + "\\" + user.getNombreUsuario() + conexionBD.FINAL_NOMBRE_FICHERO_DB);
+		File ficheroBD = new File(user.getDirectorio().getName() + "\\" + user.getNombreUsuario().toLowerCase() + conexionBD.FINAL_NOMBRE_FICHERO_DB);
 		
         //Intenta crear el fichero de BD y las las tablas.
 		if(!ficheroBD.exists()) {

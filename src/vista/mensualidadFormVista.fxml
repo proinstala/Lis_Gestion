@@ -97,19 +97,19 @@
             <Insets right="10.0" />
          </GridPane.margin>
       </Label>
-      <ComboBox fx:id="cbAsistenciaSemanal" maxWidth="-Infinity" prefWidth="200.0" promptText="Número Asistencia Semanal" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+      <ComboBox fx:id="cbAsistenciaSemanal" maxWidth="-Infinity" prefWidth="200.0" promptText="Selecciona a. semanal..." GridPane.columnIndex="1" GridPane.rowIndex="7" />
       <Label text="Fecha del Pago" GridPane.rowIndex="10">
          <GridPane.margin>
             <Insets right="10.0" />
          </GridPane.margin>
       </Label>
-      <DatePicker fx:id="dpFechaPago" maxWidth="-Infinity" prefWidth="200.0" promptText="Fecha" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+      <DatePicker fx:id="dpFechaPago" maxWidth="-Infinity" prefWidth="200.0" promptText="Selecciona fecha..." GridPane.columnIndex="1" GridPane.rowIndex="10" />
       <Label text="Anotación" GridPane.rowIndex="13" GridPane.valignment="TOP">
          <GridPane.margin>
             <Insets right="10.0" />
          </GridPane.margin>
       </Label>
-      <TextField fx:id="tfImporte" promptText="Importe del pago" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+      <TextField fx:id="tfImporte" promptText="Introduce importe del pago..." GridPane.columnIndex="1" GridPane.rowIndex="11" />
       <HBox alignment="CENTER_LEFT" layoutX="30.0" layoutY="330.0" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.rowIndex="15">
          <children>
             <Label text="Alumno" />
@@ -162,15 +162,15 @@
             <Insets left="-20.0" right="-20.0" />
          </GridPane.margin>
       </Pane>
-      <ComboBox fx:id="cbMes" layoutX="140.0" layoutY="205.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Mes" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-      <ComboBox fx:id="cbYear" layoutX="140.0" layoutY="115.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Año" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-      <ComboBox fx:id="cbFormaPago" layoutX="140.0" layoutY="145.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Forma Pago" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+      <ComboBox fx:id="cbMes" layoutX="140.0" layoutY="205.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Selecciona un mes..." GridPane.columnIndex="1" GridPane.rowIndex="4" />
+      <ComboBox fx:id="cbYear" layoutX="140.0" layoutY="115.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Selecciona un año..." GridPane.columnIndex="1" GridPane.rowIndex="5" />
+      <ComboBox fx:id="cbFormaPago" layoutX="140.0" layoutY="145.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Selecciona forma de Pago..." GridPane.columnIndex="1" GridPane.rowIndex="6" />
       <Label layoutX="39.0" layoutY="201.0" text="Estado del Pago" GridPane.rowIndex="9">
          <GridPane.margin>
             <Insets right="10.0" />
          </GridPane.margin>
       </Label>
-      <ComboBox fx:id="cbEstadoPago" layoutX="150.0" layoutY="189.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Estado Pago" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+      <ComboBox fx:id="cbEstadoPago" layoutX="150.0" layoutY="189.0" maxWidth="-Infinity" prefWidth="200.0" promptText="Selecciona estado pago..." GridPane.columnIndex="1" GridPane.rowIndex="9" />
       <Label layoutX="59.0" layoutY="267.0" text="Importe" GridPane.rowIndex="11">
          <GridPane.margin>
             <Insets right="10.0" />

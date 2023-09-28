@@ -60,6 +60,7 @@ public class MensualidadesControlador implements Initializable {
     private final String ORDEN_NOMBRE = "NOMBRE";
     private final String ORDEN_ESTADO_PAGO = "ESTADO_PAGO";
     private final String ORDEN_FECHA = "FECHA";
+    private final String ORDEN_FORMA_PAGO = "FORMA_PAGO";
 
     private FilteredList<Mensualidad> filtro;
     private ObservableList<Alumno> listadoAlumnosGeneral;
@@ -337,7 +338,7 @@ public class MensualidadesControlador implements Initializable {
 
         //Configura el ComboBox cbOrden.
         ObservableList<String> listadoOrden = FXCollections.observableArrayList();
-        listadoOrden.setAll(ORDEN_ID_MENSUALIDAD, ORDEN_ID_ALUMNO, ORDEN_NOMBRE, ORDEN_FECHA, ORDEN_ESTADO_PAGO);
+        listadoOrden.setAll(ORDEN_ID_MENSUALIDAD, ORDEN_ID_ALUMNO, ORDEN_NOMBRE, ORDEN_FECHA, ORDEN_ESTADO_PAGO, ORDEN_FORMA_PAGO);
         cbOrden.setItems(listadoOrden);
         cbOrden.setValue(ORDEN_ID_ALUMNO); //Valor inicial.
 
@@ -747,6 +748,10 @@ public class MensualidadesControlador implements Initializable {
 
             case ORDEN_ESTADO_PAGO -> {
                 comparador = Comparator.comparing(Mensualidad::getEstadoPago).thenComparing(Mensualidad::getFecha).thenComparing(Mensualidad::getIdAlumno);
+            }
+
+            case ORDEN_FORMA_PAGO -> {
+                comparador = Comparator.comparing(Mensualidad::getFormaPago).thenComparing(Mensualidad::getFecha).thenComparing(Mensualidad::getIdAlumno);
             }
 
             default -> {
