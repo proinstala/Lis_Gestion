@@ -197,7 +197,7 @@ public class ConexionBD implements Cloneable{
                     "nombre TEXT NOT NULL, " +
                     "provincia_id INTEGER NOT NULL, " +
                     "UNIQUE (provincia_id, nombre), " +
-                    "FOREIGN KEY (provincia_id) REFERENCES provincia (id));";
+                    "FOREIGN KEY (provincia_id) REFERENCES PROVINCIA (id));";
             st.execute(sql);
 
             // Crea la tabla "MENSUALIDAD"
@@ -213,7 +213,7 @@ public class ConexionBD implements Cloneable{
                     "cuota DOUBLE NOT NULL, " +
                     "anotacion TEXT, " +
                     "UNIQUE (alumno_id, mes, anio), " +
-                    "FOREIGN KEY (alumno_id) REFERENCES alumno (id) ON DELETE CASCADE);";
+                    "FOREIGN KEY (alumno_id) REFERENCES ALUMNO (id) ON DELETE CASCADE);";
             st.execute(sql);
 
             // Crea la tabla "DIRECCION"
@@ -223,7 +223,7 @@ public class ConexionBD implements Cloneable{
                     "numero INTEGER, " +
                     "localidad_id INTEGER NOT NULL, " +
                     "codigo_postal INTEGER, " +
-                    "FOREIGN KEY (localidad_id) REFERENCES localidad (id));";
+                    "FOREIGN KEY (localidad_id) REFERENCES LOCALIDAD (id));";
             st.execute(sql);
 
             // Crea la tabla "ALUMNO"
@@ -240,7 +240,7 @@ public class ConexionBD implements Cloneable{
                     "estado TEXT NOT NULL, " +
                     "asistencia_semanal INTEGER NOT NULL, " +
                     "forma_pago TEXT NOT NULL, " +
-                    "FOREIGN KEY (direccion_id) REFERENCES direccion (id));";
+                    "FOREIGN KEY (direccion_id) REFERENCES DIRECCION (id));";
             st.execute(sql);
 
             // Crea la tabla "JORNADA"
@@ -257,7 +257,7 @@ public class ConexionBD implements Cloneable{
                     "hora TEXT NOT NULL, " +
                     "anotaciones TEXT," +
                     "jornada TEXT NOT NULL, " +
-                    "FOREIGN KEY (jornada) REFERENCES jornada (fecha), " +
+                    "FOREIGN KEY (jornada) REFERENCES JORNADA (fecha), " +
                     "UNIQUE (numero, jornada), " +
                     "CHECK (jornada IS NOT NULL));";
             st.execute(sql);
@@ -267,8 +267,8 @@ public class ConexionBD implements Cloneable{
                     "clase_id INTEGER NOT NULL, " +
                     "alumno_id INTEGER NOT NULL, " +
                     "PRIMARY KEY (clase_id, alumno_id), " +
-                    "FOREIGN KEY (clase_id) REFERENCES clase (id) ON DELETE CASCADE, " +
-                    "FOREIGN KEY (alumno_id) REFERENCES alumno (id) ON DELETE CASCADE);";
+                    "FOREIGN KEY (clase_id) REFERENCES CLASE (id) ON DELETE CASCADE, " +
+                    "FOREIGN KEY (alumno_id) REFERENCES ALUMNO (id) ON DELETE CASCADE);";
             st.execute(sql);
 
             conn.commit(); //Confirma la transacción de la inserción de los datos.
