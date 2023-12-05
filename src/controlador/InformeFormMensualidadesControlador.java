@@ -151,10 +151,10 @@ public class InformeFormMensualidadesControlador implements Initializable {
         Image formulario;
         try {
             //Intentar cargar la imagen desde el recurso en el IDE y en el JAR.
-            formulario = new Image(getClass().getResourceAsStream("/recursos/calendar_2_72.png")); //Forma desde IDE y JAR.
+            formulario = new Image(getClass().getResourceAsStream("/recursos/informe_1_72.png")); //Forma desde IDE y JAR.
         } catch (Exception e) {
             //Si ocurre una excepción al cargar la imagen desde el recurso en el IDE o el JAR, cargar la imagen directamente desde el JAR.
-            formulario = new Image("/recursos/calendar_2_72.png"); //Forma desde el JAR.
+            formulario = new Image("/recursos/informe_1_72.png"); //Forma desde el JAR.
         }
         //Establecer las imagenes cargadas en los ImageView.
         ivImagenTipoFormulario.setImage(formulario);

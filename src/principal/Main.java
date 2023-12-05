@@ -43,10 +43,10 @@ public class Main extends Application {
 		scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm());
 		
 		//Icono de aplicacion.
-		URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); //guardar ruta de recurso imagen.
+		URL rutaIcono = getClass().getResource(Constants.IMAGEN_LOGO); //guardar ruta de recurso imagen.
 		this.primaryStage.getIcons().add(new Image(rutaIcono.toString())); //poner imagen icono a la ventana.	
 
-		this.primaryStage.setTitle("LIS_Gestión " + Constants.VERSION_LIS_GESTION);
+		this.primaryStage.setTitle(Constants.NOMBRE_APP +  " " + Constants.VERSION_LIS_GESTION);
 		this.primaryStage.setScene(scene);
 		this.primaryStage.setMinHeight(800);
 		this.primaryStage.setMinWidth(1200);

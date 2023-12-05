@@ -426,7 +426,7 @@ public class PrincipalControlador implements Initializable {
 		Alert alerta = new Alert(AlertType.CONFIRMATION);
 		alerta.getDialogPane().getStylesheets()
 				.add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
-		alerta.setTitle("Lis_Gestión");
+		alerta.setTitle(Constants.NOMBRE_APP);
 		alerta.setHeaderText("Salir de Aplicación.");
 		alerta.setContentText("¿Estas seguro de que quieres salir de la aplicación?");
 		alerta.initStyle(StageStyle.DECORATED);

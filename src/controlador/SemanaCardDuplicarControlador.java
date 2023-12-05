@@ -209,14 +209,14 @@ public class SemanaCardDuplicarControlador implements Initializable {
                         "",
                         "Duplicado de semana realizado correctamente.");
                 
-                toast.show((Stage) ((Stage) apCopiarSemana.getScene().getWindow()).getOwner(), "Duplicado de jornada realizado.");
+                toast.show((Stage) ((Stage) apCopiarSemana.getScene().getWindow()).getOwner(), "Duplicado de semana realizado.");
                 ((Stage) apCopiarSemana.getScene().getWindow()).close(); //Obtener la referencia al Stage actual y cerrarlo.
             } else {
                 logUser.warning("Fallo al duplicar la semana.");
                 mensajeAviso(Alert.AlertType.ERROR,
                         "Fallo al copiar Jornada.",
                         "",
-                        "No se ha podido copiar la Jornada.");
+                        "No se ha podido copiar la semana.");
             }
         }
     }

@@ -17,7 +17,7 @@
                   <Image url="@../recursos/logo_nuevo_134_159.png" />
                </image>
             </ImageView>
-            <Label layoutX="21.0" layoutY="177.0" text="LIS_Gestión">
+            <Label layoutX="21.0" layoutY="177.0" text="Lis_Gestión">
                <font>
                   <Font size="30.0" />
                </font>

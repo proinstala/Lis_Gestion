@@ -110,6 +110,7 @@ BorderPane {
 .menu:hover {
 	-fx-background-color: #80488F;
 	-fx-text-fill: white;
+	-fx-cursor: hand;
 }
 
 
