@@ -8,7 +8,7 @@ package utilidades;
 public class Constants {
     
     public static final String NOMBRE_APP = "Lis_Gestión";
-    public static final String VERSION_LIS_GESTION = "1.0.4";                                   //Version actual de LIS_Gestión.
+    public static final String VERSION_LIS_GESTION = "1.1.0";                                   //Version actual de LIS_Gestión.
     public static final String URL_REPOSITORIO = "https://github.com/proinstala/Lis_Gestion";   //Repositorio de GibHub del proyecto.
     public static final String CORREO_AUTOR = "david.alonso.murcia@gmail.com";                  //Correo Autor del proyecto.
 

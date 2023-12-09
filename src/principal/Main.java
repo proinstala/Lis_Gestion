@@ -13,7 +13,7 @@ import utilidades.Constants;
 
 /**
  * @author David Jimenez Alonso.
- * @version 1.0.4
+ * @version 1.1.0
  * 
  */
 public class Main extends Application {
@@ -43,8 +43,8 @@ public class Main extends Application {
 		scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm());
 		
 		//Icono de aplicacion.
-		URL rutaIcono = getClass().getResource(Constants.IMAGEN_LOGO); //guardar ruta de recurso imagen.
-		this.primaryStage.getIcons().add(new Image(rutaIcono.toString())); //poner imagen icono a la ventana.	
+		URL rutaIcono = getClass().getResource(Constants.IMAGEN_LOGO);		//guardar ruta de recurso imagen.
+		this.primaryStage.getIcons().add(new Image(rutaIcono.toString()));	//poner imagen icono a la ventana.	
 
 		this.primaryStage.setTitle(Constants.NOMBRE_APP +  " " + Constants.VERSION_LIS_GESTION);
 		this.primaryStage.setScene(scene);
