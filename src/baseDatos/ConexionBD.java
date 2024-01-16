@@ -2737,9 +2737,17 @@ public class ConexionBD implements Cloneable{
             String sql = "SELECT count(CS.alumno_id) FROM CLASE_ALUMNO CS JOIN CLASE C ON(CS.clase_id = C.id)"
                     + "WHERE CS.alumno_id = ? AND strftime('%W', C.jornada) = ? AND strftime('%Y', C.jornada) = ?;";
 
+            //Obtengo el numero de semana de la jornada.
+            int semana = jornada.getFecha().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR); //Obtengo el numero de semana de la jornada.
+
+            //Conviete a string el numero de semana y añade un cero delante si el numero es menor de 10.
+            String stringSemana = (semana < 10)? "0" + Integer.toString(semana): Integer.toString(semana); //A
+
+            System.out.println("hola");
+
             ps = conn.prepareStatement(sql);
             ps.setInt(1, idAlumno);
-            ps.setString(2, Integer.toString(jornada.getFecha().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)));
+            ps.setString(2, stringSemana);
             ps.setString(3, Integer.toString(jornada.getFecha().getYear()));
            
             res = ps.executeQuery();
