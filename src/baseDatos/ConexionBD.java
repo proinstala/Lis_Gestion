@@ -262,6 +262,14 @@ public class ConexionBD implements Cloneable{
                     "CHECK (jornada IS NOT NULL));";
             st.execute(sql);
 
+            //Crea la tabla "GRUPO"
+            sql = "CREATE TABLE IF NOT EXISTS GRUPO (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "nombre TEXT NOT NULL, " +
+                    "descripcion TEXT NOT NULL, " + 
+                    "UNIQUE (nombre));";
+            st.execute(sql);
+
             // Crea la tabla "CLASE_ALUMNO"
             sql = "CREATE TABLE IF NOT EXISTS CLASE_ALUMNO (" +
                     "clase_id INTEGER NOT NULL, " +
@@ -269,6 +277,15 @@ public class ConexionBD implements Cloneable{
                     "PRIMARY KEY (clase_id, alumno_id), " +
                     "FOREIGN KEY (clase_id) REFERENCES CLASE (id) ON DELETE CASCADE, " +
                     "FOREIGN KEY (alumno_id) REFERENCES ALUMNO (id) ON DELETE CASCADE);";
+            st.execute(sql);
+
+            // Crea la tabla "GRUPO_ALUMNO"
+            sql = "CREATE TABLE IF NOT EXISTS GRUPO_ALUMNO (" +
+                    "grupo_id INTEGER NOT NULL, " +
+                    "alumno_id INTEGER NOT NULL, " + 
+                    "PRIMARY KEY (grupo_id, alumno_id), " +
+                    "FOREIGN KEY (grupo_id) REFERENCES GRUPO (id) ON DELETE CASCADE " +
+	                "FOREIGN KEY (alumno_id) REFERENCES ALUMNO (id) ON DELETE CASCADE);";
             st.execute(sql);
 
             conn.commit(); //Confirma la transacción de la inserción de los datos.
