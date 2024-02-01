@@ -2741,9 +2741,7 @@ public class ConexionBD implements Cloneable{
             int semana = jornada.getFecha().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR); //Obtengo el numero de semana de la jornada.
 
             //Conviete a string el numero de semana y añade un cero delante si el numero es menor de 10.
-            String stringSemana = (semana < 10)? "0" + Integer.toString(semana): Integer.toString(semana); //A
-
-            System.out.println("hola");
+            String stringSemana = (semana < 10)? "0" + Integer.toString(semana): Integer.toString(semana); 
 
             ps = conn.prepareStatement(sql);
             ps.setInt(1, idAlumno);
