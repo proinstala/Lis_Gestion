@@ -47,6 +47,8 @@ public class AjustesControlador implements Initializable {
     private Toast toast;
     private Double tiempoDelay = 0.5;
     
+    @FXML
+    private ComboBox<String> cbGrupo;
 
     @FXML
     private ComboBox<String> cbLocalidad;
@@ -59,6 +61,15 @@ public class AjustesControlador implements Initializable {
 
     @FXML
     private GridPane gpAjustes;
+
+    @FXML
+    private ImageView ivAddGrupo;
+
+    @FXML
+    private ImageView ivBorrarGrupo;
+
+    @FXML
+    private ImageView ivEditarGrupo;
 
     @FXML
     private ImageView ivAcercaDe;
@@ -80,6 +91,12 @@ public class AjustesControlador implements Initializable {
 
     @FXML
     private TextField tfPrecioClase;
+
+    @FXML
+    private TextField tfDescripcionGrupo;
+
+    @FXML
+    private TextField tfNombreGrupo;
 
 
     @Override
@@ -108,6 +125,9 @@ public class AjustesControlador implements Initializable {
         ivEditarPrecio.setImage(imagenEditar);
         ivEditarLocalidad.setImage(imagenEditar);
         ivAcercaDe.setImage(imagenAcercaDe); 
+        ivAddGrupo.setImage(imagenAdd);
+        ivBorrarGrupo.setImage(imagenBorrar);
+        ivEditarGrupo.setImage(imagenEditar);
 
         //Crear Tooltip.
         Tooltip tltAddLocalidad = new Tooltip("Añadir Nueva Localidad");
@@ -115,18 +135,27 @@ public class AjustesControlador implements Initializable {
 		Tooltip tltEditarPrecio = new Tooltip("Editar Precio");
 		Tooltip tltEditarLocalidad = new Tooltip("Editar Localidad");
         Tooltip tltAcercaDe = new Tooltip("Acerca De");
+        Tooltip tltAddGrupo = new Tooltip("Añadir Nuevo Grupo");
+		Tooltip tltBorrarGrupo = new Tooltip("Eliminar Grupo");
+		Tooltip tltEditarGrupo = new Tooltip("Editar Grupo");
 
         tltAddLocalidad.setShowDelay(Duration.seconds(tiempoDelay)); //Establecer retardo de aparición.
 		tltBorrarLocalidad.setShowDelay(Duration.seconds(tiempoDelay));
 		tltEditarPrecio.setShowDelay(Duration.seconds(tiempoDelay)); 
 		tltEditarLocalidad.setShowDelay(Duration.seconds(tiempoDelay)); 
         tltAcercaDe.setShowDelay(Duration.seconds(tiempoDelay)); 
+        tltAddGrupo.setShowDelay(Duration.seconds(tiempoDelay)); 
+        tltBorrarGrupo.setShowDelay(Duration.seconds(tiempoDelay));
+        tltEditarGrupo.setShowDelay(Duration.seconds(tiempoDelay));
 
 		Tooltip.install(ivAddLocalidad, tltAddLocalidad); //Establecer Tooltip a ImageView.
 		Tooltip.install(ivBorrarLocalidad, tltBorrarLocalidad);
 		Tooltip.install(ivEditarPrecio, tltEditarPrecio);
 		Tooltip.install(ivEditarLocalidad, tltEditarLocalidad);
         Tooltip.install(ivAcercaDe, tltAcercaDe); 
+        Tooltip.install(ivAddGrupo, tltAddGrupo); 
+        Tooltip.install(ivBorrarGrupo, tltBorrarGrupo); 
+        Tooltip.install(ivEditarGrupo, tltEditarGrupo); 
        
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
         conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.

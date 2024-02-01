@@ -88,6 +88,14 @@
                         <Font size="10.0" />
                      </font>
                   </Label>
+                  <Label layoutX="333.0" layoutY="10.0" text="Precio" GridPane.columnIndex="1" GridPane.valignment="TOP">
+                     <font>
+                        <Font size="10.0" />
+                     </font>
+                     <GridPane.margin>
+                        <Insets left="331.0" />
+                     </GridPane.margin>
+                  </Label>
                </children>
             </GridPane>
          </children>
@@ -205,23 +213,22 @@
                         <Font name="System Bold" size="13.0" />
                      </font>
                   </Label>
-                  <ComboBox fx:id="cbProvincia1" maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="150.0" GridPane.columnIndex="1">
+                  <ComboBox fx:id="cbGrupo" maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="150.0" GridPane.columnIndex="1">
                      <GridPane.margin>
                         <Insets left="20.0" />
                      </GridPane.margin>
                   </ComboBox>
-                  <TextField fx:id="tfLocalidad1" maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="150.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
+                  <TextField fx:id="tfDescripcionGrupo" maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="150.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
                      <GridPane.margin>
                         <Insets right="20.0" />
                      </GridPane.margin>
                   </TextField>
-                  <ComboBox fx:id="cbLocalidad1" maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="150.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
                   <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.columnIndex="2">
                      <padding>
                         <Insets right="20.0" />
                      </padding>
                      <children>
-                        <ImageView fx:id="ivEditarLocalidad1" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="ivEditarGrupo" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../recursos/pen-new-round-linear_30.png" />
                            </image>
@@ -229,7 +236,7 @@
                               <Cursor fx:constant="HAND" />
                            </cursor>
                         </ImageView>
-                        <ImageView fx:id="ivAddLocalidad1" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="ivAddGrupo" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../recursos/add-circle-linear_30.png" />
                            </image>
@@ -237,7 +244,7 @@
                               <Cursor fx:constant="HAND" />
                            </cursor>
                         </ImageView>
-                        <ImageView fx:id="ivBorrarLocalidad1" fitHeight="30.0" fitWidth="30.0" layoutX="108.0" layoutY="18.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="ivBorrarGrupo" fitHeight="30.0" fitWidth="30.0" layoutX="108.0" layoutY="18.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../recursos/close-circle-linear_30.png" />
                            </image>
@@ -247,7 +254,7 @@
                         </ImageView>
                      </children>
                   </HBox>
-                  <Label text="Provincia" GridPane.columnIndex="1" GridPane.valignment="TOP">
+                  <Label text="Grupo" GridPane.columnIndex="1" GridPane.valignment="TOP">
                      <font>
                         <Font size="10.0" />
                      </font>
@@ -255,12 +262,21 @@
                         <Insets left="21.0" />
                      </GridPane.margin>
                   </Label>
-                  <Label text="Localidad" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="TOP">
+                  <Label text="Nombre" GridPane.columnIndex="1" GridPane.valignment="TOP">
                      <font>
                         <Font size="10.0" />
                      </font>
                      <GridPane.margin>
-                        <Insets right="109.0" />
+                        <Insets left="176.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <TextField fx:id="tfNombreGrupo" layoutX="488.0" layoutY="26.0" maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="150.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
+                  <Label layoutX="335.0" layoutY="10.0" text="Descripción" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.valignment="TOP">
+                     <font>
+                        <Font size="10.0" />
+                     </font>
+                     <GridPane.margin>
+                        <Insets left="331.0" />
                      </GridPane.margin>
                   </Label>
                </children>
