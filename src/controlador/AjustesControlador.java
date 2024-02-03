@@ -19,6 +19,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -29,7 +30,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import modelo.Alumno;
+import modelo.GrupoAlumnos;
 import utilidades.Constants;
 import utilidades.Toast;
 
@@ -39,6 +42,7 @@ public class AjustesControlador implements Initializable {
     private ObservableList<Alumno> listadoAlumnosGeneral;
     private ObservableList<String> listadoProvincias;
     private ObservableList<String> listadoLocalidades;
+    private ObservableList<GrupoAlumnos> listadoGruposAlumnos;
     private Map<Integer, Double> precios_clases;
 
     private DecimalFormat decimalFormat;
@@ -48,7 +52,7 @@ public class AjustesControlador implements Initializable {
     private Double tiempoDelay = 0.5;
     
     @FXML
-    private ComboBox<String> cbGrupo;
+    private ComboBox<GrupoAlumnos> cbGrupo;
 
     @FXML
     private ComboBox<String> cbLocalidad;
@@ -184,6 +188,8 @@ public class AjustesControlador implements Initializable {
         } else {
             cbNumeroAsistencias.setItems(FXCollections.observableArrayList(new Integer[] {1,2,3,4}));
         }
+
+        cbGrupoSetup();
 
         cbProvinciaSetup();
 
@@ -348,6 +354,50 @@ public class AjustesControlador implements Initializable {
         });
 
     }
+
+
+    /**
+     * Configura el ComboBox cbGrupo.
+     * 
+     */
+    private void cbGrupoSetup() {
+        //Establecer el texto a mostrar en el ComboBox utilizando un CellFactory.
+        cbGrupo.setCellFactory(param -> new ListCell<GrupoAlumnos>() {
+            @Override
+            protected void updateItem(GrupoAlumnos grupo, boolean empty) {
+                super.updateItem(grupo, empty);
+                if (empty || grupo == null) {
+                    setText(null);
+                } else {
+                    setText(grupo.getId() + " - " + grupo.getNombre()); //Mostrar el ID y el nombre del Alumno en el ComboBox.
+                }
+            }
+        });
+
+        //Establecer el texto a mostrar en el ComboBox cuando está desplegado utilizando un StringConverter.
+        cbGrupo.setConverter(new StringConverter<GrupoAlumnos>() {
+            @Override
+            public String toString(GrupoAlumnos grupo) {
+                if (grupo != null) {
+                    //Mostrar el ID y el nombre del Alumno en el ComboBox cuando está desplegado.
+                    return grupo.getId() + " - " + grupo.getNombre();
+                }
+                return null;
+            }
+
+            @Override
+            public GrupoAlumnos fromString(String string) {
+                // No se necesita esta implementación para este caso.
+                return null;
+            }
+        });
+
+        //Establece un listener para que cuando se seleccione un elemento del ComboBox cbAlumnos.
+        cbGrupo.getSelectionModel().selectedItemProperty().addListener((o, nv, ov) -> {
+            //configurarFiltro(ov.getNombreCompleto());
+            //if(checkbFormatoAlumno.isSelected()) {taTexto.setText(textoInformePersonalizado());}
+        });
+    }//FIN configurarCbAlumnos.
 
 
     /**

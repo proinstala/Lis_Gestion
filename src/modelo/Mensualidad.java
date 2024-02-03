@@ -32,6 +32,10 @@ public class Mensualidad {
      private DoubleProperty importe;
      private StringProperty anotacion;
 
+     /**
+      * Constructor por defecto de la clase Mensualidad.
+      * Inicializa los atributos con valores predeterminados.
+      */
      public Mensualidad() {
           this.id = new SimpleIntegerProperty(-1);
           this.idAlumno = new SimpleIntegerProperty(-1);
@@ -44,6 +48,20 @@ public class Mensualidad {
           this.anotacion = new SimpleStringProperty("");
      }
 
+     /**
+      * Constructor de la clase Mensualidad con parámetros.
+      * Inicializa los atributos con los valores proporcionados.
+      *
+      * @param id               Identificador único de la mensualidad.
+      * @param idAlumno         Identificador del alumno asociado a la mensualidad.
+      * @param fecha            Mes y año de la mensualidad.
+      * @param fechaPago        Fecha de pago de la mensualidad.
+      * @param formaPago        Forma de pago de la mensualidad.
+      * @param estadoPago       Estado de pago de la mensualidad.
+      * @param asistenciasSemanales Número de asistencias semanales del alumno.
+      * @param importe          Importe total de la mensualidad.
+      * @param anotacion        Anotación o comentario asociado a la mensualidad.
+      */
      public Mensualidad(int id, int idAlumno, YearMonth fecha, LocalDate fechaPago, FormaPago formaPago, EstadoPago estadoPago,
                int asistenciasSemanales, Double importe, String anotacion) {
           this.id = new SimpleIntegerProperty(id);
@@ -57,6 +75,12 @@ public class Mensualidad {
           this.anotacion = new SimpleStringProperty(anotacion);
      }
 
+     /**
+      * Constructor de copia de la clase Mensualidad.
+      * Crea una nueva instancia de Mensualidad a partir de otra instancia existente.
+      *
+      * @param m La Mensualidad a ser copiada.
+      */
      public Mensualidad(Mensualidad m) {
           this.id = new SimpleIntegerProperty(m.getId());
           this.idAlumno = new SimpleIntegerProperty(m.getIdAlumno());
@@ -86,6 +110,7 @@ public class Mensualidad {
           this.anotacion.set(m.getAnotacion());
      }
 
+     
      // id -----------------------------------------
      /**
       * Obtiene la propiedad del ID de la mensualidad.

@@ -26,6 +26,7 @@ import modelo.EstadoAlumno;
 import modelo.EstadoPago;
 import modelo.FormaPago;
 import modelo.Genero;
+import modelo.GrupoAlumnos;
 import modelo.HoraClase;
 import modelo.Jornada;
 import modelo.Mensualidad;
@@ -131,7 +132,7 @@ public class ConexionBD implements Cloneable{
      * 
      * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
      */
-    public void crearTablasApp() throws SQLException {
+    public void crearTablasApp1() throws SQLException {
         ConexionBD cn = INSTANCE;
         conn = cn.conectar();
         st = conn.createStatement();
@@ -150,6 +151,50 @@ public class ConexionBD implements Cloneable{
         logger.config("BD: Creada tabla usuario de APP.");
     }
 
+    //EN PRUEBAS ------*******
+    public void crearTablasApp() throws SQLException {
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+       
+        try {
+            TablaManager.crearTablasApp(conn);
+        } catch (SQLException e) {
+            logger.severe("Excepción SQL: " + e.toString());
+            e.printStackTrace();
+            throw e;
+        } finally {
+            cn.desconectar(conn);
+        }
+         
+        logger.config("BD: Creada tabla usuario de APP.");
+    }
+
+
+    //EN PRUEBAS ------*******
+    public boolean crearTablasUsuario() throws SQLException {
+        ConexionBD cn = INSTANCE;
+        Boolean result = false;
+        conn = cn.conectar();
+
+        try {
+            result = TablaManager.crearTablasUsuairo(conn);
+        } catch (SQLException e) {
+            logger.severe("Excepción SQL: " + e.toString());
+            e.printStackTrace();
+            throw e;
+        } finally {
+            cn.desconectar(conn);
+        }
+        
+        if(result == true) {
+            logger.config("BD: Creadas tablas.");
+            if(!insertProvincias()) {logger.warning("BD: NO se han insertado las provincias y localidades.");}
+            if(!insertPreciosClase()) {logger.warning("BD: NO se han insertado los precios de las clases.");}
+        }
+
+        return result;
+    }
+
 
     /**
      * Crea las tablas necesarias en la base de datos del usuario.
@@ -157,7 +202,7 @@ public class ConexionBD implements Cloneable{
      * @return true si se crearon las tablas correctamente, false en caso contrario.
      * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
      */
-    public boolean crearTablasUsuario() throws SQLException {
+    public boolean crearTablasUsuario1() throws SQLException {
         ConexionBD cn = INSTANCE;
         String sql;
         Boolean result = false;
@@ -263,7 +308,7 @@ public class ConexionBD implements Cloneable{
             st.execute(sql);
 
             //Crea la tabla "GRUPO"
-            sql = "CREATE TABLE IF NOT EXISTS GRUPO (" +
+            sql = "CREATE TABLE IF NOT EXISTS GRUPOALUMNOS (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "nombre TEXT NOT NULL, " +
                     "descripcion TEXT NOT NULL, " + 
@@ -280,11 +325,11 @@ public class ConexionBD implements Cloneable{
             st.execute(sql);
 
             // Crea la tabla "GRUPO_ALUMNO"
-            sql = "CREATE TABLE IF NOT EXISTS GRUPO_ALUMNO (" +
+            sql = "CREATE TABLE IF NOT EXISTS GRUPOALUMNOS_ALUMNO (" +
                     "grupo_id INTEGER NOT NULL, " +
                     "alumno_id INTEGER NOT NULL, " + 
                     "PRIMARY KEY (grupo_id, alumno_id), " +
-                    "FOREIGN KEY (grupo_id) REFERENCES GRUPO (id) ON DELETE CASCADE " +
+                    "FOREIGN KEY (grupo_id) REFERENCES GRUPOALUMNOS (id) ON DELETE CASCADE " +
 	                "FOREIGN KEY (alumno_id) REFERENCES ALUMNO (id) ON DELETE CASCADE);";
             st.execute(sql);
 
@@ -3106,5 +3151,49 @@ public class ConexionBD implements Cloneable{
 
         cn.desconectar(conn);
         return result;
+    }
+
+    /**
+     * Obtiene la lista de Grupos de Alumnos desde la base de datos.
+     * 
+     * @return Un objeto ArrayList<String> que contiene los nombres de las localidades.
+     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
+     */
+
+    /**
+     * Obtiene una lista de todos los grupos de alumnos desde la base de datos.
+     *
+     * @return Una lista de objetos GrupoAlumnos que representan los grupos almacenados en la base de datos.
+     * @throws SQLException Si se produce un error al ejecutar la consulta SQL.
+     */
+    public ArrayList<GrupoAlumnos> getGruposAlumnos() throws SQLException {
+        ConexionBD cn = INSTANCE;
+        ArrayList<GrupoAlumnos> listaGruposAlumnos = null;
+        conn = cn.conectar();
+
+        try {
+            st = conn.createStatement();
+            res = st.executeQuery("SELECT * FROM GRUPOALUMNOS;");
+
+            listaGruposAlumnos = new ArrayList<GrupoAlumnos>();
+            while (res.next()) {
+                GrupoAlumnos grupo = new GrupoAlumnos(
+                    res.getInt(1),
+                    res.getString(2),
+                    res.getString(3)
+                );
+               
+                listaGruposAlumnos.add(grupo);
+            }
+        } catch (SQLException e) {
+            logger.severe("Excepción SQL: " + e.toString());
+            e.printStackTrace();
+        } finally { 
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
+        }
+        
+        cn.desconectar(conn);
+        return listaGruposAlumnos;
     }
 }
