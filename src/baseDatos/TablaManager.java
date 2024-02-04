@@ -4,51 +4,57 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-
+/**
+ * Clase encargada de la gestión de creación de tablas en la base de datos.
+ * 
+ */
 class TablaManager {
-
-    static boolean crearTablasApp(Connection conn) throws SQLException {
+	
+	/**
+	 * Crea las tablas necesarias en la base de datos de la aplicación.
+	 * Utiliza la conexión a la base de datos proporcionada.
+	 *
+	 * @param conn Conexión a la base de datos.
+	 * @return true si la creación de tablas fue exitosa, false en caso contrario.
+	 * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL durante la creación de las tablas.
+	 */
+	static boolean crearTablasApp(Connection conn) throws SQLException {
         String sql;
         Boolean result = false;
-        Statement st = null;
-       
-        try {
-            st = conn.createStatement();
-            conn.setAutoCommit(false);
 
-            //Crea la tabla "usuario" de la App.
-            sql = "CREATE TABLE IF NOT EXISTS USUARIO (" +
-            "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            "nombre TEXT NOT NULL UNIQUE, " +
-            "password TEXT NOT NULL, " +
-            "directorio TEXT NOT NULL); "; 
-            st.execute(sql);
-
-            conn.commit(); //Confirma la transacción de la inserción de los datos.
-            result = true;
-        } catch (SQLException e) {
-            conn.rollback(); // Si hay algun error hacemos un rollback en la inserción de los datos.
-            e.printStackTrace();
-            throw e;
-        } finally {
-            conn.setAutoCommit(true);
-            if (st != null) st.close();
+		//El bloque try-with-resources se encarga de cerrar automáticamente el Statement al salir del bloque.
+        try (Statement st = conn.createStatement()) {
+			//Crea la tabla "usuario" de la App.
+			sql = "CREATE TABLE IF NOT EXISTS USUARIO (" +
+					"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+					"nombre TEXT NOT NULL UNIQUE, " +
+					"password TEXT NOT NULL, " +
+					"directorio TEXT NOT NULL); "; 
+			
+			st.execute(sql);
+	
+			result = true;
         }
-            
+              
         return result;
     }
 
     
-    static boolean crearTablasUsuairo(Connection conn) throws SQLException {
+    /**
+     * Crea las tablas necesarias en la base de datos del usuario.
+     * Utiliza la conexión a la base de datos proporcionada.
+     *
+     * @param conn Conexión a la base de datos.
+     * @return true si la creación de tablas fue exitosa, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL durante la creación de las tablas.
+     */
+    static boolean crearTablasUsuario(Connection conn) throws SQLException {
         String sql;
         Boolean result = false;
-        Statement st = null;
-        
-        try {
-            st = conn.createStatement();
-            conn.setAutoCommit(false);
 
-            // Crea la tabla "DATOS_USUARIO"
+		//El bloque try-with-resources se encarga de cerrar automáticamente el Statement al salir del bloque.
+		try (Statement st = conn.createStatement()) {
+			// Crea la tabla "DATOS_USUARIO"
             sql = "CREATE TABLE IF NOT EXISTS DATOS_USUARIO (" +
                     "id INTEGER PRIMARY KEY, " +
                     "nombre TEXT, " +
@@ -160,7 +166,7 @@ class TablaManager {
                     "FOREIGN KEY (alumno_id) REFERENCES ALUMNO (id) ON DELETE CASCADE);";
             st.execute(sql);
 
-            // Crea la tabla "GRUPO_ALUMNO"
+            // Crea la tabla "GRUPOALUMNOS_ALUMNO"
             sql = "CREATE TABLE IF NOT EXISTS GRUPOALUMNOS_ALUMNO (" +
                     "grupo_id INTEGER NOT NULL, " +
                     "alumno_id INTEGER NOT NULL, " + 
@@ -168,15 +174,8 @@ class TablaManager {
                     "FOREIGN KEY (grupo_id) REFERENCES GRUPOALUMNOS (id) ON DELETE CASCADE " +
 	                "FOREIGN KEY (alumno_id) REFERENCES ALUMNO (id) ON DELETE CASCADE);";
             st.execute(sql);
-
-            conn.commit(); //Confirma la transacción de la inserción de los datos.
-            result = true;
-        } catch (SQLException e) {
-            conn.rollback(); // Si hay algun error hacemos un rollback en la inserción de los datos.
-            e.printStackTrace();
-        } finally {
-            conn.setAutoCommit(true);
-            if (st != null) st.close();
+	
+			result = true;
         }
             
         return result;

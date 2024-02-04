@@ -567,7 +567,7 @@ public class PrincipalControlador implements Initializable {
 		if(!ficheroBD.exists()) {
 			try {
 				conexionBD.crearTablasApp();
-				logRoot.log(Level.INFO, "Creadas tablas App");
+				logRoot.log(Level.INFO, "Creada tabla App.");
 			} catch (SQLException e) {
 				logRoot.log(Level.SEVERE, "Fallo al crear las tablas de la app. " + e.toString());
 				e.printStackTrace();

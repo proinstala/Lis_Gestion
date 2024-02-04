@@ -126,314 +126,90 @@ public class ConexionBD implements Cloneable{
         }
     }
 
-    
     /**
      * Crea las tablas necesarias en la base de datos de la aplicación.
-     * 
-     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
+     *
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL durante la creación de las tablas.
      */
-    public void crearTablasApp1() throws SQLException {
-        ConexionBD cn = INSTANCE;
-        conn = cn.conectar();
-        st = conn.createStatement();
-        String sql;
-
-        //Crea la tabla "usuario" de la App.
-        sql = "CREATE TABLE IF NOT EXISTS USUARIO (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "nombre TEXT NOT NULL UNIQUE, " +
-                "password TEXT NOT NULL, " +
-                "directorio TEXT NOT NULL); "; 
-        st.execute(sql);
-        
-        st.close();
-        cn.desconectar(conn);
-        logger.config("BD: Creada tabla usuario de APP.");
-    }
-
-    //EN PRUEBAS ------*******
     public void crearTablasApp() throws SQLException {
         ConexionBD cn = INSTANCE;
         conn = cn.conectar();
        
         try {
-            TablaManager.crearTablasApp(conn);
+            conn.setAutoCommit(false);
+            TablaManager.crearTablasApp(conn); //Llama al método estático de TablaManager para crear las tablas de la aplicación.
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
         } catch (SQLException e) {
+            conn.rollback(); // Si hay algun error hacemos un rollback en la inserción de los datos.
             logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
             throw e;
         } finally {
+            conn.setAutoCommit(true);
             cn.desconectar(conn);
         }
          
-        logger.config("BD: Creada tabla usuario de APP.");
+        logger.config("BD: Creada tabla APP.");
     }
 
-
-    //EN PRUEBAS ------*******
+    /**
+     * Crea las tablas necesarias en la base de datos de cada usuario e inserta los datos iniciales.
+     *
+     * @return true si se crearon las tablas correctamente, false en caso contrario.
+     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL durante la creación de las tablas.
+     */
     public boolean crearTablasUsuario() throws SQLException {
         ConexionBD cn = INSTANCE;
         Boolean result = false;
         conn = cn.conectar();
 
         try {
-            result = TablaManager.crearTablasUsuairo(conn);
+            conn.setAutoCommit(false);
+
+            //Llama al método estático de TablaManager para crear las tablas del usuario.
+            if(TablaManager.crearTablasUsuario(conn)) {
+                result = true;
+
+                //Llama al método estático de TablaManager para crear los precios de clase.
+                if(!InsercionManager.insertPreciosClase(conn)) {
+                    logger.warning("BD: NO se han insertado los precios de las clases.");
+                    result = false;
+                } 
+
+                //Llama al método estático de TablaManager para crear las provincias.
+                if(InsercionManager.insertProvincias(conn)) {
+                    //Llama al método estático de TablaManager para crear las localidades.
+                    if(!InsercionManager.insertLocalidades(conn)) {
+                        logger.warning("BD: NO se han insertado las localidades.");
+                        result = false;
+                    }
+                } else {
+                    logger.warning("BD: NO se han insertado las provincias.");
+                    result = false;
+                }
+                
+            } else {
+                logger.warning("BD: NO se han creado las tablas del usuario.");
+            }
+
+            if(result) {
+                conn.commit(); //Confirma la transacción de la inserción de los datos.
+            } else {
+                logger.warning("BD: NO se han creado las tablas del usuario ni se han insertado los datos iniciales.");
+                conn.rollback(); //Si hay algún error, se realiza un rollback en la inserción de los datos.
+            }
+            
         } catch (SQLException e) {
+            conn.rollback(); //Si hay algún error, se realiza un rollback en la inserción de los datos.
             logger.severe("Excepción SQL: " + e.toString());
-            e.printStackTrace();
             throw e;
         } finally {
+            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
             cn.desconectar(conn);
         }
         
-        if(result == true) {
-            logger.config("BD: Creadas tablas.");
-            if(!insertProvincias()) {logger.warning("BD: NO se han insertado las provincias y localidades.");}
-            if(!insertPreciosClase()) {logger.warning("BD: NO se han insertado los precios de las clases.");}
-        }
-
         return result;
     }
-
-
-    /**
-     * Crea las tablas necesarias en la base de datos del usuario.
-     * 
-     * @return true si se crearon las tablas correctamente, false en caso contrario.
-     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
-     */
-    public boolean crearTablasUsuario1() throws SQLException {
-        ConexionBD cn = INSTANCE;
-        String sql;
-        Boolean result = false;
-        conn = cn.conectar();
-
-        try {
-            st = conn.createStatement();
-            conn.setAutoCommit(false);
-
-            // Crea la tabla "DATOS_USUARIO"
-            sql = "CREATE TABLE IF NOT EXISTS DATOS_USUARIO (" +
-                    "id INTEGER PRIMARY KEY, " +
-                    "nombre TEXT, " +
-                    "apellido1 TEXT, " +
-                    "apellido2 TEXT, " +
-                    "telefono INTEGER, " +
-                    "email TEXT, " +
-                    "email_app TEXT, " +
-                    "password_email_app TEXT);";
-            st.execute(sql);
-
-            sql = "CREATE TABLE IF NOT EXISTS PRECIO_CLASE (" +
-                    "id INTEGER PRIMARY KEY, " +
-                    "numero_clases INTEGER NOT NULL UNIQUE, " +
-                    "precio DOUBLE NOT NULL);";
-            st.execute(sql);
-
-            // Crea la tabla "PROVINCIA"
-            sql = "CREATE TABLE IF NOT EXISTS PROVINCIA (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "nombre TEXT NOT NULL UNIQUE);";
-            st.execute(sql);
-
-            // Crea la tabla "LOCALIDAD"
-            sql = "CREATE TABLE IF NOT EXISTS LOCALIDAD (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "nombre TEXT NOT NULL, " +
-                    "provincia_id INTEGER NOT NULL, " +
-                    "UNIQUE (provincia_id, nombre), " +
-                    "FOREIGN KEY (provincia_id) REFERENCES PROVINCIA (id));";
-            st.execute(sql);
-
-            // Crea la tabla "MENSUALIDAD"
-            sql = "CREATE TABLE IF NOT EXISTS MENSUALIDAD (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "alumno_id INTEGER NOT NULL, " +
-                    "mes TEXT NOT NULL, " +
-                    "anio TEXT NOT NULL, " +
-                    "fecha_pago TEXT, " +
-                    "forma_pago TEXT NOT NULL, " +
-                    "estado_pago TEXT NOT NULL, " +
-                    "asistencia_semanal INTEGER NOT NULL, " +
-                    "cuota DOUBLE NOT NULL, " +
-                    "anotacion TEXT, " +
-                    "UNIQUE (alumno_id, mes, anio), " +
-                    "FOREIGN KEY (alumno_id) REFERENCES ALUMNO (id) ON DELETE CASCADE);";
-            st.execute(sql);
-
-            // Crea la tabla "DIRECCION"
-            sql = "CREATE TABLE IF NOT EXISTS DIRECCION (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "calle TEXT, " +
-                    "numero INTEGER, " +
-                    "localidad_id INTEGER NOT NULL, " +
-                    "codigo_postal INTEGER, " +
-                    "FOREIGN KEY (localidad_id) REFERENCES LOCALIDAD (id));";
-            st.execute(sql);
-
-            // Crea la tabla "ALUMNO"
-            sql = "CREATE TABLE IF NOT EXISTS ALUMNO (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "nombre TEXT NOT NULL, " +
-                    "apellido1 TEXT NOT NULL, " +
-                    "apellido2 TEXT NOT NULL, " +
-                    "genero TEXT NOT NULL, " +
-                    "direccion_id INTEGER NOT NULL, " +
-                    "fecha_nacimiento TEXT NOT NULL, " +
-                    "telefono INTEGER NOT NULL, " +
-                    "email TEXT, " +
-                    "estado TEXT NOT NULL, " +
-                    "asistencia_semanal INTEGER NOT NULL, " +
-                    "forma_pago TEXT NOT NULL, " +
-                    "FOREIGN KEY (direccion_id) REFERENCES DIRECCION (id));";
-            st.execute(sql);
-
-            // Crea la tabla "JORNADA"
-            sql = "CREATE TABLE IF NOT EXISTS JORNADA (" +
-                    "fecha TEXT PRIMARY KEY, " +
-                    "comentario TEXT);";
-            st.execute(sql);
-
-            // Crea la tabla "CLASE"
-            sql = "CREATE TABLE IF NOT EXISTS CLASE (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "numero INTEGER NOT NULL, " +
-                    "tipo TEXT NOT NULL, " +
-                    "hora TEXT NOT NULL, " +
-                    "anotaciones TEXT," +
-                    "jornada TEXT NOT NULL, " +
-                    "FOREIGN KEY (jornada) REFERENCES JORNADA (fecha), " +
-                    "UNIQUE (numero, jornada), " +
-                    "CHECK (jornada IS NOT NULL));";
-            st.execute(sql);
-
-            //Crea la tabla "GRUPO"
-            sql = "CREATE TABLE IF NOT EXISTS GRUPOALUMNOS (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "nombre TEXT NOT NULL, " +
-                    "descripcion TEXT NOT NULL, " + 
-                    "UNIQUE (nombre));";
-            st.execute(sql);
-
-            // Crea la tabla "CLASE_ALUMNO"
-            sql = "CREATE TABLE IF NOT EXISTS CLASE_ALUMNO (" +
-                    "clase_id INTEGER NOT NULL, " +
-                    "alumno_id INTEGER NOT NULL, " +
-                    "PRIMARY KEY (clase_id, alumno_id), " +
-                    "FOREIGN KEY (clase_id) REFERENCES CLASE (id) ON DELETE CASCADE, " +
-                    "FOREIGN KEY (alumno_id) REFERENCES ALUMNO (id) ON DELETE CASCADE);";
-            st.execute(sql);
-
-            // Crea la tabla "GRUPO_ALUMNO"
-            sql = "CREATE TABLE IF NOT EXISTS GRUPOALUMNOS_ALUMNO (" +
-                    "grupo_id INTEGER NOT NULL, " +
-                    "alumno_id INTEGER NOT NULL, " + 
-                    "PRIMARY KEY (grupo_id, alumno_id), " +
-                    "FOREIGN KEY (grupo_id) REFERENCES GRUPOALUMNOS (id) ON DELETE CASCADE " +
-	                "FOREIGN KEY (alumno_id) REFERENCES ALUMNO (id) ON DELETE CASCADE);";
-            st.execute(sql);
-
-            conn.commit(); //Confirma la transacción de la inserción de los datos.
-            result = true;
-        } catch (SQLException e) {
-            conn.rollback(); // Si hay algun error hacemos un rollback en la inserción de los datos.
-            logger.severe("Excepción SQL: " + e.toString());
-            e.printStackTrace();
-        } finally {
-            conn.setAutoCommit(true);
-            if (st != null) st.close();
-        }
-
-        logger.config("BD: Creadas tablas.");
-        cn.desconectar(conn);
-        
-        if(!insertProvincias()) {logger.warning("BD: NO se han insertado las provincias y localidades.");}
-        if(!insertPreciosClase()) {logger.warning("BD: NO se han insertado los precios de las clases.");}
-            
-        return result;
-    }
-
-
-    /**
-     * Inserta las provincias y localidades en la base de datos.
-     * 
-     * @return true si se insertaron las provincias y localidades correctamente, false en caso contrario.
-     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
-     */
-    private boolean insertProvincias() throws SQLException{
-        ConexionBD cn = INSTANCE;
-        boolean result = false;
-        conn = cn.conectar();
-
-        try {
-            st = conn.createStatement();
-            conn.setAutoCommit(false);
-
-            st.execute("INSERT INTO PROVINCIA (nombre) VALUES ('" + "Murcia" + "');");
-            st.execute("INSERT INTO PROVINCIA (nombre) VALUES ('" + "Alicante" + "');");
-
-            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Alquerias" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
-            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Santa Cruz" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
-            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "El Raal" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
-            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Los Ramos" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
-            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "LLano de Brujas" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
-            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Puente Tocinos" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
-            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Beniel" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
-            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Casillas" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
-            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Santomera" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Murcia" + "'));");
-            st.execute("INSERT INTO LOCALIDAD (nombre, provincia_id) VALUES ('" + "Orihuela" + "', (SELECT id FROM PROVINCIA WHERE nombre = '" + "Alicante" + "'));");
-
-            conn.commit(); //Confirma la transacción de la inserción de los datos.
-            result = true;
-        } catch (SQLException e) {
-            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
-            logger.severe("Excepción SQL: " + e.toString());
-            e.printStackTrace();
-        } finally {
-            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            if (st != null) {st.close();}
-        }
-
-        cn.desconectar(conn);
-        return result;
-    }
-
-
-    /**
-     * Inserta los precios de las clases en la base de datos.
-     * 
-     * @return true si se insertaron los precios de las clases correctamente, false en caso contrario.
-     * @throws SQLException Si ocurre algún error al ejecutar las consultas SQL.
-     */
-    private boolean insertPreciosClase() throws SQLException{
-        ConexionBD cn = INSTANCE;
-        boolean result = false;
-        conn = cn.conectar();
-
-        try {
-            st = conn.createStatement();
-            conn.setAutoCommit(false);
-
-            st.execute("INSERT INTO PRECIO_CLASE (numero_clases, precio) VALUES (" + 1 + ", " + 25.00 + ");");
-            st.execute("INSERT INTO PRECIO_CLASE (numero_clases, precio) VALUES (" + 2 + ", " + 35.00 + ");");
-            st.execute("INSERT INTO PRECIO_CLASE (numero_clases, precio) VALUES (" + 3 + ", " + 40.00 + ");");
-            st.execute("INSERT INTO PRECIO_CLASE (numero_clases, precio) VALUES (" + 4 + ", " + 50.00 + ");");
-            
-            conn.commit(); //Confirma la transacción de la inserción de los datos.
-            result = true;
-        } catch (SQLException e) {
-            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
-            logger.severe("Excepción SQL: " + e.toString());
-            e.printStackTrace();
-        } finally {
-            conn.setAutoCommit(true); //Restaura autocommit a true después de confirmar la transacción.
-            if(st != null) {st.close();}
-        }
-
-        cn.desconectar(conn);
-        return result;
-    }
-
 
     /**
      * Cambia la contraseña de la base de datos.
