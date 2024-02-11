@@ -8,9 +8,9 @@ import java.sql.Statement;
  * Clase encargada de la gestión de creación de tablas en la base de datos.
  * 
  */
-class TablaManager {
-	
-	/**
+public class TablaManager {
+    
+    /**
 	 * Crea las tablas necesarias en la base de datos de la aplicación.
 	 * Utiliza la conexión a la base de datos proporcionada.
 	 *
@@ -22,7 +22,7 @@ class TablaManager {
         String sql;
         Boolean result = false;
 
-		//El bloque try-with-resources se encarga de cerrar automáticamente el Statement al salir del bloque.
+        //El bloque try-with-resources se encarga de cerrar automáticamente el Statement al salir del bloque.
         try (Statement st = conn.createStatement()) {
 			//Crea la tabla "usuario" de la App.
 			sql = "CREATE TABLE IF NOT EXISTS USUARIO (" +
@@ -39,7 +39,7 @@ class TablaManager {
         return result;
     }
 
-    
+
     /**
      * Crea las tablas necesarias en la base de datos del usuario.
      * Utiliza la conexión a la base de datos proporcionada.
@@ -180,4 +180,6 @@ class TablaManager {
             
         return result;
     }
+
+    
 }

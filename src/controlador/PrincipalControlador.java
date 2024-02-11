@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.FileHandler;
@@ -31,6 +32,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import modelo.Alumno;
+import modelo.GrupoAlumnos;
 import modelo.Jornada;
 import modelo.Mensualidad;
 import modelo.Usuario;
@@ -44,6 +46,7 @@ public class PrincipalControlador implements Initializable {
 	private String menuSeleccionado = "ninguno";
 	private ObservableList<Alumno> listadoAlumnosGeneral;
 	private ObservableList<Mensualidad> listadoMensualidadesGeneral;
+	private ObservableList<GrupoAlumnos> listadoGruposAlumnosGeneral;
 	private ConexionBD conexionBD;
 	private Toast toast = new Toast();
 
@@ -279,7 +282,9 @@ public class PrincipalControlador implements Initializable {
 				
 				AlumnosControlador controller = loader.getController(); // cargo el controlador.
 				controller.setListaAlumnos(listadoAlumnosGeneral);
+				controller.setListaGruposAlumnos(listadoGruposAlumnosGeneral);
 				controller.setUsuarioActual(usuarioActual);
+				controller.setControladorPrincipal(this);
 				
 			} catch (IOException e) {
 				logUser.log(Level.SEVERE, "Excepción: " + e.toString());
@@ -403,6 +408,7 @@ public class PrincipalControlador implements Initializable {
 				
 				AjustesControlador controller = loader.getController(); // cargo el controlador.
 				controller.setListaAlumnos(listadoAlumnosGeneral);
+				controller.setListadoGruposAlumnos(listadoGruposAlumnosGeneral);
             	
 			} catch (IOException e) {
 				logUser.log(Level.SEVERE, "Excepción: " + e.toString());
@@ -624,16 +630,47 @@ public class PrincipalControlador implements Initializable {
 		try {
 			listadoAlumnosGeneral = FXCollections.observableArrayList(conexionBD.getListadoAlumnos());
 			listadoMensualidadesGeneral = FXCollections.observableArrayList(conexionBD.getListadoMensualidades());
-			
+			listadoGruposAlumnosGeneral = FXCollections.observableArrayList(conexionBD.getListadoGruposAlumnos());
+	
 			for (Alumno a : listadoAlumnosGeneral) {
 				for (Mensualidad m : listadoMensualidadesGeneral) {
 					if(a.getId() == m.getIdAlumno()) {a.addMensualidad(m);}
 				}
 			}
+
+			//Actualiza las listas de alumnos de los grupos por los alumnos de la lista general de la aplicación.
+			for (GrupoAlumnos grupo : listadoGruposAlumnosGeneral) {
+				grupo.setListaAlumnos(actualizarListaAlumnos(grupo.getListaAlumnos()));
+			}
+
+			System.out.println("hola");
 		} catch (Exception e) {
 			logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Reemplaza los alumnos de una lista de alumnos por los alumnos de la aplicación.
+	 * 
+	 * @param listaAlumnos La lista de alumnos a remplazar.
+	 * @return La nueva lista de alumnos con los alumnos de la aplicación.
+	 */
+	private ArrayList<Alumno> actualizarListaAlumnos(ArrayList<Alumno> listaAlumnos) {
+		ArrayList<Alumno> nuevaListaAlumnos = new ArrayList<Alumno>();
+		
+		//Itera sobre la lista de alumnos proporcionada.
+		for(Alumno alumno : listaAlumnos) {
+			//Compara cada alumno con los alumnos de la aplicación.
+			for(Alumno alumnoApp : listadoAlumnosGeneral) {
+				//Si encuentra una coincidencia por ID, agrega el alumno de la aplicación a la nueva lista.
+				if(alumno.getId() == alumnoApp.getId()) {
+					nuevaListaAlumnos.add(alumnoApp);
+					break;
+				}
+			}
+		}
+		return nuevaListaAlumnos; //Devuelve la nueva lista de alumnos.
 	}
 
 

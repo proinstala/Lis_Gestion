@@ -46,6 +46,7 @@ public class Alumno extends Persona implements Cloneable {
 		this.listaMensualidades = new ArrayList<Mensualidad>();
 	}
 	
+
 	/**
 	 * Contructor con parametros.
 	 * Crea un objeto de tipo Alumno con los datos pasados por parametros.
@@ -111,7 +112,7 @@ public class Alumno extends Persona implements Cloneable {
 		this.formaPago = new SimpleObjectProperty<FormaPago>(formaPago);
 		this.listaMensualidades = new ArrayList<Mensualidad>(listaMensualidades);
 	}
-	
+
 
 	/**
 	 * Contructor de copia.
@@ -131,8 +132,8 @@ public class Alumno extends Persona implements Cloneable {
 		listaMensualidades = new ArrayList<Mensualidad>(a.getListaMensualidades());
 	}
 
-	public Object clone(){
-        
+	
+	public Object clone(){  
     	Alumno obj = new Alumno();
 
 		obj.setId(this.id.getValue().intValue());

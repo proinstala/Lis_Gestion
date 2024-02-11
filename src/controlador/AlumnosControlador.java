@@ -49,6 +49,7 @@ import javafx.util.Duration;
 import modelo.Alumno;
 import modelo.EstadoAlumno;
 import modelo.Genero;
+import modelo.GrupoAlumnos;
 import modelo.Usuario;
 import utilidades.Constants;
 import utilidades.Toast;
@@ -62,8 +63,10 @@ public class AlumnosControlador implements Initializable {
     private final String ORDEN_ESTADO = "ESTADO";
     private final String ORDEN_GENERO = "GENERO";
 
+    private PrincipalControlador controladorPincipal;
     private FilteredList<Alumno> filtro;
-    private ObservableList<Alumno> listadoAlumnos;
+    private ObservableList<Alumno> listadoAlumnosGeneral;
+    private ObservableList<GrupoAlumnos> listadoGruposAlumnosGeneral;
     private DateTimeFormatter formatter;
     private ConexionBD conexionBD;
     private Logger logUser;
@@ -94,6 +97,9 @@ public class AlumnosControlador implements Initializable {
 
     @FXML
     private Button btnVer;
+
+    @FXML
+    private Button btnGruposAlumnos;
 
     @FXML
     private ComboBox<String> cbEstado;
@@ -390,7 +396,7 @@ public class AlumnosControlador implements Initializable {
     		if (result.get() == ButtonType.OK) {
                 try {
                     if(conexionBD.borrarAlumno(alumnoSeleccionado)) {
-                        listadoAlumnos.remove(alumnoSeleccionado);
+                        listadoAlumnosGeneral.remove(alumnoSeleccionado);
                         logUser.config("Eliminado Alumno. " + alumnoSeleccionado.toString());
                         toast.show((Stage) bpAlumnos.getScene().getWindow(), "Alumno eliminado!!.");
                     } else {
@@ -521,7 +527,7 @@ public class AlumnosControlador implements Initializable {
             ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
 
             controller.modoFormulario(controller.MODO_NUEVO_ALUMNO);
-            controller.setListaAlumnos(listadoAlumnos);
+            controller.setListaAlumnos(listadoAlumnosGeneral);
 
             Scene scene = new Scene(FormAlumno);
             scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
@@ -536,6 +542,27 @@ public class AlumnosControlador implements Initializable {
             e.printStackTrace();
         }	
     }    
+
+    @FXML
+    void gruposAlumnos(MouseEvent event) {
+        try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/gruposAlumnosVista.fxml"));
+			BorderPane bpGruposAlumnos;
+			bpGruposAlumnos = (BorderPane) loader.load();
+			controladorPincipal.setPane(bpGruposAlumnos);
+			
+			GruposAlumnosControlador controller = loader.getController(); //cargo el controlador.
+			controller.setControladorPrincipal(controladorPincipal);
+			controller.setListaAlumnos(listadoAlumnosGeneral);
+            
+		} catch (IOException e) {
+			logUser.severe("Excepción: " + e.toString());
+			e.printStackTrace();
+		} catch (Exception e) {
+			logUser.severe("Excepción: " + e.toString());
+			e.printStackTrace();
+		}
+    }
 
 
     /**
@@ -612,7 +639,7 @@ public class AlumnosControlador implements Initializable {
             }
         		
             if (cbModoFiltro.getValue() == "Nombre Alumno") {
-                for(Alumno alumno : listadoAlumnos) {
+                for(Alumno alumno : listadoAlumnosGeneral) {
                     if(obj.getId() == alumno.getId()) {
                         if(alumno.getNombreCompleto().toLowerCase().contains(texto.toLowerCase())) {
                             return true;
@@ -666,7 +693,7 @@ public class AlumnosControlador implements Initializable {
             }
         }
         
-        Collections.sort(listadoAlumnos, comparador); //Odena la lista de alumnos "listadoAlumnos" segun los criterios seleccionados.
+        Collections.sort(listadoAlumnosGeneral, comparador); //Odena la lista de alumnos "listadoAlumnos" segun los criterios seleccionados.
     }
 
 
@@ -723,9 +750,9 @@ public class AlumnosControlador implements Initializable {
 	 * @param lista La lista de donde se obtienen los Alumnos.
 	 */
 	public void setListaAlumnos(ObservableList<Alumno> lista) {
-        listadoAlumnos = lista; //Guado la lista pasada a la lista de Clasecontrolador.
+        listadoAlumnosGeneral = lista; //Guado la lista pasada a la lista de Clasecontrolador.
 		//tvAlumnos.setItems(listadoAlumnos);
-		filtro = new FilteredList<Alumno>(listadoAlumnos); //Inicio el filtro pasandole el listado de alumnos.
+		filtro = new FilteredList<Alumno>(listadoAlumnosGeneral); //Inicio el filtro pasandole el listado de alumnos.
 		tvAlumnos.setItems(filtro); //Añado la lista de alumnos TextView tvAlumnos.
         
         IntegerProperty tamLista = new SimpleIntegerProperty(filtro.size());
@@ -741,6 +768,11 @@ public class AlumnosControlador implements Initializable {
         setupDatosTalba(); //configuro los bindign para que se actualice los labels de informacion de la tableViev.
 	}
 
+
+    public void setListaGruposAlumnos(ObservableList<GrupoAlumnos> listaGrupos) {
+        listadoGruposAlumnosGeneral = listaGrupos;
+    }
+
     /**
 	 * Etablece el usuario que esta usando la aplicación.
      * 
@@ -748,5 +780,14 @@ public class AlumnosControlador implements Initializable {
 	 */
 	public void setUsuarioActual(Usuario usuarioActual) {
 		this.usuario = usuarioActual;
+	}
+
+    /**
+	 * Establece para este controlador, el controlador principal de la aplicacion.
+	 * 
+	 * @param principal Controlador principal.
+	 */
+	public void setControladorPrincipal(PrincipalControlador principal) {
+		controladorPincipal = principal;
 	}
 }

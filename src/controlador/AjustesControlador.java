@@ -42,7 +42,7 @@ public class AjustesControlador implements Initializable {
     private ObservableList<Alumno> listadoAlumnosGeneral;
     private ObservableList<String> listadoProvincias;
     private ObservableList<String> listadoLocalidades;
-    private ObservableList<GrupoAlumnos> listadoGruposAlumnos;
+    private ObservableList<GrupoAlumnos> listadoGruposAlumnosGeneral;
     private Map<Integer, Double> precios_clases;
 
     private DecimalFormat decimalFormat;
@@ -189,8 +189,6 @@ public class AjustesControlador implements Initializable {
             cbNumeroAsistencias.setItems(FXCollections.observableArrayList(new Integer[] {1,2,3,4}));
         }
 
-        cbGrupoSetup();
-
         cbProvinciaSetup();
 
         if(listadoProvincias != null) {
@@ -198,8 +196,8 @@ public class AjustesControlador implements Initializable {
             cbLocalidadSetup(cbProvincia.getValue());
         }
 
-        cbLocalidad.getSelectionModel().selectedItemProperty().addListener((o, nv, ov) -> {
-            tfLocalidad.setText(ov);
+        cbLocalidad.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
+            tfLocalidad.setText(nv);
         });
         
         //Configurar un evento de clic del ratón para la imagen "ivEditarPrecio" para editar el precio de las clases.
@@ -353,6 +351,31 @@ public class AjustesControlador implements Initializable {
             }
         });
 
+        //Configurar un evento de clic del ratón para la imagen "ivAddGrupo" para añadir un grupo de alumnos.
+        ivAddGrupo.setOnMouseClicked(e -> {
+            //if (comporobarCamposLocalidad("ivAddLocalidad")) {
+            if (true) {
+                String nombre = tfNombreGrupo.getText();
+                String descripcion = tfDescripcionGrupo.getText();
+                GrupoAlumnos nuevoGrupoAlumnos = new GrupoAlumnos(-1, nombre, descripcion);
+
+                try {
+                    if(conexionBD.insertarGrupoAlumnos(nuevoGrupoAlumnos)) {
+                        listadoGruposAlumnosGeneral.add(nuevoGrupoAlumnos);
+                        //Mostrar una notificación de éxito en la interfaz gráfica.
+                        toast.show((Stage) gpAjustes.getScene().getWindow(),"Grupo añadido!");
+                        cbGrupo.getSelectionModel().select(nuevoGrupoAlumnos);
+                    } else {
+                        //Mostrar una notificación en la interfaz gráfica.
+                        toast.show((Stage) gpAjustes.getScene().getWindow(),"NO se ha añadido el Grupo!");
+                    }
+                } catch (Exception ex) {
+                    toast.show((Stage) gpAjustes.getScene().getWindow(),"Fallo al añadir el Grupo.");
+
+                    logUser.severe("Excepción: " + ex.toString());
+                }
+            }
+        });
     }
 
 
@@ -361,6 +384,8 @@ public class AjustesControlador implements Initializable {
      * 
      */
     private void cbGrupoSetup() {
+        cbGrupo.setItems(listadoGruposAlumnosGeneral);
+
         //Establecer el texto a mostrar en el ComboBox utilizando un CellFactory.
         cbGrupo.setCellFactory(param -> new ListCell<GrupoAlumnos>() {
             @Override
@@ -369,7 +394,7 @@ public class AjustesControlador implements Initializable {
                 if (empty || grupo == null) {
                     setText(null);
                 } else {
-                    setText(grupo.getId() + " - " + grupo.getNombre()); //Mostrar el ID y el nombre del Alumno en el ComboBox.
+                    setText(grupo.getId() + " - " + grupo.getNombre()); //Mostrar el ID y el nombre del Alumno en el ComboBox cuando está desplegado.
                 }
             }
         });
@@ -379,8 +404,8 @@ public class AjustesControlador implements Initializable {
             @Override
             public String toString(GrupoAlumnos grupo) {
                 if (grupo != null) {
-                    //Mostrar el ID y el nombre del Alumno en el ComboBox cuando está desplegado.
-                    return grupo.getId() + " - " + grupo.getNombre();
+                    //Mostrar el ID y el nombre del Alumno en el ComboBox.
+                    return grupo.getNombre();
                 }
                 return null;
             }
@@ -393,9 +418,10 @@ public class AjustesControlador implements Initializable {
         });
 
         //Establece un listener para que cuando se seleccione un elemento del ComboBox cbAlumnos.
-        cbGrupo.getSelectionModel().selectedItemProperty().addListener((o, nv, ov) -> {
-            //configurarFiltro(ov.getNombreCompleto());
-            //if(checkbFormatoAlumno.isSelected()) {taTexto.setText(textoInformePersonalizado());}
+        cbGrupo.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
+            tfNombreGrupo.setText(nv.getNombre());
+            tfDescripcionGrupo.setText(nv.getDescripcion());
+            System.out.println("** PASO POR AQUI ---------------------------------------------------------");
         });
     }//FIN configurarCbAlumnos.
 
@@ -581,4 +607,17 @@ public class AjustesControlador implements Initializable {
     public void setListaAlumnos(ObservableList<Alumno> lista) {
         listadoAlumnosGeneral = lista;
 	}
+
+
+    /**
+     * Establece la lista de grupos de alumnos para este controlador.
+     * 
+     * @param lista La lista de grupos de alumnos a establecer.
+     */
+    public void setListadoGruposAlumnos(ObservableList<GrupoAlumnos> lista) {
+        listadoGruposAlumnosGeneral = lista;
+
+        //Configura el ComboBox cbGrupo con la lista de grupos.
+        cbGrupoSetup();
+    }
 }

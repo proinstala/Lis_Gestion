@@ -232,6 +232,14 @@
    <bottom>
       <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="20.0" BorderPane.alignment="CENTER">
          <children>
+            <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+               <children>
+                  <Button fx:id="btnGruposAlumnos" mnemonicParsing="false" onMouseClicked="#gruposAlumnos" prefWidth="80.0" text="Grupos" />
+               </children>
+               <HBox.margin>
+                  <Insets left="50.0" />
+               </HBox.margin>
+            </HBox>
             <Button fx:id="btnNuevo" mnemonicParsing="false" onMouseClicked="#nuevoAlumno" prefWidth="80.0" text="Nuevo" />
             <Button fx:id="btnVer" mnemonicParsing="false" onMouseClicked="#verAlumno" prefWidth="80.0" text="Ver" />
             <Button fx:id="btnModificar" mnemonicParsing="false" onMouseClicked="#modificarAlumno" prefWidth="80.0" text="Modificar" />

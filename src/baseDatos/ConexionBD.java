@@ -54,6 +54,8 @@ public class ConexionBD implements Cloneable{
     public final String FINAL_NOMBRE_FICHERO_DB = "datab.db"; 
     private Logger logger;
 
+    private final String SQL_OBTENER_ULTIMO_ID_INSERTADO = "SELECT last_insert_rowid()";
+
     private ConexionBD() {}
 
     /**
@@ -111,7 +113,9 @@ public class ConexionBD implements Cloneable{
      * @throws SQLException Si ocurre un error al cerrar la conexión.
      */
     private void desconectar(Connection con) throws SQLException {
-        con.close();
+        if(con != null) {
+            con.close();
+        }
     }
 
     /**
@@ -2930,19 +2934,12 @@ public class ConexionBD implements Cloneable{
     }
 
     /**
-     * Obtiene la lista de Grupos de Alumnos desde la base de datos.
-     * 
-     * @return Un objeto ArrayList<String> que contiene los nombres de las localidades.
-     * @throws SQLException Si ocurre algún error al ejecutar la consulta SQL.
-     */
-
-    /**
      * Obtiene una lista de todos los grupos de alumnos desde la base de datos.
      *
      * @return Una lista de objetos GrupoAlumnos que representan los grupos almacenados en la base de datos.
      * @throws SQLException Si se produce un error al ejecutar la consulta SQL.
      */
-    public ArrayList<GrupoAlumnos> getGruposAlumnos() throws SQLException {
+    public ArrayList<GrupoAlumnos> getListadoGruposAlumnos() throws SQLException {
         ConexionBD cn = INSTANCE;
         ArrayList<GrupoAlumnos> listaGruposAlumnos = null;
         conn = cn.conectar();
@@ -2961,6 +2958,20 @@ public class ConexionBD implements Cloneable{
                
                 listaGruposAlumnos.add(grupo);
             }
+
+            //Genera las listas de Alumnos de cada Grupo.
+            if(listaGruposAlumnos != null && listaGruposAlumnos.size() > 0) {
+                for (GrupoAlumnos grupoAlumnos : listaGruposAlumnos) {
+                    res = st.executeQuery("SELECT A.id FROM ALUMNO A JOIN GRUPOALUMNOS_ALUMNO G ON(A.id = G.alumno_id) WHERE G.grupo_id = " + grupoAlumnos.getId() + " ;"); //consulta sql a tabla ALUMNO.
+                    
+                    while (res.next()) {
+                        Alumno alumno = new Alumno();
+                        alumno.setId(res.getInt(1));
+                        grupoAlumnos.addAlumno(alumno);
+                    }
+                }
+            }
+
         } catch (SQLException e) {
             logger.severe("Excepción SQL: " + e.toString());
             e.printStackTrace();
@@ -2971,5 +2982,49 @@ public class ConexionBD implements Cloneable{
         
         cn.desconectar(conn);
         return listaGruposAlumnos;
+    }
+
+    /**
+     * Inserta un nuevo grupo de alumnos en la base de datos.
+     *
+     * @param grupoAlumnos El objeto GrupoAlumnos que contiene la información del grupo a insertar.
+     * @return true si la inserción fue exitosa, false si no.
+     */
+    public boolean insertarGrupoAlumnos(GrupoAlumnos grupoAlumnos) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+    
+        String sql = "INSERT INTO GRUPOALUMNOS (nombre, descripcion) values (?, ?);";
+    
+        try {
+            conn.setAutoCommit(false);    
+            ps = conn.prepareStatement(sql);
+            
+            //Establecer los valores de los parámetros.
+            ps.setString(1, grupoAlumnos.getNombre());
+            ps.setString(2, grupoAlumnos.getDescripcion());
+    
+            //Ejecutar la instrucción SQL de inserción.
+            int filasAfectadas = ps.executeUpdate();
+            
+            //Obtenemos el id que se le asignó a grupoAlumnos.
+            st = conn.createStatement();
+            res = st.executeQuery(SQL_OBTENER_ULTIMO_ID_INSERTADO);
+            grupoAlumnos.setId(res.getInt(1)); //Asigna el id obtenido en la consulta.
+    
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            return filasAfectadas > 0;
+        } catch (SQLException e) {
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
+            return false;
+        } finally {
+            if(ps != null) {ps.close();}
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
+
+            conn.setAutoCommit(true);
+            cn.desconectar(conn);
+        }
     }
 }
