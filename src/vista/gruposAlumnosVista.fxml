@@ -78,7 +78,7 @@
                   <Insets right="55.0" />
                </GridPane.margin>
             </ImageView>
-            <ImageView fx:id="ivVolver" fitHeight="42.0" fitWidth="42.0" onMouseClicked="#volver" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+            <ImageView fx:id="ivVolver" fitHeight="42.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
                <image>
                   <Image url="@../recursos/salir_42px.png" />
                </image>
@@ -139,6 +139,9 @@
                <GridPane.margin>
                   <Insets right="40.0" />
                </GridPane.margin>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
             </ImageView>
             <ImageView fx:id="ivBorrarGrupo" fitHeight="30.0" fitWidth="30.0" layoutX="310.0" layoutY="130.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="4" GridPane.valignment="TOP">
                <image>
@@ -147,6 +150,9 @@
                <GridPane.margin>
                   <Insets />
                </GridPane.margin>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
             </ImageView>
             <ImageView fx:id="ivEditarGrupo" fitHeight="30.0" fitWidth="30.0" layoutX="270.0" layoutY="130.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="4" GridPane.valignment="TOP">
                <image>
@@ -155,6 +161,9 @@
                <GridPane.margin>
                   <Insets right="80.0" />
                </GridPane.margin>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
             </ImageView>
          </children>
       </GridPane>

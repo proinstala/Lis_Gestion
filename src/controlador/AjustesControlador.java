@@ -612,10 +612,10 @@ public class AjustesControlador implements Initializable {
     /**
      * Establece la lista de grupos de alumnos para este controlador.
      * 
-     * @param lista La lista de grupos de alumnos a establecer.
+     * @param listaGrupos La lista de grupos de alumnos a establecer.
      */
-    public void setListadoGruposAlumnos(ObservableList<GrupoAlumnos> lista) {
-        listadoGruposAlumnosGeneral = lista;
+    public void setListadoGruposAlumnos(ObservableList<GrupoAlumnos> listaGrupos) {
+        listadoGruposAlumnosGeneral = listaGrupos;
 
         //Configura el ComboBox cbGrupo con la lista de grupos.
         cbGrupoSetup();

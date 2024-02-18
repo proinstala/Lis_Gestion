@@ -6,6 +6,8 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class GrupoAlumnos {
     
@@ -14,7 +16,7 @@ public class GrupoAlumnos {
     private StringProperty descripcion;
 
     private ArrayList<Alumno> listaAlumnos;
-
+    private ObservableList<Alumno> listaAlumnosObservable;
 
     /**
      * Constructor por defecto de la clase GrupoAlumnos.
@@ -25,6 +27,7 @@ public class GrupoAlumnos {
         this.nombre = new SimpleStringProperty("");
         this.descripcion = new SimpleStringProperty("");
         this.listaAlumnos = new ArrayList<Alumno>();
+        this.listaAlumnosObservable = FXCollections.observableArrayList();
     }
 
     /**
@@ -40,6 +43,7 @@ public class GrupoAlumnos {
         this.nombre = new SimpleStringProperty(nombre);
         this.descripcion = new SimpleStringProperty(descripcion);
         this.listaAlumnos = new ArrayList<Alumno>();
+        this.listaAlumnosObservable = FXCollections.observableArrayList();
     }
 
     /**
@@ -54,6 +58,7 @@ public class GrupoAlumnos {
         descripcion = new SimpleStringProperty(grupo.getDescripcion());
 
         listaAlumnos = grupo.getListaAlumnos();
+        this.listaAlumnosObservable = FXCollections.observableArrayList(grupo.getListaAlumnos());
     }
 
 
@@ -151,6 +156,17 @@ public class GrupoAlumnos {
 	 */
 	public ArrayList<Alumno> getListaAlumnos() {
 		return new ArrayList<Alumno>(listaAlumnos);
+        //return FXCollections.observableArrayList(listaAlumnos);
+	}
+
+    // listaAlumnos ----------------------------
+	/**
+	 * Obtiene una nueva lista de alumnos con los alumnos inscritos en el Grupo. 
+	 *
+	 * @return La lista de alumnos inscritos en el grupo.
+	 */
+	public ArrayList<Alumno> getListaAlumnosOriginal() {
+		return listaAlumnos;
 	}
 
 	/**
@@ -160,6 +176,15 @@ public class GrupoAlumnos {
      */
 	public void setListaAlumnos(ArrayList<Alumno> listaAlumnos) {
 		this.listaAlumnos = listaAlumnos;
+	}
+
+    
+	public ObservableList<Alumno> getListaAlumnosObservable() {
+        return listaAlumnosObservable;
+	}
+
+    public void setListaAlumnosObservable(ObservableList<Alumno> listaAlumnosObservable) {
+		this.listaAlumnosObservable = listaAlumnosObservable;
 	}
 
 	/**
@@ -277,7 +302,7 @@ public class GrupoAlumnos {
 
     @Override
     public String toString() {
-        return "GrupoAlumnos [id=" + id + ", nombre=" + nombre + ", descripcion=" + descripcion + ", Nº Alumnos en Grupo=" + numeroAlumnosEnGrupo() +" ]";
+        return getId() + " " + getNombre();
     }
 
 }

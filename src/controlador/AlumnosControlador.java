@@ -476,7 +476,7 @@ public class AlumnosControlador implements Initializable {
                 ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
                 ventana.initStyle(StageStyle.DECORATED);
                 ventana.setMinWidth(550);   //Ancho mínimo de ventana.
-                ventana.setMinHeight(600);  //Alto máximo de venta.
+                ventana.setMinHeight(600);  //Alto mínimo de venta.
                  
                 URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
                 ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
@@ -553,7 +553,9 @@ public class AlumnosControlador implements Initializable {
 			
 			GruposAlumnosControlador controller = loader.getController(); //cargo el controlador.
 			controller.setControladorPrincipal(controladorPincipal);
-			controller.setListaAlumnos(listadoAlumnosGeneral);
+			controller.setListaAlumnosGeneral(listadoAlumnosGeneral);
+            controller.setListaGruposAlumnosGeneral(listadoGruposAlumnosGeneral);
+            controller.configurar();
             
 		} catch (IOException e) {
 			logUser.severe("Excepción: " + e.toString());
@@ -749,7 +751,7 @@ public class AlumnosControlador implements Initializable {
 	 * 
 	 * @param lista La lista de donde se obtienen los Alumnos.
 	 */
-	public void setListaAlumnos(ObservableList<Alumno> lista) {
+	public void setListaAlumnosGeneral(ObservableList<Alumno> lista) {
         listadoAlumnosGeneral = lista; //Guado la lista pasada a la lista de Clasecontrolador.
 		//tvAlumnos.setItems(listadoAlumnos);
 		filtro = new FilteredList<Alumno>(listadoAlumnosGeneral); //Inicio el filtro pasandole el listado de alumnos.
@@ -768,10 +770,17 @@ public class AlumnosControlador implements Initializable {
         setupDatosTalba(); //configuro los bindign para que se actualice los labels de informacion de la tableViev.
 	}
 
-
-    public void setListaGruposAlumnos(ObservableList<GrupoAlumnos> listaGrupos) {
+    
+    /**
+     * Establece la lista de grupos de alumnos para este controlador.
+     * 
+     * @param listaGrupos La lista de grupos de alumnos a establecer.
+     */
+    public void setListaGruposAlumnosGeneral(ObservableList<GrupoAlumnos> listaGrupos) {
         listadoGruposAlumnosGeneral = listaGrupos;
     }
+
+    
 
     /**
 	 * Etablece el usuario que esta usando la aplicación.

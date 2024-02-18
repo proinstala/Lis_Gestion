@@ -2,22 +2,30 @@ package controlador;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import baseDatos.ConexionBD;
 import javafx.fxml.Initializable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
@@ -29,9 +37,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import modelo.Alumno;
 import modelo.GrupoAlumnos;
+import modelo.ModoFormulario;
 import modelo.Usuario;
 import utilidades.Constants;
 import utilidades.Toast;
@@ -43,7 +56,10 @@ public class GruposAlumnosControlador implements Initializable {
 	private ObservableList<Alumno> listadoAlumnosGeneral;
     private ObservableList<GrupoAlumnos> listadoGruposAlumnosGeneral;
 	private ObservableList<Alumno> listaAlumnosGrupo;
-    private ObservableList<GrupoAlumnos> listaGrupos;
+    private ObservableList<GrupoAlumnos> listadoGruposAlumnosCopia;
+
+    private GrupoAlumnos grupoAlumnosSeleccionado;
+    private ObservableList<Alumno> listaAlumnosGrupoSeleccionado;
 
     private FilteredList<Alumno> filtro;
     private IntegerBinding totalAlumnosGrupo;
@@ -59,6 +75,9 @@ public class GruposAlumnosControlador implements Initializable {
 	
     private Double tiempoDelay = 0.5;
 	private boolean checkChanges = false;
+    private boolean cambiosListasAlumnosGrupos = false;
+
+    private Stage thisEstage;
     
 
     @FXML
@@ -142,6 +161,7 @@ public class GruposAlumnosControlador implements Initializable {
 
         configurarBotonesImageView();
         configurarTabla(); 
+        configurarControles();
     }
 
 
@@ -240,23 +260,157 @@ public class GruposAlumnosControlador implements Initializable {
         });
     }
 
+    private void configurarListView() {
+        lvGrupos.setItems(listadoGruposAlumnosCopia);  
+        lvGrupos.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
+            grupoAlumnosSeleccionado = nv;
+            listaAlumnosGrupoSeleccionado = grupoAlumnosSeleccionado.getListaAlumnosObservable();
+            lvAlumnosGrupo.setItems(listaAlumnosGrupoSeleccionado);
+            
+            lbNumeroAlumnosGrupo.textProperty().bind(Bindings.createStringBinding(
+                () -> String.format("%d", listaAlumnosGrupoSeleccionado.size()), listaAlumnosGrupoSeleccionado));
+        });
+    }
+
+
+    private void configurarControles() {
+        ivFlechaQuitar.setOnMouseClicked(e -> {
+            borrarAlumnoGrupo();
+        });
+
+        ivFlechaAdd.setOnMouseClicked(e -> {
+            addAlumnoGrupo();
+        });
+
+        ivVolver.setOnMouseClicked(e -> {
+            volver();
+        });
+
+        ivGuardar.setOnMouseClicked(e -> {
+            guardarCambios();
+        });
+
+        ivAddGrupo.setOnMouseClicked(e -> {
+            formNuevoGrupo();
+        });
+        
+    }
+
+    private void formNuevoGrupo() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/grupoAlumnosFormVista.fxml"));
+		    GridPane FormGrupoAlumnos;
+            FormGrupoAlumnos = (GridPane) loader.load();
+            GrupoAlumnosFormControlador controller = loader.getController(); // cargo el controlador.
+            
+            Stage ventana= new Stage();
+            ventana.initOwner(thisEstage);
+            ventana.initModality(Modality.APPLICATION_MODAL); //modalida para bloquear las ventanas de detras.
+            ventana.initStyle(StageStyle.DECORATED);
+            ventana.setMinWidth(400);   //Ancho mínimo de ventana.
+            ventana.setMinHeight(300);  //Alto mínimo de venta.
+
+            URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
+            ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
+
+            controller.modoFormulario(ModoFormulario.CREAR_DATOS);
+            controller.setListaGruposAlumnosCopia(listadoGruposAlumnosCopia);
+            controller.configurar();
+
+            Scene scene = new Scene(FormGrupoAlumnos);
+            scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
+            ventana.setScene(scene);
+            ventana.setTitle("Nuevo Grupo Alumnos");
+            ventana.showAndWait();
+        } catch (IOException e) {
+            logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
+        } catch (Exception e) {
+            logUser.severe("Excepción: " + e.toString());
+            e.printStackTrace();
+        }	
+    }
+
+
+    private void borrarAlumnoGrupo() {
+        int i = lvAlumnosGrupo.getSelectionModel().getSelectedIndex(); //Guardo el indice del elemento seleccionado en la lista.
+        
+        if(i != -1) {
+            Alumno alumno = lvAlumnosGrupo.getSelectionModel().getSelectedItem(); //Obtengo el alumno seleccionado.
+            lvAlumnosGrupo.getItems().remove(alumno);
+            checkChanges = true; //Establece a true la comprobación de cambios sin guardar.
+        } else {
+            toast.show(thisEstage, "No has seleccionado ningún Alumno del Grupo..");
+        }
+    }
+
+
+    private void addAlumnoGrupo() {
+        int i = tvAlumnos.getSelectionModel().getSelectedIndex(); //Guardo el indice del elemento seleccionado en la lista.
+        
+        if(i != -1) {
+            Alumno alumno = tvAlumnos.getSelectionModel().getSelectedItem(); //Obtengo el alumno seleccionado.
+
+            if(lvAlumnosGrupo.getItems().contains(alumno)) {
+                toast.show(thisEstage, "El alumno ya esta inscrito el el grupo selccionado..");
+            } else if(lvAlumnosGrupo.getItems().add(alumno)) {
+                checkChanges = true; //Establece a true la comprobación de cambios sin guardar.
+                toast.show(thisEstage, "Alumno añadido al grupo " + grupoAlumnosSeleccionado.getNombre() + ".");
+            } else {
+                toast.show(thisEstage, "Fallo al agregar Alumno a Grupo.");
+            }
+        } else {
+            toast.show(thisEstage, "No has seleccionado ningún Alumno.");
+        }
+    }
+
+
+    public void guardarCambios() {
+        try {
+            Boolean guardado = false;
+            if(true) {
+                //Guardar los cambios de grupos(nuevos, editados)
+                guardado = true;
+            }
+            if(cambiosListasAlumnosGrupos || cambiosListaAlumnosGrupo()) {
+                //guardar en base de datos
+                //Si guardad sin fallos, entoces hacer operacion de guardar a nivel de aplicacion.
+                for(GrupoAlumnos grupoCopia : listadoGruposAlumnosCopia) {
+                    for(GrupoAlumnos grupoOriginal : listadoGruposAlumnosGeneral) {
+                        if(grupoOriginal.getId() == grupoCopia.getId()) {
+                            grupoOriginal.setListaAlumnos(new ArrayList<>(grupoCopia.getListaAlumnosObservable()));
+                        }
+                    }
+                }
+                guardado = true;
+            }
+
+            if(guardado) {
+                toast.show(thisEstage, "Cambios guardados!");
+            }
+
+            cambiosListasAlumnosGrupos = false;
+            checkChanges = false;
+        } catch (Exception e) {
+			logUser.severe("Excepción: " + e.toString());
+			e.printStackTrace();
+		}
+    }
+
     /**
-	 * Maneja el evento de hacer clic en el botón "Volver".
-	 * Se encarga de cargar la vista de la jornada principal y establecerla como contenido principal.
-	 * Configura el controlador de la vista de la jornada principal y le pasa la lista de alumnos y la jornada actual.
+	 * Se encarga de cargar la vista de Alumnos.
 	 *
-	 * @param event El evento de clic del mouse.
 	 */
-	@FXML
-	void volver(MouseEvent event) {
+	private void volver() {
 		//Comprueba si hay cambios en la clase actual sin guardar para preguntar si se quiere guardar los cambios.
-		// if (checkChanges && (cambiosConfigClase() || cambiosListaClase())) {
-		// 	ButtonData typeAnswer = saveForgottenChanges();
-		// 	//Si la respuesta es cancelar, se mantiene la vista de clase.
-		// 	if (typeAnswer == ButtonData.CANCEL_CLOSE) {
-		// 		return; //Termina la ejecución de este metodo.
-		// 	}
-		// }
+        cambiosListasAlumnosGrupos = cambiosListaAlumnosGrupo();
+		if (checkChanges && cambiosListasAlumnosGrupos) {
+			ButtonData typeAnswer = saveForgottenChanges();
+			//Si la respuesta es cancelar, se mantiene la vista de clase.
+			if (typeAnswer == ButtonData.CANCEL_CLOSE) {
+				return; //Termina la ejecución de este metodo.
+			}
+		}
 
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/alumnosVista.fxml"));
@@ -265,10 +419,10 @@ public class GruposAlumnosControlador implements Initializable {
 			controladorPincipal.setPane(alumnos);
 
 			AlumnosControlador controller = loader.getController(); //cargo el controlador.
-			controller.setListaAlumnos(listadoAlumnosGeneral);
+			controller.setListaAlumnosGeneral(listadoAlumnosGeneral);
+            controller.setListaGruposAlumnosGeneral(listadoGruposAlumnosGeneral);
             controller.setUsuarioActual(usuario);
             controller.setControladorPrincipal(controladorPincipal);
-			//controller.inicializacion(jornada);
 			
 		} catch (IOException e) {
 			logUser.severe("Excepción: " + e.toString());
@@ -281,12 +435,67 @@ public class GruposAlumnosControlador implements Initializable {
 
 
     /**
-	 * Establece para este controlador, el controlador principal de la aplicacion.
-	 * 
-	 * @param principal Controlador principal.
+	 * Muestra una alerta para confirmar si se desean guardar los cambios sin guardar.
+	 *
+	 * @return El tipo de respuesta del usuario (Si, No o Cancelar).
 	 */
-	public void setControladorPrincipal(PrincipalControlador principal) {
-		controladorPincipal = principal;
+	private ButtonData saveForgottenChanges() {
+		alerta = new Alert(AlertType.CONFIRMATION);
+		alerta.getDialogPane().getStylesheets().add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de// estilos.
+		alerta.setTitle("Cambios sin guardar");
+		alerta.setHeaderText("Hay cambios sin guardar en los Grupos.");
+		alerta.setContentText("¿Quieres guardar los cambios?");
+		alerta.initStyle(StageStyle.DECORATED);
+		alerta.initOwner(thisEstage); //Establece la ventana propietaria de la alerta.
+
+		//Define los botones de la alerta.
+		ButtonType buttonTypeConfirmar  = new ButtonType("Si", ButtonData.YES);
+		ButtonType buttonTypeDescartar   = new ButtonType("No", ButtonData.NO);
+		ButtonType buttonTypeCancel = new ButtonType("Cancelar", ButtonData.CANCEL_CLOSE);
+		alerta.getButtonTypes().setAll(buttonTypeConfirmar, buttonTypeDescartar , buttonTypeCancel);
+		
+		//Muestra la alerta y espera la respuesta del usuario.
+		Optional<ButtonType> result = alerta.showAndWait();
+		ButtonData typeAnswer = result.get().getButtonData();
+
+		if (typeAnswer == ButtonData.YES) {
+			//Si el usuario selecciona "Si", guarda los cambios y devuelve la respuesta.
+			guardarCambios();
+			return typeAnswer;
+		} else if(typeAnswer == ButtonData.NO) {
+			//Si el usuario selecciona "No", devuelve la respuesta.
+			return typeAnswer;
+		} else {
+			//Si el usuario selecciona "Cancelar", devuelve la respuesta.
+			return typeAnswer;
+		}
+	}
+
+
+    /**
+	 * Comprueba si ha habido cambios en la lista de alumnos inscritos en la clase en comparación con la lista original.
+	 *
+	 * @return true si ha habido cambios, false si no ha habido cambios.
+	 */
+	private boolean cambiosListaAlumnosGrupo() {
+        for(GrupoAlumnos grupo : listadoGruposAlumnosCopia) {
+            //Comprueba que los alumnos de la lista observable del grupo esten en la lista del grupo original.
+            for(Alumno alumno : grupo.getListaAlumnosObservable()) {
+                if(!grupo.estaInscrito(alumno)) {
+                    return true; //Si un alumno de la lista observable no está inscrito en la lista original, devuelve true.
+                }
+            }
+
+            //Comprueba que los alumnos de la lista original del grupo esten en la lista observable del grupo.
+            for(Alumno alumno : grupo.getListaAlumnos()) {
+                if(!grupo.getListaAlumnosObservable().contains(alumno)) {
+                    return true; //Si un alumno de la lista original no está en la lista observable, devuelve true.
+                }
+            }
+        }
+		
+		//Si no ha habido cambios en la lista de alumnos, devuelve false.
+		return false;
 	}
 
 
@@ -295,11 +504,31 @@ public class GruposAlumnosControlador implements Initializable {
 	 * 
 	 * @param lista La lista de donde se obtienen los Alumnos.
 	 */
-	public void setListaAlumnos(ObservableList<Alumno> lista) {
+	public void setListaAlumnosGeneral(ObservableList<Alumno> lista) {
 		listadoAlumnosGeneral = lista;
 		filtro = new FilteredList<Alumno>(listadoAlumnosGeneral); //Inicio el filtro pasandole el listado de alumnos.
 		tvAlumnos.setItems(filtro); //Añado la lista de alumnos TextView tvAlumnos.
 	}
+
+
+    /**
+     * Establece la lista de grupos de alumnos para este controlador.
+     * 
+     * @param listaGrupos La lista de grupos de alumnos a establecer.
+     */
+    public void setListaGruposAlumnosGeneral(ObservableList<GrupoAlumnos> listaGrupos) {
+        listadoGruposAlumnosGeneral = listaGrupos;
+        listadoGruposAlumnosCopia = FXCollections.observableArrayList();
+        
+        //Hace una copia de cada grupo de listadoGruposAlumnosGeneral y lo asigna a listadoGruposAlumnosCopia
+        for(GrupoAlumnos g : listadoGruposAlumnosGeneral) {
+            GrupoAlumnos grupoCopia = new GrupoAlumnos(g);
+            //g.setListaAlumnosObservable(FXCollections.observableArrayList(g.getListaAlumnos()));
+            listadoGruposAlumnosCopia.add(grupoCopia);
+        }
+        
+        configurarListView();
+    }
 
 
     /**
@@ -310,4 +539,19 @@ public class GruposAlumnosControlador implements Initializable {
 	public void setUsuarioActual(Usuario usuarioActual) {
 		this.usuario = usuarioActual;
 	}
+
+
+    /**
+	 * Establece para este controlador, el controlador principal de la aplicacion.
+	 * 
+	 * @param principal Controlador principal.
+	 */
+	public void setControladorPrincipal(PrincipalControlador principal) {
+		controladorPincipal = principal;
+	}
+
+    public void configurar() {
+        thisEstage = (Stage) bpGruposAlumnos.getScene().getWindow(); //Obtengo el Stage para mostrar Toast.
+    }
+
 }

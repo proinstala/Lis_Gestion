@@ -281,8 +281,8 @@ public class PrincipalControlador implements Initializable {
 				bpPrincipal.setCenter(alumnos);
 				
 				AlumnosControlador controller = loader.getController(); // cargo el controlador.
-				controller.setListaAlumnos(listadoAlumnosGeneral);
-				controller.setListaGruposAlumnos(listadoGruposAlumnosGeneral);
+				controller.setListaAlumnosGeneral(listadoAlumnosGeneral);
+				controller.setListaGruposAlumnosGeneral(listadoGruposAlumnosGeneral);
 				controller.setUsuarioActual(usuarioActual);
 				controller.setControladorPrincipal(this);
 				
@@ -643,7 +643,6 @@ public class PrincipalControlador implements Initializable {
 				grupo.setListaAlumnos(actualizarListaAlumnos(grupo.getListaAlumnos()));
 			}
 
-			System.out.println("hola");
 		} catch (Exception e) {
 			logUser.severe("Excepción: " + e.toString());
 			e.printStackTrace();
@@ -657,7 +656,8 @@ public class PrincipalControlador implements Initializable {
 	 * @return La nueva lista de alumnos con los alumnos de la aplicación.
 	 */
 	private ArrayList<Alumno> actualizarListaAlumnos(ArrayList<Alumno> listaAlumnos) {
-		ArrayList<Alumno> nuevaListaAlumnos = new ArrayList<Alumno>();
+		//ObservableList<Alumno> nuevaListaAlumnos = FXCollections.observableArrayList();
+		ArrayList<Alumno> nuevaListaAlumnos = new ArrayList<>();
 		
 		//Itera sobre la lista de alumnos proporcionada.
 		for(Alumno alumno : listaAlumnos) {
