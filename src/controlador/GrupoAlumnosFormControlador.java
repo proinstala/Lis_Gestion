@@ -66,7 +66,7 @@ public class GrupoAlumnosFormControlador implements Initializable {
     private Button btnConfirmacion;
 
     @FXML
-    private GridPane gpFormGrupoAlimnos;
+    private GridPane gpFormGrupoAlumnos;
 
     @FXML
     private ImageView ivImagenTipoFormulario;
@@ -86,6 +86,29 @@ public class GrupoAlumnosFormControlador implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         
+    }
+
+
+
+    private void configurarControles() {
+        btnConfirmacion.setOnMouseClicked(e -> {
+            guardarCambios(); //Guardar cambios hecho en el formulario.
+        });
+
+        btnCancelar.setOnMouseClicked(e -> {
+            thisEstage.close(); //Cerrar la ventana.
+        });
+    }
+
+    private void guardarCambios() {
+        if(comprobarCampos()) {
+            if(modoFormulario.equals(ModoFormulario.CREAR_DATOS)) {
+                listadoGruposAlumnosCopia.add(newGrupo);
+                thisEstage.close();
+            } else {
+
+            }
+        }
     }
 
 
@@ -131,8 +154,8 @@ public class GrupoAlumnosFormControlador implements Initializable {
 
         //Si no hay errores en los campos, guarda la informacion en las variables.
         if (camposCorrectos) {
-            nombre = tfNombre.getText();
-            descripcion = taDescripcion.getText();
+            newGrupo.setNombre(tfNombre.getText());
+            newGrupo.setDescripcion(taDescripcion.getText()); 
         }
 
         return camposCorrectos;
@@ -159,8 +182,10 @@ public class GrupoAlumnosFormControlador implements Initializable {
 	}
 
 
-    public void configurar() {
-        thisEstage = (Stage) gpFormGrupoAlimnos.getScene().getWindow(); //Obtengo el Stage para mostrar Toast.
+    public void configurar(Stage stage) {
+        //thisEstage = (Stage) gpFormGrupoAlumnos.getScene().getWindow(); //Obtengo el Stage para mostrar Toast.
+        thisEstage = stage;
+        configurarControles();
     }
 
 

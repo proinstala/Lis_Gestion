@@ -3027,4 +3027,50 @@ public class ConexionBD implements Cloneable{
             cn.desconectar(conn);
         }
     }
+
+
+    /**
+     * Inserta un nuevo grupo de alumnos en la base de datos.
+     *
+     * @param grupoAlumnos El objeto GrupoAlumnos que contiene la información del grupo a insertar.
+     * @return true si la inserción fue exitosa, false si no.
+     */
+    // public boolean insertarGrupoAlumnos(GrupoAlumnos grupoAlumnos) throws SQLException {
+    //     ConexionBD cn = INSTANCE;
+    //     conn = cn.conectar();
+    
+    //     String sql = "INSERT INTO GRUPOALUMNOS (nombre, descripcion) values (?, ?);";
+    
+    //     try {
+    //         conn.setAutoCommit(false);    
+    //         ps = conn.prepareStatement(sql);
+            
+    //         //Establecer los valores de los parámetros.
+    //         ps.setString(1, grupoAlumnos.getNombre());
+    //         ps.setString(2, grupoAlumnos.getDescripcion());
+    
+    //         //Ejecutar la instrucción SQL de inserción.
+    //         int filasAfectadas = ps.executeUpdate();
+            
+    //         //Obtenemos el id que se le asignó a grupoAlumnos.
+    //         st = conn.createStatement();
+    //         res = st.executeQuery(SQL_OBTENER_ULTIMO_ID_INSERTADO);
+    //         grupoAlumnos.setId(res.getInt(1)); //Asigna el id obtenido en la consulta.
+    
+    //         conn.commit(); //Confirma la transacción de la inserción de los datos.
+    //         return filasAfectadas > 0;
+    //     } catch (SQLException e) {
+    //         conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+    //         logger.severe("Excepción SQL: " + e.toString());
+    //         return false;
+    //     } finally {
+    //         if(ps != null) {ps.close();}
+    //         if(st != null) {st.close();}
+    //         if(res != null) {res.close();} 
+
+    //         conn.setAutoCommit(true);
+    //         cn.desconectar(conn);
+    //     }
+    // }
+    
 }

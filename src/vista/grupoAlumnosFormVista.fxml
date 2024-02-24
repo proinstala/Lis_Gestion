@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<GridPane fx:id="gpFormGrupoAlimnos" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="440.0" prefWidth="470.0" styleClass="fondo_ventana_degradado_toRight" stylesheets="@../hojasEstilos/Styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.GrupoAlumnosFormControlador">
+<GridPane fx:id="gpFormGrupoAlumnos" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="440.0" prefWidth="470.0" styleClass="fondo_ventana_degradado_toRight" stylesheets="@../hojasEstilos/Styles.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.GrupoAlumnosFormControlador">
   <columnConstraints>
     <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="0.0" prefWidth="110.0" />
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -86,6 +86,6 @@
          </GridPane.margin>
       </ImageView>
       <Label text="(* Campo Opcional)" GridPane.halignment="LEFT" GridPane.rowIndex="8" GridPane.valignment="BOTTOM" />
-      <TextArea fx:id="taDescripcion" prefHeight="200.0" prefWidth="200.0" promptText="Añade una descripción al grupo... (OPCIONAL)." GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.rowSpan="2" />
+      <TextArea fx:id="taDescripcion" prefHeight="200.0" prefWidth="200.0" promptText="Añade una descripción al grupo... (OPCIONAL)." wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.rowSpan="2" />
    </children>
 </GridPane>

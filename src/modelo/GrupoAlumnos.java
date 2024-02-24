@@ -61,6 +61,19 @@ public class GrupoAlumnos {
         this.listaAlumnosObservable = FXCollections.observableArrayList(grupo.getListaAlumnos());
     }
 
+    /**
+      * Establece los datos del objeto pasados como parametros a este objeto.
+      * 
+      * @param grupo objeto de donde se obtiene la información.
+      */
+    public void setValoresGrupoAlumnos(GrupoAlumnos grupo) {
+        this.id.set(grupo.getId());
+        this.nombre.set(grupo.getNombre());
+        this.descripcion.set(grupo.getDescripcion());;
+        this.setListaAlumnos(grupo.getListaAlumnosOriginal()); 
+        this.setListaAlumnosObservable(grupo.getListaAlumnosObservable()); 
+    }
+
 
     // id -----------------------------------------
 	/**
