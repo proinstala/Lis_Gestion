@@ -3172,6 +3172,7 @@ public class ConexionBD implements Cloneable{
                                 //Establecer los valores de los parámetros.
                                 ps.setString(1, grupoAlumnos.getNombre());
                                 ps.setString(2, grupoAlumnos.getDescripcion());
+                                ps.setInt(3, grupoAlumnos.getId());
                         
                                 //Ejecutar la instrucción SQL de inserción.
                                 filasAfectadas = 0;
@@ -3208,6 +3209,8 @@ public class ConexionBD implements Cloneable{
                                 return false;
                             }
 
+                            alumnosInsertados = 0; 
+
                             //Recorre la lista de alumnos del grupo para insertalos en la BD.
                             for (var alumno : grupoAlumnos.getListaAlumnosObservable()) {
                                 ps = conn.prepareStatement(sqlAddAlumnoGrupo);
@@ -3217,6 +3220,7 @@ public class ConexionBD implements Cloneable{
                                 ps.setInt(2, alumno.getId());
 
                                 //Ejecutar la instrucción SQL de inserción.
+                                filasAfectadas = 0;
                                 filasAfectadas = ps.executeUpdate();
                                 alumnosInsertados += filasAfectadas; 
                             }
@@ -3225,6 +3229,8 @@ public class ConexionBD implements Cloneable{
                             if(alumnosInsertados != grupoAlumnos.getListaAlumnosObservable().size()) {
                                 return false;
                             }
+
+                            break;
                         }
                     }
                 }
