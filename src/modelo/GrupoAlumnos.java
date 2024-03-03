@@ -58,7 +58,7 @@ public class GrupoAlumnos {
         descripcion = new SimpleStringProperty(grupo.getDescripcion());
 
         listaAlumnos = grupo.getListaAlumnos();
-        this.listaAlumnosObservable = FXCollections.observableArrayList(grupo.getListaAlumnos());
+        this.listaAlumnosObservable = grupo.getListaAlumnosObservable();
     }
 
     /**

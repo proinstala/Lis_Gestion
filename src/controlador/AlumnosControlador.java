@@ -176,8 +176,10 @@ public class AlumnosControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-    	btnBorrar.getStyleClass().add("boton_rojo"); //Añadir clases de estilo CSS a elementos.
+    	//Añadir clases de estilo CSS a elementos.
+        btnBorrar.getStyleClass().add("boton_rojo"); 
         apFiltro.getStyleClass().add("panel_border");
+        ivNotificacion.getStyleClass().add("iv_resaltado");
 
         //Cargar imagenes en ImageView.
         Image imagenLupa;
@@ -397,6 +399,12 @@ public class AlumnosControlador implements Initializable {
                 try {
                     if(conexionBD.borrarAlumno(alumnoSeleccionado)) {
                         listadoAlumnosGeneral.remove(alumnoSeleccionado);
+                        
+                        //Elimina el alumno de las listas de alumnos de los Grupos de Alumnos.
+                        listadoGruposAlumnosGeneral.forEach(g -> {
+                            g.removeAlumno(alumnoSeleccionado);
+                        });
+                        
                         logUser.config("Eliminado Alumno. " + alumnoSeleccionado.toString());
                         toast.show((Stage) bpAlumnos.getScene().getWindow(), "Alumno eliminado!!.");
                     } else {

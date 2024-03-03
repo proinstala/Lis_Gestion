@@ -52,7 +52,9 @@ public class InicioControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        bpInicio.getStyleClass().add("fondo_border_pane"); //Añadir clases de estilo CSS a elementos.
+        //Añadir clases de estilo CSS a elementos.
+        bpInicio.getStyleClass().add("fondo_border_pane"); 
+        ivCarpetaConfig.getStyleClass().add("iv_resaltado");
 
     	//Cargar imagenes en ImageView.
         Image imagenCarpetaConfig;

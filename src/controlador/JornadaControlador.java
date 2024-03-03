@@ -199,6 +199,14 @@ public class JornadaControlador implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		//Añadir clases de estilo CSS a elementos.
+		ivAnteriorJornada.getStyleClass().add("iv_resaltado");
+		ivSiguienteJornada.getStyleClass().add("iv_resaltado");
+		ivBotonCopiarSemana.getStyleClass().add("iv_resaltado");
+		ivBotonCopiarJornada.getStyleClass().add("iv_resaltado");
+		ivBotonBorrarJornada.getStyleClass().add("iv_resaltado");
+        ivBotonCrearJornada.getStyleClass().add("iv_resaltado");
+
 		//Cargar imagenes en ImageView.
         Image flechaRetroceder;
 		Image flechaAvnazar;

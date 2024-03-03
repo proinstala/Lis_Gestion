@@ -106,6 +106,9 @@ public class UsuarioControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //Añadir clases de estilo CSS a elementos.
+        ivBorrarUsuario.getStyleClass().add("iv_resaltado");
+
         //Establecer imagen en ImageView.
         Image imagenBorrarUsuario;
         try {

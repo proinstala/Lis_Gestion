@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 
 import baseDatos.ConexionBD;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
 import javafx.collections.FXCollections;
@@ -28,7 +27,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.control.Labeled;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
@@ -38,13 +36,8 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -160,6 +153,13 @@ public class GruposAlumnosControlador implements Initializable {
         //Añadir clases de estilo CSS a elementos.
         lvGrupos.getStyleClass().add("mi_list-view");
         lvAlumnosGrupo.getStyleClass().add("mi_list-view");
+        ivFlechaAdd.getStyleClass().add("iv_resaltado");
+        ivFlechaQuitar.getStyleClass().add("iv_resaltado");
+        ivVolver.getStyleClass().add("iv_resaltado");
+        ivGuardar.getStyleClass().add("iv_resaltado");
+        ivAddGrupo.getStyleClass().add("iv_resaltado");
+        ivBorrarGrupo.getStyleClass().add("iv_resaltado");
+        ivEditarGrupo.getStyleClass().add("iv_resaltado");
 
         logUser = Logger.getLogger(Constants.USER); //Crea una instancia de la clase Logger asociada al nombre de registro.
         conexionBD = ConexionBD.getInstance();      //Obtener una instancia de la clase ConexionBD utilizando el patrón Singleton.
@@ -211,7 +211,7 @@ public class GruposAlumnosControlador implements Initializable {
         ivLupa.setImage(ImagenLupa);
         ivAddGrupo.setImage(imagenAdd);
         ivBorrarGrupo.setImage(imagenBorrar);
-        ivEditarGrupo.setImage(imagenEditar);
+        ivEditarGrupo.setImage(imagenEditar);  
 
 		//Crear Tooltip.
 		Tooltip tltFlechaAdd = new Tooltip("Añadir Alumno");
@@ -299,17 +299,25 @@ public class GruposAlumnosControlador implements Initializable {
         });
 
         ivAddGrupo.setOnMouseClicked(e -> {
-            formNuevoGrupo();
+            abrirFormularioGrupoAlumnos(ModoFormulario.CREAR_DATOS);
+        });
+
+        ivEditarGrupo.setOnMouseClicked(e -> {
+            abrirFormularioGrupoAlumnos(ModoFormulario.EDITAR_DATOS);
         });
 
         ivBorrarGrupo.setOnMouseClicked(e -> {
             borrarGrupo();
         });
-        
     }
 
-    private void formNuevoGrupo() {
+    private void abrirFormularioGrupoAlumnos(ModoFormulario modo) {
         try {
+            if(modo.equals(ModoFormulario.EDITAR_DATOS) && !grupoSeleccionadoValido()) {
+                toast.show(thisEstage, "No has seleccionado un Grupo!.");
+                return;
+            }
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/grupoAlumnosFormVista.fxml"));
 		    GridPane FormGrupoAlumnos;
             FormGrupoAlumnos = (GridPane) loader.load();
@@ -325,16 +333,21 @@ public class GruposAlumnosControlador implements Initializable {
             URL rutaIcono = getClass().getResource("/recursos/lis_logo_1.png"); // guardar ruta de recurso imagen.
             ventana.getIcons().add(new Image(rutaIcono.toString())); // poner imagen icono a la ventana.
 
-            controller.modoFormulario(ModoFormulario.CREAR_DATOS);
+            controller.modoFormulario(modo);
+            if(modo.equals(ModoFormulario.EDITAR_DATOS)) {
+                controller.setGrupoAlumnos(grupoAlumnosSeleccionado);
+            }
+            
             controller.setListaGruposAlumnosCopia(listadoGruposAlumnosCopia);
             controller.configurar(ventana);
 
             Scene scene = new Scene(FormGrupoAlumnos);
             scene.getStylesheets().add(getClass().getResource("/hojasEstilos/Styles.css").toExternalForm()); //Añade hoja de estilos.
             ventana.setScene(scene);
-            ventana.setTitle("Nuevo Grupo Alumnos");
+            ventana.setTitle(modo.getAccion() + " Grupo Alumnos");
             ventana.showAndWait();
 
+            actualizarVistaGrupos();
             checkChanges = true;
         } catch (IOException e) {
             logUser.severe("Excepción: " + e.toString());
@@ -371,7 +384,7 @@ public class GruposAlumnosControlador implements Initializable {
             
             grupo.setNombre(grupo.getNombre() + "  -borrado-");
             grupo.getListaAlumnosObservable().clear();
-
+            
             actualizarVistaGrupos();
             
             checkChanges = true; //Establece a true la comprobación de cambios sin guardar.
@@ -381,6 +394,7 @@ public class GruposAlumnosControlador implements Initializable {
     }
 
     private void actualizarVistaGrupos() {
+        
         lvGrupos.setCellFactory(listView -> new ListCell<GrupoAlumnos>() {
             @Override
             protected void updateItem(GrupoAlumnos grupo, boolean empty) {
@@ -390,16 +404,20 @@ public class GruposAlumnosControlador implements Initializable {
                     setText(null);
                     setGraphic(null);
                 } else { 
+                    //textProperty().bind(grupo.nombreProperty());
                     setText(grupo.toString()); // Asigna el texto de la celda
-                
+                  
                     if(grupo.getNombre().endsWith("-borrado-")) {
                         setStyle("-fx-text-fill: #cc0000; -fx-font-weight: bold; -fx-background-color: #FFF0F0;");
                         //setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
                         //setStyle("-fx-strikethrough: 'true'; -fx-background-color: #FF0000;"); // Cambia el color de fondo a rojo
                     }
+                    
                 }
             }
+            
         });
+
     }
 
    
@@ -443,12 +461,12 @@ public class GruposAlumnosControlador implements Initializable {
             // cambiosEnListasAlumnosGrupos = false;
             // cambiosEnGrupos = false;
             // if(cambiosEnGrupos)
-            if(true) {
+            if(conexionBD.actualizarGruposAlumnos(new ArrayList<>(listadoGruposAlumnosCopia))) {
                 //ConexionBD.actualizarGruposAlumnos()
                 //Guardar los cambios de grupos(nuevos, editados)
                 guardado = true;
 
-                // Utiliza un iterador para recorrer la lista y eliminar los grupos que cumplen la condición.
+                //Utiliza un iterador para recorrer la lista y eliminar los grupos que cumplen la condición.
                 var iterator = listadoGruposAlumnosCopia.iterator();
                 while (iterator.hasNext()) {
                     GrupoAlumnos grupo = iterator.next();
@@ -487,6 +505,8 @@ public class GruposAlumnosControlador implements Initializable {
             */
             if(guardado) {
                 toast.show(thisEstage, "Cambios guardados!");
+            } else {
+                toast.show(thisEstage, "Error al intentar guardar los cambios!");
             }
 
             cambiosEnListasAlumnosGrupos = false;
@@ -603,9 +623,16 @@ public class GruposAlumnosControlador implements Initializable {
   
     private boolean cambiosListaGrupos() {
         for(var grupoCopia : listadoGruposAlumnosCopia) {
+
+            //devuelve true si un grupo es nuevo(id=-1) o ha sido marcado como borrado(-borrado-) pero no cumpla las 2 condiciones a la vez.
+            //Si cumple las 2 condiciones a la vez no hay que tenerlo en cuenta para activar "cambiosListaGrupos".
             if(grupoCopia.getId() == -1 || grupoCopia.getNombre().endsWith("-borrado-")) {
-                return true;
+                if(!(grupoCopia.getId() == -1 && grupoCopia.getNombre().endsWith("-borrado-"))) {
+                    return true;
+                }
             }
+
+            //Comprueba si el nombre o la descripcion de los grupos ha cambiado respecto a la lista de grupos original.
             for(var grupoOriginal : listadoGruposAlumnosGeneral) {
                 if(grupoOriginal.getId() == grupoCopia.getId()) {
                     if(!grupoOriginal.getNombre().equals(grupoCopia.getNombre()) || !grupoOriginal.getDescripcion().equals(grupoCopia.getDescripcion())) {
@@ -644,6 +671,7 @@ public class GruposAlumnosControlador implements Initializable {
         for(GrupoAlumnos g : listadoGruposAlumnosGeneral) {
             GrupoAlumnos grupoCopia = new GrupoAlumnos(g);
             //g.setListaAlumnosObservable(FXCollections.observableArrayList(g.getListaAlumnos()));
+            grupoCopia.setListaAlumnosObservable(FXCollections.observableArrayList(g.getListaAlumnos()));
             listadoGruposAlumnosCopia.add(grupoCopia);
         }
         

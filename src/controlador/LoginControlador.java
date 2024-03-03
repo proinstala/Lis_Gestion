@@ -72,6 +72,9 @@ public class LoginControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //Añadir clases de estilo CSS a elementos.
+        ivAcercaDe.getStyleClass().add("iv_resaltado");
+
         //Cargar imagenes en ImageView.
         Image imagenLogin;
         Image imagenLogo;

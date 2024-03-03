@@ -105,6 +105,16 @@ public class AjustesControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //Añadir clases de estilo CSS a elementos.
+        ivAddLocalidad.getStyleClass().add("iv_resaltado");
+        ivBorrarLocalidad.getStyleClass().add("iv_resaltado");
+        ivEditarPrecio.getStyleClass().add("iv_resaltado");
+        ivEditarLocalidad.getStyleClass().add("iv_resaltado");
+        ivAcercaDe.getStyleClass().add("iv_resaltado");
+        ivAddGrupo.getStyleClass().add("iv_resaltado");
+        ivBorrarGrupo.getStyleClass().add("iv_resaltado");
+        ivEditarGrupo.getStyleClass().add("iv_resaltado");
+
         //Cargar imagenes en ImageView.
         Image imagenAdd;
         Image imagenBorrar;

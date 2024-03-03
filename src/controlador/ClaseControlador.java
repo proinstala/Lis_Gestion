@@ -152,6 +152,12 @@ public class ClaseControlador implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		//Añadir clases de estilo CSS a elementos.
         lvClase.getStyleClass().add("mi_list-view");
+		ivFlechaIzquierda.getStyleClass().add("iv_resaltado");
+        ivFlechaDerecha.getStyleClass().add("iv_resaltado");
+        ivFlechaAdd.getStyleClass().add("iv_resaltado");
+        ivFlechaQuitar.getStyleClass().add("iv_resaltado");
+        ivVolver.getStyleClass().add("iv_resaltado");
+        ivGuardar.getStyleClass().add("iv_resaltado");
 
 		//Cargar imagenes en ImageView.
         Image imagenFlecha;

@@ -104,10 +104,10 @@ public class GrupoAlumnosFormControlador implements Initializable {
         if(comprobarCampos()) {
             if(modoFormulario.equals(ModoFormulario.CREAR_DATOS)) {
                 listadoGruposAlumnosCopia.add(newGrupo);
-                thisEstage.close();
             } else {
-
+                oldGrupo.setValoresGrupoAlumnos(newGrupo);
             }
+            thisEstage.close();
         }
     }
 
@@ -115,6 +115,10 @@ public class GrupoAlumnosFormControlador implements Initializable {
     public void setGrupoAlumnos(GrupoAlumnos grupo) {
         oldGrupo = grupo;
         newGrupo = new GrupoAlumnos(grupo);
+        //Configura los enlaces de datos bidireccionales entre los campos de texto y las propiedades del nuevo alumno.
+        tfIdentificador.setText(Integer.toString(newGrupo.getId())); //Este campo no es bindeado porque no va ha cambiar.
+        tfNombre.textProperty().bindBidirectional(newGrupo.nombreProperty());
+        taDescripcion.textProperty().bindBidirectional(newGrupo.descripcionProperty());
 
     }
 
@@ -134,6 +138,9 @@ public class GrupoAlumnosFormControlador implements Initializable {
         Pattern nombrePattern = Pattern.compile("^(?!\\d)(?=\\S)([\\s\\S]{1,50})$"); //máximo de 50 caracteres, no empiece por dígitos, puede contener cualquier carácter y espacios, y no puede estar vacío.
 		Matcher nombreMatch = nombrePattern.matcher(tfNombre.getText());
 
+        Pattern palabraReservadaPattern = Pattern.compile(".*-borrado-.*");
+        Matcher palabraReservadaMatch = palabraReservadaPattern.matcher(tfNombre.getText());
+
         Pattern descripcionPattern = Pattern.compile("^(|.{1,300})$"); //pueda estar vacío o tener un máximo de 300 caracteres
         Matcher descripcionMatcher = descripcionPattern.matcher(taDescripcion.getText());
 
@@ -143,6 +150,11 @@ public class GrupoAlumnosFormControlador implements Initializable {
             "Nombre no valido.",
             "El nombre introducido no es valido.",
             "No puede empezar por un digito.\nMáximo 50 caracteres.\nEjemplo: Grupo tardes 1º.");
+        } if(palabraReservadaMatch.matches()) {
+            mensajeAviso(AlertType.WARNING,
+            "Nombre no valido.",
+            "El nombre consta de una palabra reservada.",
+            "El nombre no puede contener la palabra -borrado-.");
         } else if(!descripcionMatcher.matches()) {
             mensajeAviso(AlertType.WARNING,
             "Descripción no valida.",
@@ -152,10 +164,9 @@ public class GrupoAlumnosFormControlador implements Initializable {
             camposCorrectos = true;
         }
 
-        //Si no hay errores en los campos, guarda la informacion en las variables.
+        //Si no hay errores en los campos.
         if (camposCorrectos) {
-            newGrupo.setNombre(tfNombre.getText());
-            newGrupo.setDescripcion(taDescripcion.getText()); 
+
         }
 
         return camposCorrectos;
@@ -194,11 +205,11 @@ public class GrupoAlumnosFormControlador implements Initializable {
        
         switch (modoFormulario) {
             case CREAR_DATOS:
-                lbTitulo.setText("Nueva Mensualidad");
+                lbTitulo.setText("Nuevo Grupo Alumnos");
                 setGrupoAlumnos(new GrupoAlumnos());
                 break;
             case EDITAR_DATOS:
-                lbTitulo.setText("Editar Mensualidad");
+                lbTitulo.setText("Editar Grupo Alumnos");
                 break;
             default:
                 break;

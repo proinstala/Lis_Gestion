@@ -2543,6 +2543,10 @@ public class ConexionBD implements Cloneable{
             ps.setInt(1, alumno.getId());
             ps.executeUpdate();
 
+            ps = conn.prepareStatement("DELETE FROM GRUPOALUMNOS_ALUMNO WHERE alumno_id = ?;"); //Esto esta porque no funciona ON DELETE CASCADE en SqlCipher.
+            ps.setInt(1, alumno.getId());
+            ps.executeUpdate();
+
             conn.commit(); //Confirma la transacción de la inserción de los datos.
             result = true;
         } catch (SQLException e) {
@@ -3029,48 +3033,223 @@ public class ConexionBD implements Cloneable{
     }
 
 
+    //FALTA BORRAR GRUPO.
+    //MODIFICAR GRUPO.
+    //MODIFICAR todo los grupos y sus alumnos asociados con una lista de grupos. actualizar los ids -1.
+
+
     /**
      * Inserta un nuevo grupo de alumnos en la base de datos.
      *
      * @param grupoAlumnos El objeto GrupoAlumnos que contiene la información del grupo a insertar.
      * @return true si la inserción fue exitosa, false si no.
      */
-    // public boolean insertarGrupoAlumnos(GrupoAlumnos grupoAlumnos) throws SQLException {
-    //     ConexionBD cn = INSTANCE;
-    //     conn = cn.conectar();
-    
-    //     String sql = "INSERT INTO GRUPOALUMNOS (nombre, descripcion) values (?, ?);";
-    
-    //     try {
-    //         conn.setAutoCommit(false);    
-    //         ps = conn.prepareStatement(sql);
-            
-    //         //Establecer los valores de los parámetros.
-    //         ps.setString(1, grupoAlumnos.getNombre());
-    //         ps.setString(2, grupoAlumnos.getDescripcion());
-    
-    //         //Ejecutar la instrucción SQL de inserción.
-    //         int filasAfectadas = ps.executeUpdate();
-            
-    //         //Obtenemos el id que se le asignó a grupoAlumnos.
-    //         st = conn.createStatement();
-    //         res = st.executeQuery(SQL_OBTENER_ULTIMO_ID_INSERTADO);
-    //         grupoAlumnos.setId(res.getInt(1)); //Asigna el id obtenido en la consulta.
-    
-    //         conn.commit(); //Confirma la transacción de la inserción de los datos.
-    //         return filasAfectadas > 0;
-    //     } catch (SQLException e) {
-    //         conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
-    //         logger.severe("Excepción SQL: " + e.toString());
-    //         return false;
-    //     } finally {
-    //         if(ps != null) {ps.close();}
-    //         if(st != null) {st.close();}
-    //         if(res != null) {res.close();} 
+    public boolean actualizarGruposAlumnos(ArrayList<GrupoAlumnos> listaGruposAlumnos) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        boolean result = false;
+        int filasAfectadas = 0;
+        int alumnosInsertados = 0;
+        ArrayList<GrupoAlumnos> listaGruposAlumnosBD;
+        conn = cn.conectar();                    
 
-    //         conn.setAutoCommit(true);
-    //         cn.desconectar(conn);
-    //     }
-    // }
+        String sqlGetListaGruposAlumnos = "SELECT * FROM GRUPOALUMNOS";
+        String sqlInsertarGrupo = "INSERT INTO GRUPOALUMNOS (nombre, descripcion) VALUES (?, ?);";
+        String sqlActualizarGrupo = "UPDATE GRUPOALUMNOS SET nombre = ?, descripcion = ? WHERE id = ?";
+        String sqlBorrarGrupo = "DELETE FROM GRUPOALUMNOS WHERE id = ?";
+        String sqlBorrarTodosAlumnosGrupo = "DELETE FROM GRUPOALUMNOS_ALUMNO WHERE grupo_id = ?";
+        String sqlAddAlumnoGrupo = "INSERT INTO GRUPOALUMNOS_ALUMNO VALUES(?, ?)"; //(?, ?) = (grupo_id, alumno_id)
+        String sqlNumeroAlumnosInscritosGrupo = "SELECT count(alumno_id) FROM GRUPOALUMNOS_ALUMNO WHERE grupo_id = ?";
     
+        try {
+            conn.setAutoCommit(false);
+            
+            //Obtener la lista de grupos de la BD.
+            st = conn.createStatement();
+            res = st.executeQuery(sqlGetListaGruposAlumnos);
+
+            listaGruposAlumnosBD = new ArrayList<>();
+            while (res.next()) {
+                GrupoAlumnos grupo = new GrupoAlumnos(
+                    res.getInt(1),
+                    res.getString(2),
+                    res.getString(3)
+                );
+               
+                listaGruposAlumnosBD.add(grupo);
+            }
+
+            //Recorre la lista de grupos para actualizar sus datos en la BD.
+            for (var grupoAlumnos : listaGruposAlumnos) {
+
+                //Grupos para borrar.
+                if (grupoAlumnos.getNombre().endsWith("-borrado-")) {
+                    if(grupoAlumnos.getId() != -1) {
+
+                        //Comprueba si hay alumnos adcritos al grupo para borrarlos del grupo.
+                        if(!grupoAlumnos.getListaAlumnos().isEmpty()) { 
+                            ps = conn.prepareStatement(sqlBorrarTodosAlumnosGrupo);
+                            ps.setInt(1, grupoAlumnos.getId());
+
+                            //Ejecutar la instrucción SQL.
+                            filasAfectadas = 0;
+                            filasAfectadas = ps.executeUpdate();
+
+                            //Comprueba que el numero de alumnos borrados sea el mismo que el de la lista de alumnos del grupo.
+                            if(filasAfectadas != grupoAlumnos.getListaAlumnos().size()) {
+                                return false;
+                            }
+                        }
+
+                        ps = conn.prepareStatement(sqlBorrarGrupo);
+                        ps.setInt(1, grupoAlumnos.getId());
+
+                        //Ejecutar la instrucción SQL.
+                        filasAfectadas = 0;
+                        filasAfectadas = ps.executeUpdate();
+
+                        //Comprueba que se a borrado un grupo.
+                        if(filasAfectadas != 1) {
+                            return false;
+                        }
+                            
+                    }
+                    
+                //Grupos nuevos para insertar.    
+                } else if(grupoAlumnos.getId() == -1) {
+                    ps = conn.prepareStatement(sqlInsertarGrupo);
+
+                    //Establecer los valores de los parámetros.
+                    ps.setString(1, grupoAlumnos.getNombre());
+                    ps.setString(2, grupoAlumnos.getDescripcion());
+
+                    //Ejecutar la instrucción SQL de inserción.
+                    filasAfectadas = 0;
+                    filasAfectadas = ps.executeUpdate();
+
+                    //Comprueba que se añade el grupo a la BD.
+                    if(filasAfectadas != 1) {
+                        return false;
+                    }
+
+                    //Obtenemos el id que se le asignó a grupoAlumnos.
+                    st = conn.createStatement();
+                    res = st.executeQuery(SQL_OBTENER_ULTIMO_ID_INSERTADO);
+                    grupoAlumnos.setId(res.getInt(1)); //Asigna el id obtenido en la consulta.
+
+                    //Comprueba que se actualiza el id del grupo insertado.
+                    if(grupoAlumnos.getId() < 1) {
+                        return false;
+                    }
+
+                    alumnosInsertados = 0;
+                    filasAfectadas = 0;
+
+                    //Recorre la lista de alumnos del grupo para insertalos en la BD.
+                    for (var alumno : grupoAlumnos.getListaAlumnosObservable()) {
+                        ps = conn.prepareStatement(sqlAddAlumnoGrupo);
+
+                        //Establecer los valores de los parámetros.
+                        ps.setInt(1, grupoAlumnos.getId());
+                        ps.setInt(2, alumno.getId());
+
+                        //Ejecutar la instrucción SQL de inserción.
+                        filasAfectadas = ps.executeUpdate();
+                        alumnosInsertados += filasAfectadas; 
+                    }
+
+                    //Comprueba que el numero de alumnos del grupo sea los mismos que los alumnos insertados a BD.
+                    if(alumnosInsertados != grupoAlumnos.getListaAlumnosObservable().size()) {
+                        return false;
+                    }
+                
+                //Grupos para actualizar.
+                } else {
+                    for (var grupoAlumnosBD : listaGruposAlumnosBD) {
+                        if(grupoAlumnosBD.getId() == grupoAlumnos.getId()) {
+                            if(!grupoAlumnos.getNombre().equals(grupoAlumnosBD.getNombre()) || !grupoAlumnos.getDescripcion().equals(grupoAlumnosBD.getDescripcion())) {
+                                ps = conn.prepareStatement(sqlActualizarGrupo);
+            
+                                //Establecer los valores de los parámetros.
+                                ps.setString(1, grupoAlumnos.getNombre());
+                                ps.setString(2, grupoAlumnos.getDescripcion());
+                        
+                                //Ejecutar la instrucción SQL de inserción.
+                                filasAfectadas = 0;
+                                filasAfectadas = ps.executeUpdate();
+
+                                //Comprueba que se ha modificado una fila.
+                                if(filasAfectadas != 1) {
+                                    return false;
+                                }
+                            }
+
+                            //Comprueba si hay alumnos adcritos al grupo para borrarlos del grupo.
+                            if(!grupoAlumnos.getListaAlumnos().isEmpty()) { 
+                                ps = conn.prepareStatement(sqlBorrarTodosAlumnosGrupo);
+                                ps.setInt(1, grupoAlumnos.getId());
+
+                                //Ejecutar la instrucción SQL.
+                                filasAfectadas = 0;
+                                filasAfectadas = ps.executeUpdate();
+
+                                //Comprueba que el numero de alumnos borrados sea el mismo que el de la lista de alumnos del grupo.
+                                if(filasAfectadas != grupoAlumnos.getListaAlumnos().size()) {
+                                    return false;
+                                }
+                            }
+
+                            //Obtiene el numero de alumnos adcritos al grupo en la BD.
+                            st = conn.createStatement();
+                            res = st.executeQuery(sqlNumeroAlumnosInscritosGrupo);
+                            int numeroAlumnosInscritos = res.getInt(1);
+
+                            //Comprueba que no hay alumnos inscritos al grupo.
+                            if(numeroAlumnosInscritos != 0) {
+                                return false;
+                            }
+
+                            //Recorre la lista de alumnos del grupo para insertalos en la BD.
+                            for (var alumno : grupoAlumnos.getListaAlumnosObservable()) {
+                                ps = conn.prepareStatement(sqlAddAlumnoGrupo);
+
+                                //Establecer los valores de los parámetros.
+                                ps.setInt(1, grupoAlumnos.getId());
+                                ps.setInt(2, alumno.getId());
+
+                                //Ejecutar la instrucción SQL de inserción.
+                                filasAfectadas = ps.executeUpdate();
+                                alumnosInsertados += filasAfectadas; 
+                            }
+
+                            //Comprueba que el numero de alumnos del grupo sea los mismos que los alumnos insertados a BD.
+                            if(alumnosInsertados != grupoAlumnos.getListaAlumnosObservable().size()) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+            result = true;
+            
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            return result;
+        } catch (SQLException e) {
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
+            return false;
+        } finally {
+
+            if(!result) {
+                conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+                logger.warning("ERROR al intentar guardar la configuracion de los grupos de alumnos en la base de datos.");
+            }
+
+            if(ps != null) {ps.close();}
+            if(st != null) {st.close();}
+            if(res != null) {res.close();} 
+            conn.setAutoCommit(true);
+            cn.desconectar(conn);
+        }
+    }
+
 }

@@ -470,5 +470,10 @@ BorderPane {
 	-fx-text-fill: black;
 }
 
+.iv_resaltado:hover {
+	/* -fx-opacity: 0.8; */
+	-fx-blend-mode: hard_light; /*Efecto que hace tener un poco de brillo a las imagenes.*/
+	/* -fx-blend-mode: green;  */ /*Este efecto quita el color verde a las imagenes y en este caso se ponen de color rosa fluorescente.*/
+}
 
 

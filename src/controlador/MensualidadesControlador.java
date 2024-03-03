@@ -194,7 +194,10 @@ public class MensualidadesControlador implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        btnBorrar.getStyleClass().add("boton_rojo"); //Añadir clases de estilo CSS a elementos.
+        //Añadir clases de estilo CSS a elementos.
+        btnBorrar.getStyleClass().add("boton_rojo"); 
+        ivGenerarMensualidades.getStyleClass().add("iv_resaltado");
+        ivNotificacion.getStyleClass().add("iv_resaltado");
 
         //Establecer imagen en ImageView.
         Image lupa;
