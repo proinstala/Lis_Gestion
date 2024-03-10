@@ -31,6 +31,7 @@ import javafx.util.Duration;
 import javafx.util.converter.LocalDateStringConverter;
 import modelo.Alumno;
 import modelo.Clase;
+import modelo.GrupoAlumnos;
 import modelo.HoraClase;
 import modelo.Jornada;
 import modelo.TipoClase;
@@ -53,6 +54,7 @@ public class JornadaControlador implements Initializable {
 	private Jornada jornada = null;
 	private Jornada jornadaOriginal;
 	private ObservableList<Alumno> listadoAlumnosGeneral;
+	private ObservableList<GrupoAlumnos> listadoGruposAlumnosGeneral;
 	private ConexionBD conexionBD;
 	private Logger logUser;
 	private Alert alerta;
@@ -715,6 +717,7 @@ public class JornadaControlador implements Initializable {
 			controller.setControladorPrincipal(controladorPincipal);
 			controller.setJornada(jornada);
 			controller.setListaAlumnos(listadoAlumnosGeneral);
+			controller.setListaGruposAlumnosGeneral(listadoGruposAlumnosGeneral);
 			controller.setClaseIniciacion(numeroClase);
 			
 		} catch (IOException e) {
@@ -1013,4 +1016,13 @@ public class JornadaControlador implements Initializable {
 	public void setJornada(Jornada jornada) {
 		this.jornada = jornada;
 	}	
+
+	/**
+     * Establece la lista de grupos de alumnos para este controlador.
+     * 
+     * @param listaGrupos La lista de grupos de alumnos a establecer.
+     */
+    public void setListaGruposAlumnosGeneral(ObservableList<GrupoAlumnos> listaGrupos) {
+        listadoGruposAlumnosGeneral = listaGrupos;
+    }
 }

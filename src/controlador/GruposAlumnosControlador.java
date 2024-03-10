@@ -2,12 +2,13 @@ package controlador;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
@@ -26,6 +27,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -43,8 +45,10 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import modelo.Alumno;
+import modelo.EstadoAlumno;
 import modelo.GrupoAlumnos;
 import modelo.ModoFormulario;
+import modelo.ModoOrdenTablaAlumno;
 import modelo.Usuario;
 import utilidades.Constants;
 import utilidades.Toast;
@@ -146,6 +150,16 @@ public class GruposAlumnosControlador implements Initializable {
 
     @FXML
     private TableView<Alumno> tvAlumnos;
+
+    @FXML
+    private ComboBox<String> cbEstado;
+
+    @FXML
+    private ComboBox<String> cbModoFiltro;
+
+    @FXML
+    private ComboBox<ModoOrdenTablaAlumno> cbOrden;
+
     
 
     @Override
@@ -259,6 +273,7 @@ public class GruposAlumnosControlador implements Initializable {
             return cellData.getValue().fechaNacimientoProperty().asString(Integer.toString(Period.between(fechaText, LocalDate.now()).getYears()));
         });
 
+        /* 
         //Con esto la busqueda es automatica al insertar texto en el tfBusqueda.
         tfBusqueda.textProperty().addListener( (o, ov, nv) -> {
         	filtro.setPredicate(obj -> {
@@ -266,6 +281,7 @@ public class GruposAlumnosControlador implements Initializable {
         		else {return false;}
         	});
         });
+        */
     }
 
     private void configurarListView() {
@@ -309,7 +325,124 @@ public class GruposAlumnosControlador implements Initializable {
         ivBorrarGrupo.setOnMouseClicked(e -> {
             borrarGrupo();
         });
+
+        //Configurar el ComboBox cbEstado.
+        ObservableList<String> listadoEstado = FXCollections.observableArrayList();
+        listadoEstado.setAll("TODOS", EstadoAlumno.ACTIVO.toString(), EstadoAlumno.BAJA.toString());
+        cbEstado.setItems(listadoEstado);
+        cbEstado.setValue("TODOS"); //Valor inicial.
+
+        //Configurar Listener para el ComboBox cbEstado.
+        cbEstado.setOnAction(e -> {
+            tfBusqueda.clear();
+            configurarFiltro("");
+        });
+
+        //cbModoFiltro
+        ObservableList<String> tipoBusqueda = FXCollections.observableArrayList();
+        tipoBusqueda.setAll("Id Alumno", "Nombre Alumno");
+        cbModoFiltro.setItems(tipoBusqueda);
+        cbModoFiltro.setValue("Nombre Alumno"); //Valor inicial.
+
+        //Configurar Listener para el ComboBox cbModoFiltro.
+        cbModoFiltro.setOnAction(e -> {
+            tfBusqueda.clear();
+            configurarFiltro("");
+        });
+
+        //Configurar Listener para el TextField tfBusqueda.
+        tfBusqueda.textProperty().addListener( (o, ov, nv) -> {
+            configurarFiltro(nv);
+        });
+
+        //Configura el ComboBox cbOrden.
+        cbOrden.setItems(FXCollections.observableArrayList(ModoOrdenTablaAlumno.values()));
+        cbOrden.setValue(ModoOrdenTablaAlumno.ID); //Valor inicial.
+
+        //Configurar Listener para el ComboBox cbOrdenar.
+        cbOrden.setOnAction(e -> {
+            ordenarListaAlumnos();
+        });
     }
+
+    /**
+     * Configura el filtro para la tabla de alumno según los criterios seleccionados.
+     *
+     * @param texto El texto de búsqueda utilizado para filtrar.
+     */
+    private void configurarFiltro(String texto) {
+        filtro.setPredicate(obj -> {
+            /*
+            if ( !(cbGenero.getValue().equals("AMBOS")) && !(obj.generoProperty().getValue().toString().equals(cbGenero.getValue())) ) {
+                return false;
+            }
+            
+            if ( !(cbLocalidad.getValue().equals("TODAS")) && !(obj.getDireccion().localidadProperty().getValue().toString().equals(cbLocalidad.getValue())) ) {
+                return false;
+            }
+            */
+            if ( !(cbEstado.getValue().equals("TODOS")) && !(obj.estadoProperty().getValue().toString().equals(cbEstado.getValue())) ) {
+                return false;
+            }
+        		
+            if (cbModoFiltro.getValue() == "Nombre Alumno") {
+                for(Alumno alumno : listadoAlumnosGeneral) {
+                    if(obj.getId() == alumno.getId()) {
+                        if(alumno.getNombreCompleto().toLowerCase().contains(texto.toLowerCase())) {
+                            return true;
+                        }
+                    }    
+                }
+                return false;
+            } else {
+                if(texto.isBlank()) {return true;}
+                if(texto.matches("[0-9]{0,4}") && obj.getId() == Integer.parseInt(texto)) {
+                    return true;
+                }
+
+                return false;
+            }
+        });
+    }
+
+
+    /**
+     * Ordena la colección de alumnos (listadoAlumnos) utilizando un comparador basado en el criterio de ordenamiento seleccionado.
+     *
+     */
+    private void ordenarListaAlumnos() {
+        //Crea el comparador para ordenar la lista de alumnos "listadoAlumnos" por el criterio seleccionado.
+        Comparator<Alumno> comparador = null;
+
+        switch (cbOrden.getValue()) {
+            case ID -> {
+                comparador = Comparator.comparingInt(Alumno::getId);
+            }
+
+            case NOMBRE -> {
+                comparador = Comparator.comparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
+            }
+
+            case LOCALIDAD -> {
+                comparador = Comparator.comparing((Alumno alumno) -> alumno.getDireccion().getLocalidad()).thenComparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
+            }
+
+            case ESTADO -> {
+                comparador = Comparator.comparing(Alumno::getEstado).thenComparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
+            }
+
+            case GENERO -> {
+                comparador = Comparator.comparing(Alumno::getGenero).thenComparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
+            }
+
+            default -> {
+                comparador = Comparator.comparingInt(Alumno::getId);
+            }
+        }
+        
+        Collections.sort(listadoAlumnosGeneral, comparador); //Odena la lista de alumnos "listadoAlumnos" segun los criterios seleccionados.
+    }
+
 
     private void abrirFormularioGrupoAlumnos(ModoFormulario modo) {
         try {

@@ -30,6 +30,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -46,22 +47,18 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import modelo.Alumno;
 import modelo.EstadoAlumno;
 import modelo.Genero;
 import modelo.GrupoAlumnos;
+import modelo.ModoOrdenTablaAlumno;
 import modelo.Usuario;
 import utilidades.Constants;
 import utilidades.Toast;
 import javafx.fxml.Initializable;
 
 public class AlumnosControlador implements Initializable {
-
-    private final String ORDEN_ID = "ID";
-    private final String ORDEN_NOMBRE = "NOMBRE";
-    private final String ORDEN_LOCALIDAD = "LOCALIDAD";
-    private final String ORDEN_ESTADO = "ESTADO";
-    private final String ORDEN_GENERO = "GENERO";
 
     private PrincipalControlador controladorPincipal;
     private FilteredList<Alumno> filtro;
@@ -105,10 +102,13 @@ public class AlumnosControlador implements Initializable {
     private ComboBox<String> cbEstado;
 
     @FXML
-    private ComboBox<String> cbOrden;
+    private ComboBox<ModoOrdenTablaAlumno> cbOrden;
+
+    //@FXML
+    //private ComboBox<String> cbGenero;
 
     @FXML
-    private ComboBox<String> cbGenero;
+    private ComboBox<GrupoAlumnos> cbGrupoAlumnos;
 
     @FXML
     private ComboBox<String> cbLocalidad;
@@ -240,17 +240,21 @@ public class AlumnosControlador implements Initializable {
         //Configura el ComboBox cbLocalidad
         cbLocalidadSetup();
 
+        /* 
+        Nota: Este ComboBox se ha sustituido por el de grupos de alumnos.
+
         //cbGenero
         ObservableList<String> listadoGenero = FXCollections.observableArrayList();
         listadoGenero.setAll(Genero.HOMBRE.toString(), Genero.MUJER.toString(), "AMBOS");
         cbGenero.setItems(listadoGenero);
         cbGenero.setValue("AMBOS"); //Valor inicial.
-
+    
         //Configurar Listener para el ComboBox cbGenero.
         cbGenero.setOnAction(e -> {
             tfBusqueda.clear();
             configurarFiltro("");
         });
+        */
 
         //Configurar el ComboBox cbEstado.
         ObservableList<String> listadoEstado = FXCollections.observableArrayList();
@@ -282,16 +286,75 @@ public class AlumnosControlador implements Initializable {
         });
 
         //Configura el ComboBox cbOrden.
-        ObservableList<String> listadoOrden = FXCollections.observableArrayList();
-        listadoOrden.setAll(ORDEN_ID, ORDEN_NOMBRE, ORDEN_LOCALIDAD, ORDEN_ESTADO, ORDEN_GENERO);
-        cbOrden.setItems(listadoOrden);
-        cbOrden.setValue("ID"); //Valor inicial.
+        cbOrden.setItems(FXCollections.observableArrayList(ModoOrdenTablaAlumno.values()));
+        cbOrden.setValue(ModoOrdenTablaAlumno.ID); //Valor inicial.
 
         //Configurar Listener para el ComboBox cbOrdenar.
         cbOrden.setOnAction(e -> {
             ordenarListaAlumnos();
         });
     }
+
+
+    /**
+     * Configura el ComboBox de Alumnos.
+     * 
+     */
+    private void configurarCbGrupoAlumnos() {
+
+        //Creo un ObservableList<String> con el nombre de los meses del año. Cargo la lista en el ComboBox cbMes.
+        ObservableList<GrupoAlumnos> listGrupos = FXCollections.observableArrayList(listadoGruposAlumnosGeneral);
+        
+        GrupoAlumnos grupoTodos = new GrupoAlumnos();
+        grupoTodos.setNombre("TODOS");
+        listGrupos.add(0, grupoTodos);
+        cbGrupoAlumnos.setItems(listGrupos);
+        cbGrupoAlumnos.setValue(grupoTodos);
+
+        //Establecer el texto a mostrar en el ComboBox cuando está desplegado utilizando un StringConverter.
+        cbGrupoAlumnos.setCellFactory(param -> new ListCell<GrupoAlumnos>() {
+            @Override
+            protected void updateItem(GrupoAlumnos a, boolean empty) {
+                super.updateItem(a, empty);
+                if (empty || a == null) {
+                    setText(null);
+                } else {     
+                    if(a.equals(grupoTodos)) {
+                        setText("   - " + a.getNombre());
+                    } else {
+                        setText(a.getId() + " - " + a.getNombre()); //Mostrar el ID y el nombre del Alumno en el ComboBox cuando está desplegado.
+                    }
+                }
+            }
+        });
+
+        
+        //Establecer el texto a mostrar en el ComboBox utilizando un CellFactory.
+        cbGrupoAlumnos.setConverter(new StringConverter<GrupoAlumnos>() {
+            @Override
+            public String toString(GrupoAlumnos a) {
+                if (a != null) {
+                    //Mostrar el ID y el nombre del Alumno en el ComboBox cuando está desplegado.
+                    //return a.getId() + " - " + a.getNombre();
+                    return a.getNombre();
+                }
+                return null;
+            }
+
+            @Override
+            public GrupoAlumnos fromString(String string) {
+                // No se necesita esta implementación para este caso.
+                return null;
+            }
+        });
+
+        //Establece un listener para que cuando se seleccione un elemento del ComboBox cbAlumnos.
+        cbGrupoAlumnos.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
+            tfBusqueda.clear();
+            configurarFiltro("");
+            
+        });
+    }//FIN configurarCbAlumnos.
 
     
     /**
@@ -636,9 +699,11 @@ public class AlumnosControlador implements Initializable {
     private void configurarFiltro(String texto) {
         filtro.setPredicate(obj -> {
 
+            /*
             if ( !(cbGenero.getValue().equals("AMBOS")) && !(obj.generoProperty().getValue().toString().equals(cbGenero.getValue())) ) {
                 return false;
             }
+            */
             
             if ( !(cbLocalidad.getValue().equals("TODAS")) && !(obj.getDireccion().localidadProperty().getValue().toString().equals(cbLocalidad.getValue())) ) {
                 return false;
@@ -646,6 +711,23 @@ public class AlumnosControlador implements Initializable {
 
             if ( !(cbEstado.getValue().equals("TODOS")) && !(obj.estadoProperty().getValue().toString().equals(cbEstado.getValue())) ) {
                 return false;
+            }
+
+            //Comprueba que el alumno este en el grupo seleccionado para no devolver false. (id -1 = TODOS).
+            GrupoAlumnos grupoSeleccionado = cbGrupoAlumnos.getValue();
+            if ( (grupoSeleccionado.getId() != -1)) {
+                boolean match = false;
+               
+                for(Alumno alumnoGrupo : grupoSeleccionado.getListaAlumnos()) {
+                    if(alumnoGrupo.getId() == obj.idProperty().getValue()) {
+                        match = true;
+                        break;
+                    }
+                }
+                    
+                if (!match) {
+                    return false;
+                }
             }
         		
             if (cbModoFiltro.getValue() == "Nombre Alumno") {
@@ -678,23 +760,23 @@ public class AlumnosControlador implements Initializable {
         Comparator<Alumno> comparador = null;
 
         switch (cbOrden.getValue()) {
-            case ORDEN_ID -> {
+            case ID -> {
                 comparador = Comparator.comparingInt(Alumno::getId);
             }
 
-            case ORDEN_NOMBRE -> {
+            case NOMBRE -> {
                 comparador = Comparator.comparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
             }
 
-            case ORDEN_LOCALIDAD -> {
+            case LOCALIDAD -> {
                 comparador = Comparator.comparing((Alumno alumno) -> alumno.getDireccion().getLocalidad()).thenComparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
             }
 
-            case ORDEN_ESTADO -> {
+            case ESTADO -> {
                 comparador = Comparator.comparing(Alumno::getEstado).thenComparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
             }
 
-            case ORDEN_GENERO -> {
+            case GENERO -> {
                 comparador = Comparator.comparing(Alumno::getGenero).thenComparing(Alumno::getNombre).thenComparing(Alumno::getApellido1).thenComparing(Alumno::getApellido2);
             }
 
@@ -781,11 +863,13 @@ public class AlumnosControlador implements Initializable {
     
     /**
      * Establece la lista de grupos de alumnos para este controlador.
+     * LLama al metodo que configura el ComboBox cbGrupoAlumnos.
      * 
      * @param listaGrupos La lista de grupos de alumnos a establecer.
      */
     public void setListaGruposAlumnosGeneral(ObservableList<GrupoAlumnos> listaGrupos) {
         listadoGruposAlumnosGeneral = listaGrupos;
+        configurarCbGrupoAlumnos();
     }
 
     

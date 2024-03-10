@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import baseDatos.ConexionBD;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -26,6 +25,7 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -40,8 +40,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import modelo.Alumno;
 import modelo.Clase;
+import modelo.EstadoAlumno;
+import modelo.GrupoAlumnos;
 import modelo.HoraClase;
 import modelo.Jornada;
 import modelo.TipoClase;
@@ -54,6 +57,7 @@ public class ClaseControlador implements Initializable {
 
 	private IntegerBinding totalAlumnos;
 	private PrincipalControlador controladorPincipal;
+	private ObservableList<GrupoAlumnos> listadoGruposAlumnosGeneral;
 	private ObservableList<Alumno> listadoAlumnosGeneral;
 	private ObservableList<Alumno> listaClase;
 	private int numeroClase;
@@ -81,6 +85,15 @@ public class ClaseControlador implements Initializable {
 
 	@FXML
 	private ComboBox<TipoClase> cbTipo;
+
+	@FXML
+    private ComboBox<String> cbModoFiltro;
+
+	@FXML
+    private ComboBox<String> cbEstado;
+
+    @FXML
+    private ComboBox<GrupoAlumnos> cbGrupoAlumnos;
 
 	@FXML
 	private TableColumn<Alumno, String> colApellido1;
@@ -235,6 +248,10 @@ public class ClaseControlador implements Initializable {
             return cellData.getValue().fechaNacimientoProperty().asString(Integer.toString(Period.between(fechaText, LocalDate.now()).getYears()));
         });
         
+
+		/* 
+		Nota: Se cambia forma de filtro para tener mas opciones de filtrado. 
+
         //Con esto la busqueda es automatica al insertar texto en el tfBusqueda.
         tfBusqueda.textProperty().addListener( (o, ov, nv) -> {
         	filtro.setPredicate(obj -> {
@@ -242,7 +259,163 @@ public class ClaseControlador implements Initializable {
         		else {return false;}
         	});
         });
+		*/
+
+
+		//Configurar el ComboBox cbEstado.
+        ObservableList<String> listadoEstado = FXCollections.observableArrayList();
+        listadoEstado.setAll(EstadoAlumno.ACTIVO.toString(), EstadoAlumno.BAJA.toString(), "TODOS");
+        cbEstado.setItems(listadoEstado);
+		cbEstado.setValue("TODOS"); //Valor inicial.
+
+        //Configurar Listener para el ComboBox cbEstado.
+        cbEstado.setOnAction(e -> {
+            tfBusqueda.clear();
+            configurarFiltro("");
+        });
+
+		
+
+        //cbModoFiltro
+        ObservableList<String> tipoBusqueda = FXCollections.observableArrayList();
+        tipoBusqueda.setAll("Id Alumno", "Nombre Alumno");
+        cbModoFiltro.setItems(tipoBusqueda);
+        cbModoFiltro.setValue("Nombre Alumno"); //Valor inicial.
+
+        //Configurar Listener para el ComboBox cbModoFiltro.
+        cbModoFiltro.setOnAction(e -> {
+            tfBusqueda.clear();
+            configurarFiltro("");
+        });
+
+        //Configurar Listener para el TextField tfBusqueda.
+        tfBusqueda.textProperty().addListener( (o, ov, nv) -> {
+            configurarFiltro(nv);
+        });
 	}
+
+
+	/**
+     * Configura el ComboBox de Alumnos.
+     * 
+     */
+    private void configurarCbGrupoAlumnos() {
+
+        //Creo un ObservableList<String> con el nombre de los meses del año. Cargo la lista en el ComboBox cbMes.
+        ObservableList<GrupoAlumnos> listGrupos = FXCollections.observableArrayList(listadoGruposAlumnosGeneral);
+        
+        GrupoAlumnos grupoTodos = new GrupoAlumnos();
+        grupoTodos.setNombre("TODOS");
+        listGrupos.add(0, grupoTodos);
+        cbGrupoAlumnos.setItems(listGrupos);
+        cbGrupoAlumnos.setValue(grupoTodos);
+
+        //Establecer el texto a mostrar en el ComboBox cuando está desplegado utilizando un StringConverter.
+        cbGrupoAlumnos.setCellFactory(param -> new ListCell<GrupoAlumnos>() {
+            @Override
+            protected void updateItem(GrupoAlumnos a, boolean empty) {
+                super.updateItem(a, empty);
+                if (empty || a == null) {
+                    setText(null);
+                } else {     
+                    if(a.equals(grupoTodos)) {
+                        setText("   - " + a.getNombre());
+                    } else {
+                        setText(a.getId() + " - " + a.getNombre()); //Mostrar el ID y el nombre del Alumno en el ComboBox cuando está desplegado.
+                    }
+                }
+            }
+        });
+
+        
+        //Establecer el texto a mostrar en el ComboBox utilizando un CellFactory.
+        cbGrupoAlumnos.setConverter(new StringConverter<GrupoAlumnos>() {
+            @Override
+            public String toString(GrupoAlumnos a) {
+                if (a != null) {
+                    //Mostrar el ID y el nombre del Alumno en el ComboBox cuando está desplegado.
+                    //return a.getId() + " - " + a.getNombre();
+                    return a.getNombre();
+                }
+                return null;
+            }
+
+            @Override
+            public GrupoAlumnos fromString(String string) {
+                // No se necesita esta implementación para este caso.
+                return null;
+            }
+        });
+
+        //Establece un listener para que cuando se seleccione un elemento del ComboBox cbAlumnos.
+        cbGrupoAlumnos.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
+            tfBusqueda.clear();
+            configurarFiltro("");
+            
+        });
+    }//FIN configurarCbAlumnos.
+
+
+	/**
+     * Configura el filtro para la tabla de alumno según los criterios seleccionados.
+     *
+     * @param texto El texto de búsqueda utilizado para filtrar.
+     */
+    private void configurarFiltro(String texto) {
+        filtro.setPredicate(obj -> {
+
+            /*
+            if ( !(cbGenero.getValue().equals("AMBOS")) && !(obj.generoProperty().getValue().toString().equals(cbGenero.getValue())) ) {
+                return false;
+            }
+            */
+
+            /* 
+            if ( !(cbLocalidad.getValue().equals("TODAS")) && !(obj.getDireccion().localidadProperty().getValue().toString().equals(cbLocalidad.getValue())) ) {
+                return false;
+            }
+			*/
+
+            if ( !(cbEstado.getValue().equals("TODOS")) && !(obj.estadoProperty().getValue().toString().equals(cbEstado.getValue())) ) {
+                return false;
+            }
+
+            //Comprueba que el alumno este en el grupo seleccionado para no devolver false. (id -1 = TODOS).
+            GrupoAlumnos grupoSeleccionado = cbGrupoAlumnos.getValue();
+            if ( (grupoSeleccionado.getId() != -1)) {
+                boolean match = false;
+               
+                for(Alumno alumnoGrupo : grupoSeleccionado.getListaAlumnos()) {
+                    if(alumnoGrupo.getId() == obj.idProperty().getValue()) {
+                        match = true;
+                        break;
+                    }
+                }
+                    
+                if (!match) {
+                    return false;
+                }
+            }
+        		
+            if (cbModoFiltro.getValue() == "Nombre Alumno") {
+                for(Alumno alumno : listadoAlumnosGeneral) {
+                    if(obj.getId() == alumno.getId()) {
+                        if(alumno.getNombreCompleto().toLowerCase().contains(texto.toLowerCase())) {
+                            return true;
+                        }
+                    }    
+                }
+                return false;
+            } else {
+                if(texto.isBlank()) {return true;}
+                if(texto.matches("[0-9]{0,4}") && obj.getId() == Integer.parseInt(texto)) {
+                    return true;
+                }
+
+                return false;
+            }
+        });
+    }
 
 
 	/**
@@ -466,6 +639,7 @@ public class ClaseControlador implements Initializable {
 			JornadaControlador controller = loader.getController(); //cargo el controlador.
 			controller.setControladorPrincipal(controladorPincipal);
 			controller.setListaAlumnos(listadoAlumnosGeneral);
+			controller.setListaGruposAlumnosGeneral(listadoGruposAlumnosGeneral);
 			controller.inicializacion(jornada);
 			
 		} catch (IOException e) {
@@ -732,4 +906,16 @@ public class ClaseControlador implements Initializable {
 		filtro = new FilteredList<Alumno>(listadoAlumnosGeneral); //Inicio el filtro pasandole el listado de alumnos.
 		tvAlumnos.setItems(filtro); //Añado la lista de alumnos TextView tvAlumnos.
 	}
+
+
+	/**
+     * Establece la lista de grupos de alumnos para este controlador.
+     * LLama al metodo que configura el ComboBox cbGrupoAlumnos.
+     * 
+     * @param listaGrupos La lista de grupos de alumnos a establecer.
+     */
+    public void setListaGruposAlumnosGeneral(ObservableList<GrupoAlumnos> listaGrupos) {
+        listadoGruposAlumnosGeneral = listaGrupos;
+        configurarCbGrupoAlumnos();
+    }
 }

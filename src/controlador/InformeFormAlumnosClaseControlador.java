@@ -318,7 +318,7 @@ public class InformeFormAlumnosClaseControlador implements Initializable {
         cbEstado.setItems(listadoEstado);
         cbEstado.setValue("TODOS"); //Valor inicial.
 
-        //Configurar Listener para el ComboBox cbGenero.
+        //Configurar Listener para el ComboBox cbEstado.
         cbEstado.setOnAction(e -> {
             configurarFiltro("");
         });

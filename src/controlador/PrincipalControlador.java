@@ -198,6 +198,7 @@ public class PrincipalControlador implements Initializable {
 				JornadaControlador controller = loader.getController(); // cargo el controlador.
 				controller.setControladorPrincipal(this);
 				controller.setListaAlumnos(listadoAlumnosGeneral);
+				controller.setListaGruposAlumnosGeneral(listadoGruposAlumnosGeneral);
 				controller.inicializacion(jornada);
 				
 			} catch (IOException e) {
