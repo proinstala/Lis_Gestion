@@ -2917,9 +2917,7 @@ public class ConexionBD implements Cloneable{
             conn.commit(); //Confirma la transacción de la inserción de los datos.
 
             //Comprueba si ha modificado alguna fila y si es así, establece a true la variable result.
-            if (filas > 0) {
-                 result = true;
-            }
+            result = filas > 0;
         } catch (SQLException e) {
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
             logger.severe("Excepción SQL: " + e.toString());
@@ -2938,10 +2936,14 @@ public class ConexionBD implements Cloneable{
     }
 
     /**
-     * Obtiene una lista de todos los grupos de alumnos desde la base de datos.
+     * Recupera el listado de todos los grupos de alumnos desde la base de datos.
+     * Este método consulta la tabla GRUPOALUMNOS para obtener todos los registros de grupos,
+     * creando y llenando una lista de objetos {@link GrupoAlumnos}. Para cada grupo de alumnos,
+     * también recupera y asigna los alumnos correspondientes de la relación GRUPOALUMNOS_ALUMNO.
      *
-     * @return Una lista de objetos GrupoAlumnos que representan los grupos almacenados en la base de datos.
-     * @throws SQLException Si se produce un error al ejecutar la consulta SQL.
+     * @return ArrayList<GrupoAlumnos> Una lista de objetos {@link GrupoAlumnos} que representa todos los grupos
+     *         de alumnos encontrados en la base de datos, junto con los alumnos asignados a cada grupo.
+     * @throws SQLException Si ocurre un error durante la ejecución de las consultas SQL.
      */
     public ArrayList<GrupoAlumnos> getListadoGruposAlumnos() throws SQLException {
         ConexionBD cn = INSTANCE;
@@ -2951,8 +2953,9 @@ public class ConexionBD implements Cloneable{
         try {
             st = conn.createStatement();
             res = st.executeQuery("SELECT * FROM GRUPOALUMNOS;");
-
             listaGruposAlumnos = new ArrayList<GrupoAlumnos>();
+
+            //Iterar sobre el resultado de la consulta para crear y añadir objetos GrupoAlumnos a la lista.
             while (res.next()) {
                 GrupoAlumnos grupo = new GrupoAlumnos(
                     res.getInt(1),
@@ -2963,11 +2966,13 @@ public class ConexionBD implements Cloneable{
                 listaGruposAlumnos.add(grupo);
             }
 
-            //Genera las listas de Alumnos de cada Grupo.
-            if(listaGruposAlumnos != null && listaGruposAlumnos.size() > 0) {
+            //Si se encontraron grupos, proceder a cargar los alumnos de cada grupo.
+            if(listaGruposAlumnos.size() > 0) {
                 for (GrupoAlumnos grupoAlumnos : listaGruposAlumnos) {
+                    //Ejecutar una consulta para obtener los IDs de los alumnos pertenecientes a cada grupo.
                     res = st.executeQuery("SELECT A.id FROM ALUMNO A JOIN GRUPOALUMNOS_ALUMNO G ON(A.id = G.alumno_id) WHERE G.grupo_id = " + grupoAlumnos.getId() + " ;"); //consulta sql a tabla ALUMNO.
                     
+                    //Crear y añadir objetos Alumno a cada grupo según los resultados de la consulta.
                     while (res.next()) {
                         Alumno alumno = new Alumno();
                         alumno.setId(res.getInt(1));
@@ -2975,10 +2980,8 @@ public class ConexionBD implements Cloneable{
                     }
                 }
             }
-
         } catch (SQLException e) {
             logger.severe("Excepción SQL: " + e.toString());
-            e.printStackTrace();
         } finally { 
             if(st != null) {st.close();}
             if(res != null) {res.close();} 
@@ -2990,38 +2993,44 @@ public class ConexionBD implements Cloneable{
 
     /**
      * Inserta un nuevo grupo de alumnos en la base de datos.
+     * Este método crea un nuevo registro en la tabla GRUPOALUMNOS con los detalles proporcionados
+     * en el objeto {@link GrupoAlumnos} suministrado. El ID del nuevo grupo se establece en el objeto
+     * {@link GrupoAlumnos} después de la inserción.
      *
-     * @param grupoAlumnos El objeto GrupoAlumnos que contiene la información del grupo a insertar.
-     * @return true si la inserción fue exitosa, false si no.
+     * @param grupoAlumnos El objeto {@link GrupoAlumnos} que contiene la información del nuevo grupo a insertar.
+     * @return boolean Verdadero si la inserción es exitosa y se afecta al menos una fila en la base de datos,
+     *                 falso en caso contrario o si ocurre un error durante la operación.
+     * @throws SQLException Si ocurre un error de SQL durante la ejecución de la operación de inserción.
      */
     public boolean insertarGrupoAlumnos(GrupoAlumnos grupoAlumnos) throws SQLException {
         ConexionBD cn = INSTANCE;
         conn = cn.conectar();
     
+        //Define la consulta SQL para insertar un nuevo grupo de alumnos.
         String sql = "INSERT INTO GRUPOALUMNOS (nombre, descripcion) values (?, ?);";
     
         try {
             conn.setAutoCommit(false);    
-            ps = conn.prepareStatement(sql);
             
-            //Establecer los valores de los parámetros.
+            //Prepara la consulta SQL para la inserción, estableciendo los valores para 'nombre' y 'descripcion'.
+            ps = conn.prepareStatement(sql);
             ps.setString(1, grupoAlumnos.getNombre());
             ps.setString(2, grupoAlumnos.getDescripcion());
     
-            //Ejecutar la instrucción SQL de inserción.
+            //Ejecuta la consulta de inserción y guarda el número de filas afectadas.
             int filasAfectadas = ps.executeUpdate();
             
-            //Obtenemos el id que se le asignó a grupoAlumnos.
+            //Obtiene el ID generado automáticamente para el nuevo grupo insertado y lo asigna al objeto grupoAlumnos.
             st = conn.createStatement();
             res = st.executeQuery(SQL_OBTENER_ULTIMO_ID_INSERTADO);
             grupoAlumnos.setId(res.getInt(1)); //Asigna el id obtenido en la consulta.
     
             conn.commit(); //Confirma la transacción de la inserción de los datos.
-            return filasAfectadas > 0;
+            return filasAfectadas > 0; //Retorna verdadero si se insertó al menos una fila en la base de datos, indicando éxito.
         } catch (SQLException e) {
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
             logger.severe("Excepción SQL: " + e.toString());
-            return false;
+            return false; //Retorna falso para indicar que la operación no fue exitosa.
         } finally {
             if(ps != null) {ps.close();}
             if(st != null) {st.close();}
@@ -3033,16 +3042,100 @@ public class ConexionBD implements Cloneable{
     }
 
 
-    //FALTA BORRAR GRUPO.
-    //MODIFICAR GRUPO.
-    //MODIFICAR todo los grupos y sus alumnos asociados con una lista de grupos. actualizar los ids -1.
+    /**
+     * Actualiza la información de un grupo de alumnos específico en la base de datos.
+     * Este método modifica los campos 'nombre' y 'descripcion' del registro correspondiente
+     * al grupo de alumnos proporcionado, identificado por su ID único.
+     *
+     * @param grupoAlumnos El objeto {@link GrupoAlumnos} que representa el grupo de alumnos con la información actualizada.
+     * @return boolean Verdadero si la operación de actualización afecta al menos una fila (indicando éxito),
+     *                 falso en caso contrario o si ocurre un error durante la operación.
+     * @throws SQLException Si se produce un error de SQL durante la ejecución de la consulta.
+     */
+    public boolean actualizarGrupoAlumno(GrupoAlumnos grupoAlumnos) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+    
+        //Define la consulta SQL para actualizar los detalles de un grupo de alumnos existente por ID.
+        String sql = "UPDATE GRUPOALUMNOS SET nombre = ?, descripcion = ? WHERE id = ?;";
+    
+        try {
+            conn.setAutoCommit(false);    
+            ps = conn.prepareStatement(sql);
+            
+            //Asignar los valores a cada uno de los parámetros de la consulta.
+            ps.setString(1, grupoAlumnos.getNombre());
+            ps.setString(2, grupoAlumnos.getDescripcion());
+            ps.setInt(3, grupoAlumnos.getId());
+    
+            //Ejecutar la consulta de actualización y obtener el número de filas afectadas.
+            int filasAfectadas = ps.executeUpdate();
+    
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            return filasAfectadas > 0; // Devolver verdadero si la operación de actualización fue exitosa (afectó al menos una fila).
+        } catch (SQLException e) {
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
+            return false;
+        } finally {
+            if(ps != null) {ps.close();}
+
+            conn.setAutoCommit(true);
+            cn.desconectar(conn);
+        }
+    }
 
 
     /**
-     * Inserta un nuevo grupo de alumnos en la base de datos.
+     * Borra un grupo de alumnos específico de la base de datos.
+     * Este método elimina el registro correspondiente al grupo de alumnos proporcionado
+     * de la tabla GRUPOALUMNOS, basándose en su identificador único (ID).
      *
-     * @param grupoAlumnos El objeto GrupoAlumnos que contiene la información del grupo a insertar.
-     * @return true si la inserción fue exitosa, false si no.
+     * @param grupoAlumnos El objeto {@link GrupoAlumnos} que representa el grupo de alumnos a borrar.
+     * @return boolean Verdadero si la operación de borrado se ejecuta exitosamente y al menos una fila es afectada,
+     *                 falso en caso contrario o si ocurre un error durante la operación.
+     * @throws SQLException Si ocurre un error de SQL durante la ejecución de la consulta.
+     */
+    public boolean borrarGrupoAlumno(GrupoAlumnos grupoAlumnos) throws SQLException {
+        ConexionBD cn = INSTANCE;
+        conn = cn.conectar();
+    
+        //Definición de la consulta SQL para borrar un grupo de alumnos por ID.
+        String sql = "DELETE FROM GRUPOALUMNOS WHERE id = ?;";
+    
+        try {
+            conn.setAutoCommit(false);    
+            ps = conn.prepareStatement(sql);
+            
+            //Establecer el ID del grupo de alumnos a borrar en la consulta.
+            ps.setInt(1, grupoAlumnos.getId());
+    
+            //Ejecutar la instrucción SQL y obtener el número de filas afectadas.
+            int filasAfectadas = ps.executeUpdate();
+    
+            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            return filasAfectadas > 0; //Retorna verdadero si la operación afectó al menos una fila, indicando éxito en el borrado.
+        } catch (SQLException e) {
+            conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.
+            logger.severe("Excepción SQL: " + e.toString());
+            return false;
+        } finally {
+            if(ps != null) {ps.close();}
+
+            conn.setAutoCommit(true);
+            cn.desconectar(conn);
+        }
+    }
+
+
+    /**
+     * Actualiza la información de los grupos de alumnos en la base de datos. Esto incluye insertar nuevos grupos,
+     * actualizar grupos existentes y eliminar grupos marcados para borrado. También maneja la inserción de alumnos
+     * en los grupos correspondientes.
+     *
+     * @param listaGruposAlumnos La lista de grupos de alumnos para actualizar.
+     * @return boolean Verdadero si la actualización se completa con éxito, falso en caso contrario.
+     * @throws SQLException Si ocurre algún problema durante las operaciones de base de datos.
      */
     public boolean actualizarGruposAlumnos(ArrayList<GrupoAlumnos> listaGruposAlumnos) throws SQLException {
         ConexionBD cn = INSTANCE;
@@ -3052,6 +3145,7 @@ public class ConexionBD implements Cloneable{
         ArrayList<GrupoAlumnos> listaGruposAlumnosBD;
         conn = cn.conectar();                    
 
+        //Consultas SQL para operaciones de CRUD en la tabla GRUPOALUMNOS y GRUPOALUMNOS_ALUMNO
         String sqlGetListaGruposAlumnos = "SELECT * FROM GRUPOALUMNOS";
         String sqlInsertarGrupo = "INSERT INTO GRUPOALUMNOS (nombre, descripcion) VALUES (?, ?);";
         String sqlActualizarGrupo = "UPDATE GRUPOALUMNOS SET nombre = ?, descripcion = ? WHERE id = ?";
@@ -3063,10 +3157,9 @@ public class ConexionBD implements Cloneable{
         try {
             conn.setAutoCommit(false);
             
-            //Obtener la lista de grupos de la BD.
+            //Obtener la lista actual de grupos de alumnos de la base de datos.
             st = conn.createStatement();
             res = st.executeQuery(sqlGetListaGruposAlumnos);
-
             listaGruposAlumnosBD = new ArrayList<>();
             while (res.next()) {
                 GrupoAlumnos grupo = new GrupoAlumnos(
@@ -3081,16 +3174,15 @@ public class ConexionBD implements Cloneable{
             //Recorre la lista de grupos para actualizar sus datos en la BD.
             for (var grupoAlumnos : listaGruposAlumnos) {
 
-                //Grupos para borrar.
+                //Proceso de eliminación de grupos marcados para borrado.
                 if (grupoAlumnos.getNombre().endsWith("-borrado-")) {
+                    //Solo proceder si el grupo tiene un ID válido (no es nuevo).
                     if(grupoAlumnos.getId() != -1) {
 
-                        //Comprueba si hay alumnos adcritos al grupo para borrarlos del grupo.
+                        //Eliminar todos los alumnos asociados al grupo, si los hay.
                         if(!grupoAlumnos.getListaAlumnos().isEmpty()) { 
                             ps = conn.prepareStatement(sqlBorrarTodosAlumnosGrupo);
                             ps.setInt(1, grupoAlumnos.getId());
-
-                            //Ejecutar la instrucción SQL.
                             filasAfectadas = 0;
                             filasAfectadas = ps.executeUpdate();
 
@@ -3100,10 +3192,9 @@ public class ConexionBD implements Cloneable{
                             }
                         }
 
+                        //Eliminar el grupo de la base de datos.
                         ps = conn.prepareStatement(sqlBorrarGrupo);
                         ps.setInt(1, grupoAlumnos.getId());
-
-                        //Ejecutar la instrucción SQL.
                         filasAfectadas = 0;
                         filasAfectadas = ps.executeUpdate();
 
@@ -3114,7 +3205,7 @@ public class ConexionBD implements Cloneable{
                             
                     }
                     
-                //Grupos nuevos para insertar.    
+                //Proceso de inserción de nuevos grupos.  
                 } else if(grupoAlumnos.getId() == -1) {
                     ps = conn.prepareStatement(sqlInsertarGrupo);
 
@@ -3131,9 +3222,9 @@ public class ConexionBD implements Cloneable{
                         return false;
                     }
 
-                    //Obtenemos el id que se le asignó a grupoAlumnos.
+                    //Asignación del ID al nuevo grupo insertado.
                     st = conn.createStatement();
-                    res = st.executeQuery(SQL_OBTENER_ULTIMO_ID_INSERTADO);
+                    res = st.executeQuery(SQL_OBTENER_ULTIMO_ID_INSERTADO); //Obtenemos el id que se le asignó a grupoAlumnos.
                     grupoAlumnos.setId(res.getInt(1)); //Asigna el id obtenido en la consulta.
 
                     //Comprueba que se actualiza el id del grupo insertado.
@@ -3144,7 +3235,7 @@ public class ConexionBD implements Cloneable{
                     alumnosInsertados = 0;
                     filasAfectadas = 0;
 
-                    //Recorre la lista de alumnos del grupo para insertalos en la BD.
+                    //Inserción de alumnos al nuevo grupo.
                     for (var alumno : grupoAlumnos.getListaAlumnosObservable()) {
                         ps = conn.prepareStatement(sqlAddAlumnoGrupo);
 
@@ -3162,10 +3253,11 @@ public class ConexionBD implements Cloneable{
                         return false;
                     }
                 
-                //Grupos para actualizar.
+                //Proceso de actualización de grupos existentes.
                 } else {
                     for (var grupoAlumnosBD : listaGruposAlumnosBD) {
                         if(grupoAlumnosBD.getId() == grupoAlumnos.getId()) {
+                            //Actualizar el grupo si su nombre o descripción han cambiado.
                             if(!grupoAlumnos.getNombre().equals(grupoAlumnosBD.getNombre()) || !grupoAlumnos.getDescripcion().equals(grupoAlumnosBD.getDescripcion())) {
                                 ps = conn.prepareStatement(sqlActualizarGrupo);
             
@@ -3230,14 +3322,14 @@ public class ConexionBD implements Cloneable{
                                 return false;
                             }
 
-                            break;
+                            break; //Salir del ciclo una vez que se encuentra y actualiza el grupo correspondiente.
                         }
                     }
                 }
             }
+
             result = true;
-            
-            conn.commit(); //Confirma la transacción de la inserción de los datos.
+            conn.commit(); //Confirmar todas las operaciones realizadas.
             return result;
         } catch (SQLException e) {
             conn.rollback(); //Si hay algun error hacemos un rollback en la inserción de los datos.

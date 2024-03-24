@@ -4,7 +4,8 @@ public enum ModoFormulario {
     
     CREAR_DATOS("Nuevo"),
     EDITAR_DATOS("Modificar"),
-    VER_DATOS("Ver");
+    VER_DATOS("Ver"),
+    BORRAR_DATOS("Borrar");
 
     //Campos del enumerado.
     private String accion;

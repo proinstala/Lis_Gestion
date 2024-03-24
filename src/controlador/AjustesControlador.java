@@ -5,6 +5,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -18,6 +19,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
@@ -33,6 +36,7 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 import modelo.Alumno;
 import modelo.GrupoAlumnos;
+import modelo.ModoFormulario;
 import utilidades.Constants;
 import utilidades.Toast;
 
@@ -239,7 +243,7 @@ public class AjustesControlador implements Initializable {
 
         //Configurar un evento de clic del ratón para la imagen "ivEditarLocalidad" para editar el nombre de una localidad.
         ivEditarLocalidad.setOnMouseClicked(e -> {
-            if (comporobarCamposLocalidad("ivEditarLocalidad")) { 
+            if (comporobarCamposLocalidad(ModoFormulario.EDITAR_DATOS)) { 
                 try {
                     String provincia = cbProvincia.getValue();
                     String oldLocalidad = cbLocalidad.getValue();
@@ -284,7 +288,7 @@ public class AjustesControlador implements Initializable {
 
         //Configurar un evento de clic del ratón para la imagen "ivAddLocalidad" para añadir una localidad.
         ivAddLocalidad.setOnMouseClicked(e -> {
-            if (comporobarCamposLocalidad("ivAddLocalidad")) {
+            if (comporobarCamposLocalidad(ModoFormulario.CREAR_DATOS)) {
 
                 String provincia = cbProvincia.getValue();
                 String localidad = tfLocalidad.getText();
@@ -309,7 +313,7 @@ public class AjustesControlador implements Initializable {
 
         //Configurar un evento de clic del ratón para la imagen "ivBorrarLocalidad" para borrar una localidad.
         ivBorrarLocalidad.setOnMouseClicked(e -> {
-            if (comporobarCamposLocalidad("ivBorrarLocalidad")) {
+            if (comporobarCamposLocalidad(ModoFormulario.BORRAR_DATOS)) {
 
                 String provincia = cbProvincia.getValue();
                 String localidad = cbLocalidad.getSelectionModel().getSelectedItem();
@@ -332,6 +336,7 @@ public class AjustesControlador implements Initializable {
             }
         });
 
+        //Configurar un evento de clic del ratón para la imagen "ivAcercaDe" para mostrar informacion acerca de la app.
         ivAcercaDe.setOnMouseClicked(e -> {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/acercaDeVista.fxml"));
@@ -363,40 +368,129 @@ public class AjustesControlador implements Initializable {
 
         //Configurar un evento de clic del ratón para la imagen "ivAddGrupo" para añadir un grupo de alumnos.
         ivAddGrupo.setOnMouseClicked(e -> {
-            //if (comporobarCamposLocalidad("ivAddLocalidad")) {
-            if (true) {
-                String nombre = tfNombreGrupo.getText();
-                String descripcion = tfDescripcionGrupo.getText();
-                GrupoAlumnos nuevoGrupoAlumnos = new GrupoAlumnos(-1, nombre, descripcion);
+            if (comprobarCamposGrupos(ModoFormulario.CREAR_DATOS)) {
+                
+                //Crea una nueva instancia de GrupoAlumnos con los datos ingresados por el usuario.
+                GrupoAlumnos nuevoGrupoAlumnos = new GrupoAlumnos(-1, tfNombreGrupo.getText().trim(), tfDescripcionGrupo.getText().trim());
 
                 try {
+                    //Intenta insertar el nuevo grupo en la base de datos a través del método insertarGrupoAlumnos.
                     if(conexionBD.insertarGrupoAlumnos(nuevoGrupoAlumnos)) {
+                        //Si la inserción es exitosa, añade el nuevo grupo a la lista de grupos en la interfaz de usuario.
                         listadoGruposAlumnosGeneral.add(nuevoGrupoAlumnos);
                         //Mostrar una notificación de éxito en la interfaz gráfica.
                         toast.show((Stage) gpAjustes.getScene().getWindow(),"Grupo añadido!");
+                        //Selecciona el nuevo grupo en el ComboBox para visualizarlo.
                         cbGrupo.getSelectionModel().select(nuevoGrupoAlumnos);
                     } else {
-                        //Mostrar una notificación en la interfaz gráfica.
+                        //Si la inserción falla, muestra una notificación de error.
                         toast.show((Stage) gpAjustes.getScene().getWindow(),"NO se ha añadido el Grupo!");
                     }
                 } catch (Exception ex) {
                     toast.show((Stage) gpAjustes.getScene().getWindow(),"Fallo al añadir el Grupo.");
-
                     logUser.severe("Excepción: " + ex.toString());
                 }
             }
         });
-    }
+
+        //Configurar un evento de clic del ratón para la imagen(Botón) "ivEditarGrupo" para modificar un grupo de alumnos.
+        ivEditarGrupo.setOnMouseClicked(e -> {
+            if(comprobarCamposGrupos(ModoFormulario.EDITAR_DATOS)) {
+                try {
+
+                    //Crea un nuevo objeto GrupoAlumnos basado en el grupo seleccionado en el comboBox.
+                    GrupoAlumnos newGrupo = new GrupoAlumnos(cbGrupo.getValue());
+                    
+                    //Actualiza el nombre y la descripción del grupo con los valores ingresados por el usuario quitando los espacios del principio y final.
+                    newGrupo.setNombre(tfNombreGrupo.getText().trim());
+                    newGrupo.setDescripcion(tfDescripcionGrupo.getText().trim());
+                    
+                    //Intenta actualizar la información del grupo en la base de datos.
+                    if(conexionBD.actualizarGrupoAlumno(newGrupo)) {
+                        //Si la actualización es exitosa, también actualiza la información en la interfaz de usuario.
+                        GrupoAlumnos grupoSeleccionado = cbGrupo.getValue();
+                        grupoSeleccionado.setNombre(newGrupo.getNombre());
+                        grupoSeleccionado.setDescripcion(newGrupo.getDescripcion());
+
+                        //Obtiene el índice del grupo seleccionado para poder reseleccionarlo después de la actualización.
+                        int indice = cbGrupo.getSelectionModel().getSelectedIndex();
+                        
+                        cbGrupo.getSelectionModel().clearSelection();   //Limpia la selección actual en el comboBox
+                        cbGrupo.getSelectionModel().select(indice);     //Selecciona el grupo actualizado para asegurar que los cambios se reflejen en la interfaz.
+
+                        toast.show((Stage) gpAjustes.getScene().getWindow(),"Grupo modificado!");
+                    }
+                } catch (Exception ex) {
+                    toast.show((Stage) gpAjustes.getScene().getWindow(),"Fallo al modificar el Grupo.");
+                    logUser.severe("Excepción: " + ex.toString());
+                }
+            }
+        });
+
+    
+        //Configurar un evento de clic del ratón para el elemento "ivBorrarGrupo" (imagen Botón) que permite borrar un grupo de alumnos seleccionado.
+        ivBorrarGrupo.setOnMouseClicked(e -> {
+            if (comprobarCamposGrupos(ModoFormulario.BORRAR_DATOS)) {
+
+                //Obtiene el grupo seleccionado en el comboBox.
+                GrupoAlumnos newGrupo = cbGrupo.getValue();
+
+                //Crea una alerta de confirmación para asegurarse de que el usuario realmente desea borrar el grupo.
+                Alert alerta = new Alert(AlertType.CONFIRMATION);
+                alerta.getDialogPane().getStylesheets()
+                        .add(getClass().getResource("/hojasEstilos/StylesAlert.css").toExternalForm()); // Añade hoja de estilos.
+                alerta.setTitle("Borrar Grupo");
+                alerta.setHeaderText("El grupo de alumnos \"" + newGrupo.getNombre() + "\" tiene asociados " + newGrupo.numeroAlumnosEnGrupo() + " alumnos.");
+                alerta.setContentText("¿Estas seguro de que quieres borrar el grupo?");
+                alerta.initStyle(StageStyle.DECORATED);
+                alerta.initOwner((Stage) gpAjustes.getScene().getWindow());
+
+                //Define botones personalizados para la alerta.
+                ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+                ButtonType buttonTypeConfirmar = new ButtonType("Confirmar", ButtonData.YES);
+                alerta.getButtonTypes().setAll(buttonTypeConfirmar, buttonTypeCancel);
+
+                //Muestra la alerta y espera por una respuesta del usuario.
+                Optional<ButtonType> result = alerta.showAndWait();
+
+                //Si el usuario confirma la acción de borrado:
+                if (result.get() == buttonTypeConfirmar) {
+                    try {
+                        //Intenta borrar el grupo de alumnos de la base de datos.
+                        if(conexionBD.borrarGrupoAlumno(newGrupo)) {
+                            //Si el borrado es exitoso, también lo elimina de la lista en la interfaz de usuario.
+                            listadoGruposAlumnosGeneral.remove(newGrupo);
+                            //Muestra una notificación de éxito.
+                            toast.show((Stage) gpAjustes.getScene().getWindow(),"Grupo de alumnos borrado!");
+                        } else {
+                            //Si no se puede borrar el grupo, muestra una notificación de fallo.
+                            toast.show((Stage) gpAjustes.getScene().getWindow(),"NO se ha borrado el grupo de alumnos!");
+                        }
+                    } catch (Exception ex) {
+                        toast.show((Stage) gpAjustes.getScene().getWindow(),"Fallo al borrar el Grupo de alumnos.");
+                        logUser.severe("Excepción: " + ex.toString());
+                    }
+                   
+                }
+            }
+        });
+
+    } //Fin configurarControles.
+
+        
 
 
     /**
-     * Configura el ComboBox cbGrupo.
+     * Configura el ComboBox cbGrupo utilizado para seleccionar un grupo de alumnos.
+     * Este método establece los items del ComboBox, personaliza la visualización de los items,
+     * y configura un listener para manejar los cambios de selección.
      * 
      */
     private void cbGrupoSetup() {
+        //Asigna la lista de grupos de alumnos al ComboBox para su visualización.
         cbGrupo.setItems(listadoGruposAlumnosGeneral);
 
-        //Establecer el texto a mostrar en el ComboBox utilizando un CellFactory.
+        //Personaliza cómo se muestran los items dentro del ComboBox utilizando un CellFactory. (Desplegado)
         cbGrupo.setCellFactory(param -> new ListCell<GrupoAlumnos>() {
             @Override
             protected void updateItem(GrupoAlumnos grupo, boolean empty) {
@@ -409,12 +503,12 @@ public class AjustesControlador implements Initializable {
             }
         });
 
-        //Establecer el texto a mostrar en el ComboBox cuando está desplegado utilizando un StringConverter.
+        //Configura cómo se muestra el texto del item seleccionado en el ComboBox cuando está cerrado, utilizando un StringConverter.
         cbGrupo.setConverter(new StringConverter<GrupoAlumnos>() {
             @Override
             public String toString(GrupoAlumnos grupo) {
+                //Muestra solo el nombre del grupo en el ComboBox cuando está cerrado.
                 if (grupo != null) {
-                    //Mostrar el ID y el nombre del Alumno en el ComboBox.
                     return grupo.getNombre();
                 }
                 return null;
@@ -422,16 +516,23 @@ public class AjustesControlador implements Initializable {
 
             @Override
             public GrupoAlumnos fromString(String string) {
-                // No se necesita esta implementación para este caso.
+                //Este método no es necesario para este caso específico, pero debe ser implementado.
                 return null;
             }
         });
 
-        //Establece un listener para que cuando se seleccione un elemento del ComboBox cbAlumnos.
+        //Establece un listener para detectar y manejar cambios en la selección del ComboBox.
         cbGrupo.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
-            tfNombreGrupo.setText(nv.getNombre());
-            tfDescripcionGrupo.setText(nv.getDescripcion());
-            System.out.println("** PASO POR AQUI ---------------------------------------------------------");
+            //Cuando se selecciona un nuevo item, actualiza los campos de texto con la información del grupo seleccionado.
+            if(nv != null) {
+                tfNombreGrupo.setText(nv.getNombre());
+                tfDescripcionGrupo.setText(nv.getDescripcion());
+            } else {
+                //Si no hay selección, limpia los campos de texto.
+                tfNombreGrupo.clear();
+                tfDescripcionGrupo.clear();
+            }
+            
         });
     }//FIN configurarCbAlumnos.
 
@@ -547,14 +648,14 @@ public class AjustesControlador implements Initializable {
      * @param origenCall String que se usa para filtrar las acciones que realiza este metodo.
      * @return true si todos los campos están correctamente completados, false en caso contrario.
      */
-    private boolean comporobarCamposLocalidad(String origenCall) {
+    private boolean comporobarCamposLocalidad(ModoFormulario origenCall) {
         boolean camposCorrectos = false;
         
         //De 1 a 4 palabras separadas por un espacio en blanco que comienzan por una letra mayuscula y una longitud de 1 a 30 caracteres. 
         Pattern localidadPattern = Pattern.compile("^[A-ZÑ][a-zñáéíóú]{1,30}(\\s[A-ZÑ][a-zñáéíóú]{1,30}){0,3}$");
 		Matcher localidadMatcher = localidadPattern.matcher(tfLocalidad.getText());
 
-        if (origenCall != "ivAddLocalidad" && (cbLocalidad.getValue() == null || cbLocalidad.getSelectionModel().getSelectedIndex() < 0)) {
+        if (origenCall != ModoFormulario.CREAR_DATOS && (cbLocalidad.getValue() == null || cbLocalidad.getSelectionModel().getSelectedIndex() < 0)) {
             mensajeAviso(AlertType.WARNING, 
             "Localidad No seleccionada.", 
             "",
@@ -564,13 +665,13 @@ public class AjustesControlador implements Initializable {
             mensajeAviso(AlertType.WARNING, 
             "Nombre de localidad incorrecto.", 
             "El nombre de localidad introducido no es valido.",
-                "Formato: una letra mayuscula seguido de una minuscula de 1 a 30 caracteres. De 1 a 4 palabras."
+                "Formato: Una letra mayúscula seguida de una minúscula, con una longitud de 1 a 30 caracteres y de 1 a 4 palabras."
                 +"\nEjemplo: Santa Cruz");
         } else {
             camposCorrectos = true; //Todos los campos están correctamente completados.
         }
 
-        if(camposCorrectos && origenCall != "ivBorrarLocalidad") {
+        if(camposCorrectos && origenCall != ModoFormulario.BORRAR_DATOS) {
             for(String localidad : listadoLocalidades) {
                 if (localidad.equals(tfLocalidad.getText())) {
 
@@ -587,6 +688,66 @@ public class AjustesControlador implements Initializable {
         return camposCorrectos;
     }//FIN comporobarCamposLocalidad.
 
+
+    /**
+     * Comprueba si los campos del formulario Grupos están correctamente completados.
+     * 
+     * @param origenCall String que se usa para filtrar las acciones que realiza este metodo.
+     * @return true si todos los campos están correctamente completados, false en caso contrario.
+     */
+    //private boolean comprobarCamposGrupos(String origenCall) {
+    private boolean comprobarCamposGrupos(ModoFormulario origenCall) {
+        boolean camposCorrectos = false;
+
+        Pattern nombrePattern = Pattern.compile("^(?!\\d)(?=\\S)([\\s\\S]{1,50})$"); //máximo de 50 caracteres, no empiece por dígitos ni espacios en blanco, puede contener cualquier carácter y espacios, y no puede estar vacío.
+		Matcher nombreMatch = nombrePattern.matcher(tfNombreGrupo.getText());
+
+        Pattern palabraReservadaPattern = Pattern.compile(".*-borrado-.*");
+        Matcher palabraReservadaMatch = palabraReservadaPattern.matcher(tfNombreGrupo.getText());
+
+        Pattern descripcionPattern = Pattern.compile("^(|.{1,300})$"); //pueda estar vacío o tener un máximo de 300 caracteres
+        Matcher descripcionMatcher = descripcionPattern.matcher(tfDescripcionGrupo.getText());
+
+        if (origenCall != ModoFormulario.CREAR_DATOS && (cbGrupo.getValue() == null || cbGrupo.getSelectionModel().getSelectedIndex() < 0)) {
+            mensajeAviso(AlertType.WARNING, 
+            "Grupo de alumnos NO seleccionado.", 
+            "",
+            "Selecciona un grupo de alumnos para poder editar sus datos.");
+        } else if (!nombreMatch.matches()) {
+            mensajeAviso(AlertType.WARNING, 
+            "Nombre de grupo alumnos NO valido.", 
+            "El nombre de grupo alumnos introducido no es valido.",
+                "Formato: No empiece por dígitos ni espacio en blanco y máximo de 50 caracteres."
+                +"\nEjemplo: Avanzado 2");
+        } else if (palabraReservadaMatch.matches() && origenCall != ModoFormulario.BORRAR_DATOS) {
+            mensajeAviso(AlertType.WARNING, 
+            "Nombre de grupo alumnos No valido.", 
+            "El nombre consta de una palabra reservada.",
+            "El nombre no puede contener la palabra -borrado-.");
+        } else if (!descripcionMatcher.matches()) {
+            mensajeAviso(AlertType.WARNING,
+            "Descripción no valida.",
+            "La descripción introducida no es valida.",
+            "Máximo 300 caracteres.");
+        } else {
+            camposCorrectos = true; //Todos los campos están correctamente completados.
+        }
+
+        if (camposCorrectos && origenCall != ModoFormulario.BORRAR_DATOS) {
+            for(var grupo :  listadoGruposAlumnosGeneral) {
+                if(grupo.getNombre().equals(tfNombreGrupo.getText())) {
+                    mensajeAviso(AlertType.WARNING, 
+                    "Nombre de grupo alumnos NO valido.", 
+                    "",
+                    "Ya existe un grupo de alumnos con ese nombre.");
+
+                    return false;
+                }
+            }
+        }
+
+        return camposCorrectos;
+    }
 
     /**
      * Muestra una ventana de dialogo con la informacion pasada como parametros.
