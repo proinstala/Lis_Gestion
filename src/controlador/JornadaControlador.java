@@ -707,8 +707,8 @@ public class JornadaControlador implements Initializable {
 	 */
 	private void cargaClase(int numeroClase) {
 		try {
-			//FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/ClaseVista.fxml"));
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/claseVista.fxml"));
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/ClaseVista.fxml"));
+			//FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/claseVista.fxml"));
 			BorderPane ClasePilates;
 			ClasePilates = (BorderPane) loader.load();
 			controladorPincipal.setPane(ClasePilates);

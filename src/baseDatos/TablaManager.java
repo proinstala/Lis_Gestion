@@ -171,8 +171,8 @@ public class TablaManager {
                     "grupo_id INTEGER NOT NULL, " +
                     "alumno_id INTEGER NOT NULL, " + 
                     "PRIMARY KEY (grupo_id, alumno_id), " +
-                    "FOREIGN KEY (grupo_id) REFERENCES GRUPOALUMNOS (id) ON DELETE CASCADE " +
-	                "FOREIGN KEY (alumno_id) REFERENCES ALUMNO (id) ON DELETE CASCADE);";
+                    "FOREIGN KEY (grupo_id) REFERENCES GRUPOALUMNOS (id) ON DELETE CASCADE, " +
+                    "FOREIGN KEY (alumno_id) REFERENCES ALUMNO (id) ON DELETE CASCADE);";
             st.execute(sql);
 	
 			result = true;
